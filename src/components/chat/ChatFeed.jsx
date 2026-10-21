@@ -1,29 +1,32 @@
-// Commit: feat(chat): add ChatFeed scrollable message list with empty state
+// Commit: fix(chat): polish ChatFeed with smooth scroll and clean empty state
 
 import MessageBubble from "./MessageBubble.jsx";
 import TypingIndicator from "./TypingIndicator.jsx";
 
-function EmptyState({ character }) {
-  const initials = character?.name
+function EmptyState({ character, lang }) {
+  const initials = character?.avatarInitials || (character?.name
     ? character.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
-    : "??";
+    : "??");
+
+  const borderColor = character?.borderColor || "#10b981";
 
   return (
-    <div className="flex flex-col items-center justify-center flex-1 gap-4 py-12 select-none">
+    <div className="flex flex-col items-center justify-center flex-1 gap-4 py-16 select-none">
       <div
-        className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-mono font-bold text-white border-2"
+        className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${character?.avatarBg || 'from-slate-800 to-slate-950'} flex items-center justify-center text-2xl font-mono font-black text-white border-2 shadow-xl`}
         style={{
-          background: character?.avatarBg ?? "linear-gradient(135deg,#334155,#1e293b)",
-          borderColor: character?.accentColor ?? "#64748b",
-          boxShadow: `0 0 20px ${character?.accentColor ?? "#64748b"}40`,
+          borderColor: borderColor,
+          boxShadow: `0 0 24px ${borderColor}50`,
         }}
       >
         {initials}
       </div>
       <div className="text-center space-y-1">
-        <p className="font-mono text-slate-300 font-bold">{character?.name ?? "..."}</p>
+        <p className={`font-mono font-bold text-base ${character?.textClass || 'text-white'}`}>
+          {character?.name ?? "..."}
+        </p>
         <p className="font-mono text-xs text-slate-500 tracking-widest animate-pulse">
-          // channel open...
+          // channel open... send a message or choose a prompt below
         </p>
       </div>
     </div>
@@ -40,7 +43,7 @@ export default function ChatFeed({ messages = [], character, isTyping, feedRef, 
       style={{ scrollbarWidth: "thin", scrollbarColor: "#334155 transparent" }}
     >
       {!hasMessages ? (
-        <EmptyState character={character} />
+        <EmptyState character={character} lang={lang} />
       ) : (
         <>
           {messages.map((msg, idx) => (
