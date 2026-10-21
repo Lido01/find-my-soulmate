@@ -14,7 +14,7 @@ import {
   loadAudioSettings,
   saveAudioSettings,
 } from './utils/storage.js';
-import { validateApiKey } from './utils/gemini.js';
+import { validateApiKey, cleanApiKey } from './utils/gemini.js';
 import { soundEngine } from './utils/audio.js';
 
 // Layout components
@@ -77,16 +77,16 @@ export default function App() {
   } = useGameState({ apiKey, lang, onMoodChange: handleMoodChange });
 
   // API key management
-  const handleApiKeySave = useCallback(async (key) => {
-    if (!key) { clearApiKey(); setApiKeyState(''); return true; }
-    const valid = await validateApiKey(key);
-    if (valid) { saveApiKey(key); setApiKeyState(key); return true; }
-    if (key.trim().startsWith('AIza')) {
-      saveApiKey(key.trim());
-      setApiKeyState(key.trim());
+  const handleApiKeySave = useCallback((key) => {
+    const cleaned = cleanApiKey(key);
+    if (!cleaned) {
+      clearApiKey();
+      setApiKeyState('');
       return true;
     }
-    return false;
+    saveApiKey(cleaned);
+    setApiKeyState(cleaned);
+    return true;
   }, []);
 
   // User Profile save
