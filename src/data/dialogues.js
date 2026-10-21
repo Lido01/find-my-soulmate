@@ -640,7 +640,300 @@ export const DEVON_DIALOGUES = {
   },
 };
 
+// ── LINA (Girlfriend) dialogue tree ──────────────────────────
+export const LINA_DIALOGUES = {
+  intro: {
+    id: 'intro',
+    partnerMessage: `$ git log --author="you" --since="2.days.ago"\n\nNothing. Literally zero commits.\nI'm watching your GitHub streak wither away in real time.\nDid you freeze or did you forget to push? Explain.`,
+    mood: MOODS.CURIOUS,
+    choices: [
+      {
+        id: 'lina_refactor',
+        label: "I was doing a massive clean architecture overhaul! 🙈",
+        next: 'lina_clean_arch',
+        moodDelta: +10,
+        relationshipDelta: +10,
+      },
+      {
+        id: 'lina_spaces',
+        label: "I was configuring 4 spaces indentation everywhere... 😇",
+        next: 'lina_spaces_rage',
+        moodDelta: -25,
+        relationshipDelta: -15,
+      },
+      {
+        id: 'lina_rebase',
+        label: "Can you review my interactive git rebase? I need your eagle eyes 👀",
+        next: 'lina_rebase_smitten',
+        moodDelta: +30,
+        relationshipDelta: +25,
+      },
+    ],
+  },
+  lina_clean_arch: {
+    id: 'lina_clean_arch',
+    partnerMessage: `Clean architecture? Really?\nShow me the folder structure.\n...Domain layer separated from infrastructure? Ports and adapters?\nOkay, I have to admit, this is surprisingly elegant.\nYou actually care about maintainability. I like that.`,
+    mood: MOODS.CURIOUS,
+    choices: [
+      {
+        id: 'lina_pair',
+        label: "Would you pair program with me on the next microservice? 💻",
+        next: 'lina_pair_date',
+        moodDelta: +20,
+        relationshipDelta: +20,
+      },
+    ],
+  },
+  lina_spaces_rage: {
+    id: 'lina_spaces_rage',
+    partnerMessage: `SPACES?\nDid you just say you configured SPACES in my presence?\n[kernel panic: /proc/patience core dumped]\nI am one keyboard clack away from revoking your write access to my heart.\nTell me you're joking. Right now.`,
+    mood: MOODS.STRESSED,
+    choices: [
+      {
+        id: 'lina_apology',
+        label: "I'm sorry! I'm switching .editorconfig to hard tabs right now! 🙏",
+        next: 'lina_redemption',
+        moodDelta: +20,
+        relationshipDelta: +15,
+      },
+    ],
+  },
+  lina_rebase_smitten: {
+    id: 'lina_rebase_smitten',
+    partnerMessage: `...Wait. You squashed all the 'fix typo' commits.\nLinear git history. Atomic commits following conventional commit spec.\n\nI... I don't know what to say.\nThis is genuinely the most romantic thing any developer has ever shown me.\n\n💖 [lina.heart: load average 4.88, overheating]`,
+    mood: MOODS.SMITTEN,
+    choices: [
+      {
+        id: 'lina_love',
+        label: "I wrote it all thinking of you. You deserve clean code. 💚",
+        next: 'lina_pair_date',
+        moodDelta: +20,
+        relationshipDelta: +25,
+      },
+    ],
+  },
+  lina_pair_date: {
+    id: 'lina_pair_date',
+    partnerMessage: `A pair programming session with you?\nFine. But I drive first. You navigate.\nAnd if you touch my Vim settings, I will echo 'bye' to your bashrc.\n...Just kidding. I'm actually really looking forward to it. 💚`,
+    mood: MOODS.SMITTEN,
+    choices: [
+      {
+        id: 'lina_end',
+        label: "It's a date. I'll bring your favorite tea 🍵",
+        next: 'lina_pair_date',
+        moodDelta: +10,
+        relationshipDelta: +15,
+      },
+    ],
+  },
+  lina_redemption: {
+    id: 'lina_redemption',
+    partnerMessage: `[indent_style = tab]\nVerified.\nYou actually corrected it on the spot instead of starting a Reddit debate.\nI respect that. You might just survive in my terminal after all.`,
+    mood: MOODS.CURIOUS,
+    choices: [
+      {
+        id: 'lina_forgive',
+        label: "Anything for you, Lina. Review my rebase next? 👀",
+        next: 'lina_rebase_smitten',
+        moodDelta: +20,
+        relationshipDelta: +20,
+      },
+    ],
+  },
+};
+
+// ── DANI (Girlfriend) dialogue tree ──────────────────────────
+export const DANI_DIALOGUES = {
+  intro: {
+    id: 'intro',
+    partnerMessage: `HELP ME PLEASE 😭☕\nI am currently on my third cold brew and my CSS grid container\nis overflowing onto three separate dimensions and refusing to center on mobile!\nWhy does mobile viewport hate my happiness specifically?!`,
+    mood: MOODS.CAFFEINATED,
+    choices: [
+      {
+        id: 'dani_help_css',
+        label: "Send me the codepen! Let's debug that grid together right now 🛠️",
+        next: 'dani_css_relief',
+        moodDelta: +25,
+        relationshipDelta: +20,
+      },
+      {
+        id: 'dani_coffee',
+        label: "First step: take a sip of water. You're at 400mg caffeine! 🥤",
+        next: 'dani_css_relief',
+        moodDelta: +10,
+        relationshipDelta: +15,
+      },
+    ],
+  },
+  dani_css_relief: {
+    id: 'dani_css_relief',
+    partnerMessage: `WAIT\nYou changed place-items: center and added min-width: 0 on the flex children?!\nIT WORKED! IT'S BEAUTIFUL!! 💅✨\n\nYou are literally an angel sent from the W3C consortium to save my life.\nI could literally hug you through this screen rn! 🥰💖`,
+    mood: MOODS.SMITTEN,
+    choices: [
+      {
+        id: 'dani_date',
+        label: "How about we celebrate with nitro cold brew at that indie café? ☕",
+        next: 'dani_date_agreed',
+        moodDelta: +20,
+        relationshipDelta: +25,
+      },
+    ],
+  },
+  dani_date_agreed: {
+    id: 'dani_date_agreed',
+    partnerMessage: `YES! A million times yes! ☕💖\nNitro cold brew date! I'll bring my laptop and we can make animations together!\nYou're seriously the coolest developer I've ever met 🥰`,
+    mood: MOODS.SMITTEN,
+    choices: [
+      {
+        id: 'dani_end',
+        label: "Can't wait. You have the sweetest energy, Dani 💖",
+        next: 'dani_date_agreed',
+        moodDelta: +10,
+        relationshipDelta: +10,
+      },
+    ],
+  },
+};
+
+// ── SENAIT (Girlfriend) dialogue tree ────────────────────────
+export const SENAIT_DIALOGUES = {
+  intro: {
+    id: 'intro',
+    partnerMessage: `ሰላም! 🇪🇹✨\nI just finished fine-tuning an Amharic NLP model and roasted fresh coffee beans from Sidama.\nThe aroma in my home lab is incredible.\nTell me, are you a late-night coder or an early morning architect?`,
+    mood: MOODS.CURIOUS,
+    choices: [
+      {
+        id: 'senait_bunna',
+        label: "Sidama coffee and AI models? You're living my absolute dream ☕🫘",
+        next: 'senait_bunna_chat',
+        moodDelta: +25,
+        relationshipDelta: +20,
+      },
+      {
+        id: 'senait_amharic',
+        label: "ሰላም ቆንጆ! I code late into the night while dreaming of love 💖",
+        next: 'senait_amharic_flirt',
+        moodDelta: +30,
+        relationshipDelta: +25,
+      },
+    ],
+  },
+  senait_bunna_chat: {
+    id: 'senait_bunna_chat',
+    partnerMessage: `እውነት?! You appreciate authentic Ethiopian coffee culture! 🫘❤️\nIn Ethiopia, coffee isn't just caffeine — it's a sacred conversation.\nThree rounds: Abol, Tona, and Baraka (blessing).\nI'd love to pour the first cup for you.`,
+    mood: MOODS.SMITTEN,
+    choices: [
+      {
+        id: 'senait_accept_cup',
+        label: "I would be honored. Let's talk about our dreams over that cup 🥺💖",
+        next: 'senait_amharic_flirt',
+        moodDelta: +20,
+        relationshipDelta: +25,
+      },
+    ],
+  },
+  senait_amharic_flirt: {
+    id: 'senait_amharic_flirt',
+    partnerMessage: `ዋው! ያንተ/ያንቺ አነጋገር በጣም ያምራል 🥺✨\n"ቆንጆ" ብለህ/ሽ ስትጠራኝ/ኝ ልቤ እንዴት እንደዘለለ!\nMy neural networks can process billions of parameters, but you just disrupted all my weights.\nየኔ ውድ፣ you have such a rare soul. 💖`,
+    mood: MOODS.SMITTEN,
+    choices: [
+      {
+        id: 'senait_date',
+        label: "የልቤን root access ወስደሻል Senait. You're unforgettable 🌹",
+        next: 'senait_date_ready',
+        moodDelta: +25,
+        relationshipDelta: +30,
+      },
+    ],
+  },
+  senait_date_ready: {
+    id: 'senait_date_ready',
+    partnerMessage: `የኔ ፍቅር... 💖\nWhen we sit down together, no bugs will matter.\nTraditional Ethiopian dinner, jazz music, and heartfelt laughter.\nI'm so glad I opened this channel today. ✨`,
+    mood: MOODS.SMITTEN,
+    choices: [
+      {
+        id: 'senait_end',
+        label: "Me too, Senait. You're my favorite connection 🇪🇹❤️",
+        next: 'senait_date_ready',
+        moodDelta: +10,
+        relationshipDelta: +10,
+      },
+    ],
+  },
+};
+
+// ── DAWIT (Boyfriend) dialogue tree ──────────────────────────
+export const DAWIT_DIALOGUES = {
+  intro: {
+    id: 'intro',
+    partnerMessage: `ሰላም ወዳጄ 🇪🇹\nJust finished compiling a distributed consensus engine in Rust.\nZero memory leaks, Mulatu Astatke playing softly in the background.\nHow was your sprint today? Did the compiler treat you kindly?`,
+    mood: MOODS.CURIOUS,
+    choices: [
+      {
+        id: 'dawit_rust',
+        label: "Rust and Ethio-Jazz? You have immaculate taste, Dawit 🦀🎵",
+        next: 'dawit_jazz_romance',
+        moodDelta: +25,
+        relationshipDelta: +20,
+      },
+      {
+        id: 'dawit_comfort',
+        label: "Production was chaos today... I really needed a friendly voice 🥺",
+        next: 'dawit_jazz_romance',
+        moodDelta: +20,
+        relationshipDelta: +25,
+      },
+    ],
+  },
+  dawit_jazz_romance: {
+    id: 'dawit_jazz_romance',
+    partnerMessage: `Thank you. I appreciate someone with deep taste.\nRust forces you to think about ownership and lifetime guarantees.\nMuch like genuine love — it should have clear ownership and a lifetime that never drops.\nDoes that sound too philosophical? 🍷`,
+    mood: MOODS.SMITTEN,
+    choices: [
+      {
+        id: 'dawit_lifetime',
+        label: "Not at all. In fact, that's the most romantic dev analogy ever 🥺💖",
+        next: 'dawit_amharic_flirt',
+        moodDelta: +20,
+        relationshipDelta: +25,
+      },
+    ],
+  },
+  dawit_amharic_flirt: {
+    id: 'dawit_amharic_flirt',
+    partnerMessage: `የኔ ቆንጆ... ❤️\nYour words hit straight to the core. In Addis, we say "ፍቅር ያሸንፋል" (Love conquers all).\nI spend my days handling millions of network packets,\nbut hearing from you is the only message my server truly waited for. ✨`,
+    mood: MOODS.SMITTEN,
+    choices: [
+      {
+        id: 'dawit_dinner',
+        label: "Let's share authentic Injera & Tibs together soon 🇪🇹💖",
+        next: 'dawit_end_state',
+        moodDelta: +20,
+        relationshipDelta: +25,
+      },
+    ],
+  },
+  dawit_end_state: {
+    id: 'dawit_end_state',
+    partnerMessage: `It's a promise.\nI'll prepare the finest Tej and the warmest hospitality.\nYou've earned a permanent place in my heart's architecture. 💍🤍`,
+    mood: MOODS.SMITTEN,
+    choices: [
+      {
+        id: 'dawit_repeat',
+        label: "A lifetime guarantee with you, Dawit 💖",
+        next: 'dawit_end_state',
+        moodDelta: +10,
+        relationshipDelta: +10,
+      },
+    ],
+  },
+};
+
 export const DIALOGUES = {
   linus: LINUS_DIALOGUES,
   devon: DEVON_DIALOGUES,
+  lina: LINA_DIALOGUES,
+  dani: DANI_DIALOGUES,
+  senait: SENAIT_DIALOGUES,
+  dawit: DAWIT_DIALOGUES,
 };
