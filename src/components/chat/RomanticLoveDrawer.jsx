@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState } from 'react';
-import { DEV_LOVE_EMOJIS, DEV_ROMANTIC_QUOTES, calculateLoveMetrics } from '../../data/romanticLove.js';
+import { DEV_LOVE_EMOJIS, getRomanticQuotes, calculateLoveMetrics } from '../../data/romanticLove.js';
 import { soundEngine } from '../../utils/audio.js';
 import { IconHeart, IconZap } from '../ui/Icons.jsx';
 
@@ -25,7 +25,7 @@ export default function RomanticLoveDrawer({
     charState?.giftsGiven ?? []
   );
 
-  const quotes = DEV_ROMANTIC_QUOTES[lang] || DEV_ROMANTIC_QUOTES.en;
+  const quotes = getRomanticQuotes(character?.gender || 'female', lang);
 
   function handleSendEmoji(emojiObj) {
     soundEngine.playHeartbeat();
