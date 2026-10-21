@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// audio.js — Romantic Web Audio synthesizer & SpeechSynthesis voice engine
+// audio.js — Romantic Web Audio synthesizer & SpeechRecognition/Synthesis voice engine
 // ─────────────────────────────────────────────────────────────────────────────
 
 class SoundEngine {
@@ -100,6 +100,30 @@ class SoundEngine {
     osc.stop(now + 0.26);
   }
 
+  // Mic recording activation tone
+  playMicTone() {
+    if (!this.enabled) return;
+    this.init();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(440, now);
+    osc.frequency.exponentialRampToValueAtTime(880, now + 0.12);
+
+    gain.gain.setValueAtTime(0.1, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.16);
+  }
+
   // Celebratory harp flourish for gifts
   playGiftFanfare() {
     if (!this.enabled) return;
@@ -128,7 +152,7 @@ class SoundEngine {
   }
 
   // SpeechSynthesis: speak text in a realistic romantic character tone
-  speakRomanticVoice(text, characterGender = 'female', lang = 'en') {
+  speakRomanticVoice(text, characterGender = 'female', lang = 'en', onEnd = null) {
     if (!this.voiceEnabled || typeof window === 'undefined' || !window.speechSynthesis) return;
 
     // Clean markdown, terminal markers, or emojis for natural speech
@@ -145,10 +169,10 @@ class SoundEngine {
     // Fine-tune tone based on gender
     if (characterGender === 'female') {
       utterance.pitch = 1.25; // sweet, warm higher pitch
-      utterance.rate = 0.95;  // relaxed romantic tempo
+      utterance.rate = 0.94;  // relaxed romantic tempo
     } else {
       utterance.pitch = 0.85; // deep, smooth masculine pitch
-      utterance.rate = 0.92;
+      utterance.rate = 0.90;
     }
 
     utterance.volume = this.voiceVolume;
@@ -158,11 +182,16 @@ class SoundEngine {
     if (voices && voices.length > 0) {
       const preferred = voices.find(v => {
         if (lang === 'am' && v.lang.startsWith('am')) return true;
-        if (characterGender === 'female' && (v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Zira') || v.name.includes('Victoria'))) return true;
-        if (characterGender === 'male' && (v.name.includes('Male') || v.name.includes('David') || v.name.includes('George') || v.name.includes('Alex'))) return true;
+        if (characterGender === 'female' && (v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Zira') || v.name.includes('Victoria') || v.name.includes('Google US English'))) return true;
+        if (characterGender === 'male' && (v.name.includes('Male') || v.name.includes('David') || v.name.includes('George') || v.name.includes('Alex') || v.name.includes('Natural'))) return true;
         return v.lang.startsWith('en');
       });
       if (preferred) utterance.voice = preferred;
+    }
+
+    if (onEnd) {
+      utterance.onend = onEnd;
+      utterance.onerror = onEnd;
     }
 
     window.speechSynthesis.speak(utterance);
@@ -176,3 +205,49 @@ class SoundEngine {
 }
 
 export const soundEngine = new SoundEngine();
+
+/**
+ * Check if the browser supports Speech Recognition
+ */
+export function isSpeechRecognitionSupported() {
+  if (typeof window === 'undefined') return false;
+  return Boolean(window.SpeechRecognition || window.webkitSpeechRecognition);
+}
+
+/**
+ * Helper to create and start a speech recognition session
+ */
+export function createSpeechRecognizer({ onResult, onError, onEnd, lang = 'en-US' }) {
+  if (typeof window === 'undefined') return null;
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRec) return null;
+
+  try {
+    const recognition = new SpeechRec();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = lang;
+
+    recognition.onresult = (event) => {
+      let transcript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        transcript += event.results[i][0].transcript;
+      }
+      const isFinal = Boolean(event.results[0]?.isFinal);
+      onResult?.(transcript, isFinal);
+    };
+
+    recognition.onerror = (event) => {
+      onError?.(event.error || 'Speech recognition error');
+    };
+
+    recognition.onend = () => {
+      onEnd?.();
+    };
+
+    return recognition;
+  } catch (err) {
+    onError?.(err.message);
+    return null;
+  }
+}
