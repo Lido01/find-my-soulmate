@@ -1,35 +1,33 @@
-// Commit: feat(chat): add TypingIndicator with bouncing dots and character avatar
+// Commit: fix(chat): polish TypingIndicator animation and avatar border
 
 export default function TypingIndicator({ character }) {
   if (!character) return null;
 
-  const initials = character.name
+  const initials = character.avatarInitials || (character.name
     ? character.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
-    : "??";
+    : "??");
+
+  const borderColor = character.borderColor || "#10b981";
 
   return (
-    <div className="flex items-end gap-2 animate-fade-in px-2 py-1">
+    <div className="flex items-center gap-2.5 animate-fade-in px-3 py-1">
       {/* Avatar */}
       <div
-        className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-mono font-bold text-white border"
-        style={{
-          background: character.avatarBg ?? "linear-gradient(135deg,#334155,#1e293b)",
-          borderColor: character.accentColor ?? "#64748b",
-        }}
+        className={`w-8 h-8 rounded-xl bg-gradient-to-br ${character.avatarBg || 'from-slate-800 to-slate-950'} flex items-center justify-center shrink-0 text-xs font-mono font-bold text-white border shadow`}
+        style={{ borderColor: borderColor }}
       >
         {initials}
       </div>
 
       {/* Dots bubble */}
-      <div className="bg-slate-800/80 border border-slate-700 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5 shadow">
         {[0, 1, 2].map((i) => (
           <span
             key={i}
-            className="typing-dot w-2 h-2 rounded-full inline-block"
+            className="w-2 h-2 rounded-full inline-block animate-pulse"
             style={{
-              backgroundColor: character.accentColor ?? "#64748b",
-              animationDelay: `${i * 0.15}s`,
-              animation: "typing-bounce 1s infinite ease-in-out",
+              backgroundColor: borderColor,
+              animationDelay: `${i * 0.2}s`,
             }}
           />
         ))}
