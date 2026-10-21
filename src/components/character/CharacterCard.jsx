@@ -1,4 +1,6 @@
-// Commit: feat(character): add CharacterCard clickable card with mood glow and stats
+// ─────────────────────────────────────────────────────────────────────────────
+// CharacterCard.jsx — Displays Girlfriends & Boyfriends with stats & mood glow
+// ─────────────────────────────────────────────────────────────────────────────
 
 import { MOOD_META } from "../../data/characters.js";
 import RelationshipMeter from "../ui/RelationshipMeter.jsx";
@@ -6,51 +8,51 @@ import RelationshipMeter from "../ui/RelationshipMeter.jsx";
 export function getMoodGlow(mood) {
   const m = MOOD_META[mood];
   if (!m) return {};
-  return { boxShadow: `0 0 12px ${m.borderColor}80, 0 0 28px ${m.borderColor}30`, borderColor: m.borderColor };
+  const c = m.borderColor || "#64748b";
+  return { boxShadow: `0 0 14px ${c}80, 0 0 30px ${c}30`, borderColor: c };
 }
 
 export default function CharacterCard({ character, charState, onSelect, t, lang = "en" }) {
   if (!character || !charState) return null;
 
-  const mood = charState.mood;
+  const mood = charState.mood || character.defaultMood || "curious";
   const moodMeta = MOOD_META[mood] ?? {};
   const moodGlow = getMoodGlow(mood);
 
-  const initials = character.name
+  const initials = character.avatarInitials || (character.name
     ? character.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
-    : "??";
+    : "??");
 
-  const personalities = character.personality?.slice(0, 3) ?? [];
+  const personalities = (character.personalityTags ?? character.personality ?? []).slice(0, 3);
   const funFacts = character.funFacts ?? [];
-  const randomFact = funFacts.length > 0
-    ? funFacts[Math.floor(Math.random() * funFacts.length)]
-    : null;
+  const randomFact = funFacts.length > 0 ? funFacts[0] : null;
 
-  const title = character.title?.[lang] ?? character.title?.en ?? "";
-  const accentColor = character.accentColor ?? "#64748b";
+  const title = typeof character.title === 'object'
+    ? (character.title[lang] || character.title.en || "")
+    : (character.title || "");
+
+  const borderColor = character.borderColor || "#10b981";
 
   return (
-    <button
+    <div
       onClick={() => onSelect?.(character.id)}
-      className="group relative w-full text-left rounded-2xl border border-slate-700 overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:border-opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-950"
-      style={{ ...moodGlow, focusRingColor: accentColor }}
+      className="group relative w-full text-left rounded-3xl border-2 bg-slate-900/90 p-5 overflow-hidden transition-all duration-300 hover:scale-[1.02] cursor-pointer shadow-xl flex flex-col justify-between"
+      style={moodGlow}
     >
-      {/* Gradient background */}
+      {/* Gradient background overlay */}
       <div
-        className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-300"
-        style={{ background: character.avatarBg ?? "linear-gradient(135deg,#1e293b,#0f172a)" }}
+        className={`absolute inset-0 bg-gradient-to-br ${character.avatarBg || 'from-slate-800 to-slate-950'} opacity-20 group-hover:opacity-30 transition-opacity duration-300`}
       />
 
-      <div className="relative p-4 space-y-3">
+      <div className="relative z-10 space-y-3.5">
         {/* Header row */}
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-3.5">
           {/* Avatar */}
           <div
-            className="w-14 h-14 rounded-full flex items-center justify-center shrink-0 text-lg font-mono font-bold text-white border-2"
+            className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${character.avatarBg || 'from-slate-800 to-slate-950'} flex items-center justify-center shrink-0 text-xl font-mono font-black text-white border-2 shadow-lg`}
             style={{
-              background: character.avatarBg ?? "linear-gradient(135deg,#334155,#1e293b)",
-              borderColor: accentColor,
-              boxShadow: `0 0 10px ${accentColor}50`,
+              borderColor: borderColor,
+              boxShadow: `0 0 14px ${borderColor}50`,
             }}
           >
             {initials}
@@ -58,42 +60,52 @@ export default function CharacterCard({ character, charState, onSelect, t, lang 
 
           {/* Name / handle / title */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-mono font-bold text-white text-sm">{character.name}</h3>
-              {character.flag && <span className="text-base">{character.flag}</span>}
-              {character.pronoun && (
-                <span className="font-mono text-[10px] text-slate-400 border border-slate-600 rounded px-1.5 py-0.5">
-                  {character.pronoun}
-                </span>
-              )}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <h3 className={`font-mono font-black text-base ${character.textClass || 'text-white'}`}>
+                {character.name}
+              </h3>
+              {character.nationality && <span className="text-sm">{character.nationality}</span>}
+              <span className="font-mono text-[10px] text-fuchsia-300 border border-fuchsia-800/80 bg-fuchsia-950/60 rounded px-1.5 py-0.5">
+                {character.gender === 'female' ? 'Girlfriend 👩‍💻' : 'Boyfriend 👨‍💻'}
+              </span>
             </div>
-            <p className="font-mono text-xs text-slate-400 truncate">@{character.handle}</p>
-            {title && <p className="font-mono text-xs mt-0.5" style={{ color: accentColor }}>{title}</p>}
+            <p className="font-mono text-xs text-slate-500 mt-0.5">{character.handle}</p>
+            {title && <p className="font-mono text-xs text-slate-300 mt-0.5 truncate">{title}</p>}
           </div>
+
+          {/* Mood emoji */}
+          <span className="text-2xl shrink-0">{moodMeta.emoji || "🤔"}</span>
         </div>
 
-        {/* Mood */}
-        <div className="flex items-center gap-2 bg-slate-900/60 rounded-lg px-3 py-1.5">
-          <span className="text-base">{moodMeta.emoji ?? "😐"}</span>
-          <span className="font-mono text-xs" style={{ color: moodMeta.borderColor ?? "#94a3b8" }}>
-            {t?.moods?.[mood] ?? mood}
+        {/* Mood description pill */}
+        <div
+          className={`flex items-center justify-between rounded-xl px-3 py-1.5 border border-slate-700/50 ${moodMeta.bgClass || 'bg-slate-800/50'}`}
+        >
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm">{moodMeta.emoji || "🤔"}</span>
+            <span className={`font-mono text-xs font-bold ${moodMeta.textClass || 'text-cyan-400'}`}>
+              {t?.moods?.[mood] ?? mood}
+            </span>
+          </div>
+          <span className="font-mono text-[10px] text-slate-500 truncate ml-2">
+            {t?.moodDesc?.[mood] || moodMeta.description || ""}
           </span>
         </div>
 
         {/* Relationship meter */}
         <RelationshipMeter
-          value={charState.relationship ?? 0}
-          accentColor={character.meterColor ?? "emerald"}
+          value={charState.relationship ?? character.initialRelationship ?? 15}
+          accentColor={character.accentColor ?? "emerald"}
           t={t}
         />
 
         {/* Personality tags */}
         {personalities.length > 0 && (
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1.5 pt-1">
             {personalities.map((tag, i) => (
               <span
                 key={i}
-                className="font-mono text-[10px] bg-slate-800 border border-slate-700 text-slate-400 rounded-md px-2 py-0.5"
+                className="font-mono text-[10px] bg-slate-950 border border-slate-800 text-slate-400 rounded-md px-2 py-0.5"
               >
                 {tag}
               </span>
@@ -101,31 +113,22 @@ export default function CharacterCard({ character, charState, onSelect, t, lang 
           </div>
         )}
 
-        {/* Fun fact */}
+        {/* Fun fact preview */}
         {randomFact && (
-          <p className="font-mono text-[10px] text-slate-500 italic leading-relaxed border-l-2 border-slate-700 pl-2">
-            {typeof randomFact === "object" ? randomFact[lang] ?? randomFact.en : randomFact}
+          <p className="font-mono text-[11px] text-slate-400 italic bg-slate-950/60 border border-slate-800/60 rounded-xl p-2.5 leading-relaxed">
+            💡 {randomFact}
           </p>
         )}
-
-        {/* Hover CTA overlay */}
-        <div
-          className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-2xl"
-          style={{ background: `${accentColor}15`, backdropFilter: "blur(1px)" }}
-        >
-          <span
-            className="font-mono font-bold text-sm tracking-widest px-4 py-2 rounded-lg border"
-            style={{
-              color: accentColor,
-              borderColor: accentColor,
-              background: `${accentColor}20`,
-              boxShadow: `0 0 14px ${accentColor}50`,
-            }}
-          >
-            OPEN CHANNEL
-          </span>
-        </div>
       </div>
-    </button>
+
+      {/* Action button */}
+      <div
+        className="relative z-10 w-full text-center py-2.5 rounded-2xl font-mono text-xs font-bold transition-all duration-200 border mt-4 flex items-center justify-center gap-2 group-hover:bg-slate-800/90"
+        style={{ borderColor: borderColor, color: borderColor }}
+      >
+        <span>{t?.openChannel ?? "OPEN CHANNEL"}</span>
+        <span>→</span>
+      </div>
+    </div>
   );
 }
