@@ -1,9 +1,12 @@
-// Commit: feat(layout): add HeaderBar with breadcrumb, controls, clock, and reset confirm
+// ─────────────────────────────────────────────────────────────────────────────
+// HeaderBar.jsx — Navigation, Profile Settings, AI Mode, and Voice Controls
+// ─────────────────────────────────────────────────────────────────────────────
 
 import { useState, useEffect } from "react";
 import { MOOD_META } from "../../data/characters.js";
 import LanguageToggle from "../ui/LanguageToggle.jsx";
-import { IconSettings, IconRefresh, IconChevronRight } from "../ui/Icons.jsx";
+import { IconSettings, IconRefresh, IconChevronRight, IconUser, IconHeart } from "../ui/Icons.jsx";
+import { soundEngine } from "../../utils/audio.js";
 
 function useClock() {
   const [time, setTime] = useState(() => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
@@ -20,9 +23,11 @@ export default function HeaderBar({
   phase,
   activeCharacter,
   charState,
+  userProfile,
   onReset,
   onBack,
   onApiKeyClick,
+  onOpenProfile,
   apiKeySet = false,
   t,
 }) {
@@ -35,6 +40,7 @@ export default function HeaderBar({
 
   function handleResetClick() {
     if (resetConfirm) {
+      soundEngine.playHeartbeat();
       onReset?.();
       setResetConfirm(false);
     } else {
@@ -44,7 +50,7 @@ export default function HeaderBar({
   }
 
   return (
-    <header className="h-11 flex items-center gap-2 px-3 bg-slate-950 border-b border-slate-800 shrink-0 z-30">
+    <header className="h-12 flex items-center gap-2 px-3 bg-slate-950 border-b border-slate-800 shrink-0 z-30">
       {/* macOS window dots */}
       <div className="flex items-center gap-1.5 mr-1">
         <span className="w-3 h-3 rounded-full bg-red-500/70" />
@@ -55,10 +61,14 @@ export default function HeaderBar({
       {/* Back button (chat phase only) */}
       {isChat && onBack && (
         <button
-          onClick={onBack}
-          className="font-mono text-xs text-slate-500 hover:text-slate-200 transition-colors px-2 py-1 rounded hover:bg-slate-800"
+          onClick={() => {
+            soundEngine.playHeartbeat();
+            onBack();
+          }}
+          className="font-mono text-xs text-slate-400 hover:text-white transition-colors px-2 py-1 rounded-lg hover:bg-slate-800 flex items-center gap-1"
         >
-          ← {t?.back ?? "back"}
+          <span>←</span>
+          <span>{t?.back ?? "back"}</span>
         </button>
       )}
 
@@ -73,11 +83,14 @@ export default function HeaderBar({
         )}
       </div>
 
-      {/* Chat phase: partner mood pill */}
+      {/* Chat phase: partner mood pill & gender */}
       {isChat && activeCharacter && moodMeta.emoji && (
-        <div className="flex items-center gap-1 bg-slate-900 border border-slate-700 rounded-full px-2 py-0.5 ml-1">
+        <div className="hidden sm:flex items-center gap-1.5 bg-slate-900 border border-slate-700 rounded-full px-2.5 py-0.5 ml-1">
           <span className="text-xs">{moodMeta.emoji}</span>
-          <span className="font-mono text-[10px] text-slate-400">{activeCharacter.name}</span>
+          <span className="font-mono text-[10px] text-slate-300 font-bold">{activeCharacter.name}</span>
+          <span className="text-[10px] text-slate-500">
+            {activeCharacter.gender === 'female' ? '👩‍💻 GF' : '👨‍💻 BF'}
+          </span>
         </div>
       )}
 
@@ -86,6 +99,20 @@ export default function HeaderBar({
 
       {/* Right cluster */}
       <div className="flex items-center gap-2">
+        {/* Profile & Audio Settings Button */}
+        <button
+          onClick={() => {
+            soundEngine.playHeartbeat();
+            onOpenProfile?.();
+          }}
+          className="flex items-center gap-1.5 font-mono text-xs px-2.5 py-1 rounded-lg border border-slate-800 bg-slate-900 hover:border-cyan-500/80 text-slate-300 hover:text-white transition-all shadow-sm"
+          title="Profile & Audio Voice Settings"
+        >
+          <span>{userProfile?.emoji || '🧑‍💻'}</span>
+          <span className="hidden sm:inline font-bold">{userProfile?.name || 'Profile'}</span>
+          <span className="text-slate-500">⚙️</span>
+        </button>
+
         {/* Language toggle */}
         <LanguageToggle />
 
@@ -98,28 +125,28 @@ export default function HeaderBar({
               : "border-slate-700 text-slate-400 bg-slate-900 hover:bg-slate-800 hover:text-slate-200"
             }
           `}
-          title={t?.aiModeTooltip ?? "Configure AI Mode"}
+          title={apiKeySet ? "AI Mode Active (Gemini Connected)" : "Connect Gemini API Key for Freeform Chat"}
         >
-          <IconSettings className="w-3 h-3" />
-          <span className="hidden sm:inline">⚙ AI Mode</span>
+          <span>🤖</span>
+          <span className="hidden sm:inline font-bold">{apiKeySet ? "AI ON" : "AI Mode"}</span>
         </button>
 
         {/* Clock */}
-        <span className="font-mono text-xs text-slate-500 tabular-nums hidden md:inline">{clock}</span>
+        <span className="hidden md:inline font-mono text-xs text-slate-500 px-1">{clock}</span>
 
-        {/* Reset button (2-click confirm) */}
+        {/* Reset button */}
         <button
           onClick={handleResetClick}
-          className={`flex items-center gap-1 font-mono text-xs px-2 py-1 rounded border transition-all duration-200
+          className={`flex items-center gap-1 font-mono text-xs px-2.5 py-1 rounded-lg border transition-all duration-200
             ${resetConfirm
-              ? "border-red-600 text-red-400 bg-red-950/50 animate-pulse"
-              : "border-slate-700 text-slate-500 hover:text-slate-300 hover:border-slate-500 hover:bg-slate-900"
+              ? "bg-red-950/80 border-red-600 text-red-300 animate-pulse font-bold"
+              : "bg-slate-900 border-slate-800 text-slate-500 hover:border-slate-600 hover:text-slate-300"
             }
           `}
-          title={resetConfirm ? "Click again to confirm" : "Reset game"}
+          title="Hard reset simulation data in localStorage"
         >
           <IconRefresh className="w-3 h-3" />
-          <span className="hidden sm:inline">{resetConfirm ? (t?.confirmReset ?? "confirm?") : (t?.reset ?? "reset")}</span>
+          <span className="hidden sm:inline">{resetConfirm ? (t?.wipeCacheConfirm ?? "CONFIRM?") : (t?.wipeCacheBtn ?? "Reset")}</span>
         </button>
       </div>
     </header>
