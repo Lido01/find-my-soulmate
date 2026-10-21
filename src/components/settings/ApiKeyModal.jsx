@@ -62,7 +62,7 @@ export default function ApiKeyModal({ isOpen, onClose, onSave, currentKey = "", 
         soundEngine.playRomanticChime();
         onSave?.(cleaned);
         setStatus("success");
-        setFeedback(`✓ Connected successfully to Google Gemini (${testResult.workingModel})!`);
+        setFeedback(`✓ Connected successfully to Google Gemini (${testResult.workingModel}${testResult.modelsCount ? ` · ${testResult.modelsCount} models auto-enabled` : ''})!`);
         setTimeout(() => {
           onClose?.();
           setStatus(null);
