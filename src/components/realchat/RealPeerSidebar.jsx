@@ -11,6 +11,7 @@ export default function RealPeerSidebar({
   peer,
   userProfile,
   allOnlinePeers = [],
+  unreadCounts = {},
   onSwitchPeer,
   onWave,
   onLike,
@@ -97,9 +98,13 @@ export default function RealPeerSidebar({
           }}
         >
           <div className="flex items-start gap-3">
-            <span className="text-3xl p-2 rounded-2xl bg-slate-950 border border-slate-800 shadow">
-              {peer.emoji || (peer.gender === 'female' ? '👩‍💻' : '👨‍💻')}
-            </span>
+            <div className="w-12 h-12 rounded-2xl bg-slate-950 border border-slate-800 shadow flex items-center justify-center overflow-hidden shrink-0">
+              {peer.avatarUrl ? (
+                <img src={peer.avatarUrl} alt={peer.name} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-3xl">{peer.emoji || (peer.gender === 'female' ? '👩‍💻' : '👨‍💻')}</span>
+              )}
+            </div>
             <div className="min-w-0 flex-1">
               <h3 className="font-bold text-white text-sm truncate">{peer.name}</h3>
               <p className="text-xs text-slate-400 truncate">{peer.handle}</p>
@@ -255,32 +260,50 @@ export default function RealPeerSidebar({
             </div>
 
             <div className="space-y-1.5 max-h-48 overflow-y-auto">
-              {otherPeers.map((other) => (
-                <div
-                  key={other.id}
-                  className="flex items-center justify-between p-2 rounded-xl bg-slate-950 border border-slate-800/80 hover:border-cyan-800 transition-all text-xs"
-                >
-                  <div className="flex items-center gap-2 min-w-0 pr-1">
-                    <span className="text-lg">{other.emoji || '🧑‍💻'}</span>
-                    <div className="truncate">
-                      <p className="font-bold text-white truncate text-[11px]">{other.name}</p>
-                      <p className="text-[10px] text-slate-500 truncate">{other.handle}</p>
+              {otherPeers.map((other) => {
+                const unread = unreadCounts[other.id] || 0;
+                return (
+                  <div
+                    key={other.id}
+                    className={`flex items-center justify-between p-2 rounded-xl bg-slate-950 border transition-all text-xs ${
+                      unread > 0 ? 'border-rose-500/80 shadow-md' : 'border-slate-800/80 hover:border-cyan-800'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 min-w-0 pr-1">
+                      <div className="w-7 h-7 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center overflow-hidden shrink-0">
+                        {other.avatarUrl ? (
+                          <img src={other.avatarUrl} alt={other.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-sm">{other.emoji || '🧑‍💻'}</span>
+                        )}
+                      </div>
+                      <div className="truncate">
+                        <p className="font-bold text-white truncate text-[11px]">{other.name}</p>
+                        <p className="text-[10px] text-slate-500 truncate">{other.handle}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {unread > 0 && (
+                        <span className="px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[9px] font-black animate-pulse">
+                          💬 {unread}
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          soundEngine.playRomanticChime();
+                          onSwitchPeer?.(other);
+                          onCloseMobile?.();
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-cyan-950 hover:bg-cyan-900 border border-cyan-700 text-cyan-300 text-[10px] font-bold transition-all"
+                      >
+                        Chat
+                      </button>
                     </div>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      soundEngine.playRomanticChime();
-                      onSwitchPeer?.(other);
-                      onCloseMobile?.();
-                    }}
-                    className="px-2.5 py-1 rounded-lg bg-cyan-950 hover:bg-cyan-900 border border-cyan-700 text-cyan-300 text-[10px] font-bold shrink-0 transition-all"
-                  >
-                    Chat
-                  </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

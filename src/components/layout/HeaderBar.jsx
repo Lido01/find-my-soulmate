@@ -34,6 +34,7 @@ export default function HeaderBar({
   apiKeySet = false,
   chatMode = 'virtual',
   onToggleChatMode,
+  unreadCount = 0,
   theme = 'dark',
   onToggleTheme,
   t,
@@ -128,6 +129,15 @@ export default function HeaderBar({
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
           <span className="hidden sm:inline">Live Match</span>
           <span className="sm:hidden font-bold">Live</span>
+          {unreadCount > 0 && (
+            <span
+              className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[9px] sm:text-[10px] font-black animate-pulse shadow-md ml-0.5"
+              title={`${unreadCount} unread message${unreadCount > 1 ? 's' : ''}`}
+            >
+              <span className="hidden sm:inline">💬</span>
+              <span>{unreadCount}</span>
+            </span>
+          )}
         </button>
       </div>
 
