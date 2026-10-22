@@ -111,7 +111,7 @@ export default function ApiKeyModal({ isOpen, onClose, onSave, currentKey = "", 
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in"
       onClick={(e) => e.target === e.currentTarget && onClose?.()}
     >
-      <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+      <div className="w-full max-w-md bg-slate-900 border border-slate-700  shadow-2xl overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
           <div className="flex items-center gap-2">
@@ -122,7 +122,7 @@ export default function ApiKeyModal({ isOpen, onClose, onSave, currentKey = "", 
           </div>
           <button
             onClick={onClose}
-            className="text-slate-500 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
+            className="text-slate-500 hover:text-white p-1  hover:bg-slate-800 transition-colors"
           >
             <IconX className="w-4 h-4" />
           </button>
@@ -136,9 +136,9 @@ export default function ApiKeyModal({ isOpen, onClose, onSave, currentKey = "", 
 
           {/* Current key indicator */}
           {hasKey && (
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-emerald-950/40 border border-emerald-700/60">
+            <div className="flex items-center justify-between p-3  bg-emerald-950/40 border border-emerald-700/60">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="w-2 h-2  bg-emerald-400 animate-pulse" />
                 <span className="font-mono text-xs text-emerald-300 font-bold">Active Key:</span>
                 <span className="font-mono text-xs text-slate-400">{maskKey(currentKey)}</span>
               </div>
@@ -167,7 +167,7 @@ export default function ApiKeyModal({ isOpen, onClose, onSave, currentKey = "", 
                   setFeedback("");
                 }}
                 placeholder="Paste API key (starts with AIzaSy...)"
-                className="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 rounded-xl px-3.5 py-2.5 pr-10 font-mono text-xs text-white placeholder:text-slate-600 focus:outline-none transition-colors"
+                className="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500  px-3.5 py-2.5 pr-10 font-mono text-xs text-white placeholder:text-slate-600 focus:outline-none transition-colors"
               />
               <button
                 type="button"
@@ -193,7 +193,7 @@ export default function ApiKeyModal({ isOpen, onClose, onSave, currentKey = "", 
           {/* Status feedback block */}
           {feedback && (
             <div
-              className={`p-3 rounded-xl font-mono text-xs leading-relaxed border ${
+              className={`p-3  font-mono text-xs leading-relaxed border ${
                 status === "success"
                   ? "bg-emerald-950/60 border-emerald-700 text-emerald-300"
                   : "bg-amber-950/60 border-amber-700 text-amber-300"
@@ -206,7 +206,7 @@ export default function ApiKeyModal({ isOpen, onClose, onSave, currentKey = "", 
                   <button
                     type="button"
                     onClick={handleForceSave}
-                    className="px-2.5 py-1 rounded bg-amber-800/60 hover:bg-amber-700/80 text-white font-bold text-[10px]"
+                    className="px-2.5 py-1  bg-amber-800/60 hover:bg-amber-700/80 text-white font-bold text-[10px]"
                   >
                     Save Key Anyway →
                   </button>
@@ -221,7 +221,7 @@ export default function ApiKeyModal({ isOpen, onClose, onSave, currentKey = "", 
               type="button"
               disabled={loading || !inputKey.trim()}
               onClick={handleTestAndSave}
-              className={`flex-1 py-2.5 rounded-xl font-mono text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+              className={`flex-1 py-2.5  font-mono text-xs font-bold transition-all flex items-center justify-center gap-2 ${
                 loading || !inputKey.trim()
                   ? "bg-slate-800 text-slate-500 cursor-not-allowed"
                   : "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-950/50 cursor-pointer"
