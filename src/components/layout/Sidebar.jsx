@@ -63,7 +63,10 @@ export default function Sidebar({
 
   // Normalize allCharacters list (handle both Object and Array)
   const charList = Array.isArray(allCharacters) ? allCharacters : Object.values(allCharacters || {});
-  const otherCharacters = charList.filter((c) => c.id !== activeCharacter.id);
+  // Filter other characters to strictly match current chosen gender (no mixing)
+  const otherCharacters = charList.filter(
+    (c) => c.gender === activeCharacter.gender && c.id !== activeCharacter.id
+  );
 
   return (
     <aside

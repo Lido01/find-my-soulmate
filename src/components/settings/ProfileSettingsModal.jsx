@@ -43,7 +43,7 @@ export default function ProfileSettingsModal({
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in"
       onClick={(e) => e.target === e.currentTarget && onClose?.()}
     >
-      <div className="relative w-full max-w-lg bg-slate-900 border border-slate-700 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="relative w-full max-w-lg bg-slate-900 border border-slate-700  shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -54,7 +54,7 @@ export default function ProfileSettingsModal({
           </div>
           <button
             onClick={onClose}
-            className="text-slate-500 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
+            className="text-slate-500 hover:text-white p-1  hover:bg-slate-800 transition-colors"
           >
             <IconX className="w-5 h-5" />
           </button>
@@ -73,7 +73,7 @@ export default function ProfileSettingsModal({
                 type="text"
                 value={profile.emoji || '🧑‍💻'}
                 onChange={(e) => setProfile((p) => ({ ...p, emoji: e.target.value }))}
-                className="w-12 h-12 bg-slate-950 border border-slate-700 rounded-xl text-center text-2xl focus:border-cyan-500 focus:outline-none"
+                className="w-12 h-12 bg-slate-950 border border-slate-700  text-center text-2xl focus:border-cyan-500 focus:outline-none"
                 title="Profile Emoji"
               />
               <div className="flex-1">
@@ -82,7 +82,7 @@ export default function ProfileSettingsModal({
                   value={profile.name || ''}
                   onChange={(e) => setProfile((p) => ({ ...p, name: e.target.value }))}
                   placeholder="Your Name"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 font-mono text-sm text-white focus:border-cyan-500 focus:outline-none"
+                  className="w-full bg-slate-950 border border-slate-700  px-3 py-2 font-mono text-sm text-white focus:border-cyan-500 focus:outline-none"
                 />
               </div>
             </div>
@@ -96,7 +96,7 @@ export default function ProfileSettingsModal({
                   type="text"
                   value={profile.archetype || ''}
                   onChange={(e) => setProfile((p) => ({ ...p, archetype: e.target.value }))}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 font-mono text-xs text-slate-300 focus:border-cyan-500 focus:outline-none"
+                  className="w-full bg-slate-950 border border-slate-800  px-2.5 py-1.5 font-mono text-xs text-slate-300 focus:border-cyan-500 focus:outline-none"
                 />
               </div>
               <div>
@@ -107,7 +107,7 @@ export default function ProfileSettingsModal({
                   type="text"
                   value={profile.favoriteStack || ''}
                   onChange={(e) => setProfile((p) => ({ ...p, favoriteStack: e.target.value }))}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 font-mono text-xs text-slate-300 focus:border-cyan-500 focus:outline-none"
+                  className="w-full bg-slate-950 border border-slate-800  px-2.5 py-1.5 font-mono text-xs text-slate-300 focus:border-cyan-500 focus:outline-none"
                 />
               </div>
             </div>
@@ -127,7 +127,7 @@ export default function ProfileSettingsModal({
                     key={opt.id}
                     type="button"
                     onClick={() => setProfile((p) => ({ ...p, lookingFor: opt.id }))}
-                    className={`py-2 px-1 text-center rounded-xl font-mono text-xs border transition-all ${
+                    className={`py-2 px-1 text-center  font-mono text-xs border transition-all ${
                       profile.lookingFor === opt.id
                         ? 'border-fuchsia-500 bg-fuchsia-950/50 text-fuchsia-300 font-bold'
                         : 'border-slate-800 bg-slate-950 text-slate-400'
@@ -149,7 +149,7 @@ export default function ProfileSettingsModal({
             </h3>
 
             {/* Voice narration toggle */}
-            <div className="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800">
+            <div className="flex items-center justify-between p-3  bg-slate-950 border border-slate-800">
               <div>
                 <p className="font-mono text-xs font-bold text-slate-200">
                   {lang === 'am' ? 'የገፀ-ባህሪያት ድምፅ ንግግር' : 'Romantic Voice Narration (TTS)'}
@@ -161,12 +161,12 @@ export default function ProfileSettingsModal({
               <button
                 type="button"
                 onClick={() => setAudio((a) => ({ ...a, voiceNarration: !a.voiceNarration }))}
-                className={`w-12 h-6 rounded-full transition-colors relative p-0.5 ${
+                className={`w-12 h-6  transition-colors relative p-0.5 ${
                   audio.voiceNarration ? 'bg-fuchsia-600' : 'bg-slate-800'
                 }`}
               >
                 <div
-                  className={`w-5 h-5 rounded-full bg-white transition-transform ${
+                  className={`w-5 h-5  bg-white transition-transform ${
                     audio.voiceNarration ? 'translate-x-6' : 'translate-x-0'
                   }`}
                 />
@@ -174,7 +174,7 @@ export default function ProfileSettingsModal({
             </div>
 
             {/* Romantic sound effects toggle */}
-            <div className="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800">
+            <div className="flex items-center justify-between p-3  bg-slate-950 border border-slate-800">
               <div>
                 <p className="font-mono text-xs font-bold text-slate-200">
                   {lang === 'am' ? 'የፍቅር ድምፆች (Chimes & Pulse)' : 'Romantic Audio Chimes & Beeps'}
@@ -186,12 +186,12 @@ export default function ProfileSettingsModal({
               <button
                 type="button"
                 onClick={() => setAudio((a) => ({ ...a, soundEffects: !a.soundEffects }))}
-                className={`w-12 h-6 rounded-full transition-colors relative p-0.5 ${
+                className={`w-12 h-6  transition-colors relative p-0.5 ${
                   audio.soundEffects ? 'bg-emerald-600' : 'bg-slate-800'
                 }`}
               >
                 <div
-                  className={`w-5 h-5 rounded-full bg-white transition-transform ${
+                  className={`w-5 h-5  bg-white transition-transform ${
                     audio.soundEffects ? 'translate-x-6' : 'translate-x-0'
                   }`}
                 />
@@ -209,7 +209,7 @@ export default function ProfileSettingsModal({
                   lang
                 );
               }}
-              className="w-full py-2 px-3 rounded-xl border border-slate-800 bg-slate-950/80 hover:bg-slate-800 text-slate-300 font-mono text-xs flex items-center justify-center gap-2"
+              className="w-full py-2 px-3  border border-slate-800 bg-slate-950/80 hover:bg-slate-800 text-slate-300 font-mono text-xs flex items-center justify-center gap-2"
             >
               <span>🔊</span>
               <span>{lang === 'am' ? 'የድምፅ ቅምሻ አዳምጥ' : 'Test Romantic Voice'}</span>
@@ -225,9 +225,9 @@ export default function ProfileSettingsModal({
               onClose?.();
               onOpenOnboarding?.();
             }}
-            className="w-full py-2.5 px-3 rounded-xl border border-fuchsia-800/40 bg-fuchsia-950/20 hover:bg-fuchsia-900/40 text-fuchsia-300 font-mono text-xs text-center"
+            className="w-full py-2.5 px-3  border border-fuchsia-800/40 bg-fuchsia-950/20 hover:bg-fuchsia-900/40 text-fuchsia-300 font-mono text-xs text-center"
           >
-            ✨ {lang === 'am' ? 'የመግቢያ መጠይቅ በድጋሚ ይክፈቱ' : 'Restart "Tell Me About Yourself" Quiz'}
+             {lang === 'am' ? 'የመግቢያ መጠይቅ በድጋሚ ይክፈቱ' : 'Restart "Tell Me About Yourself" Quiz'}
           </button>
         </div>
 
@@ -246,14 +246,14 @@ export default function ProfileSettingsModal({
             <button
               type="button"
               onClick={onClose}
-              className="font-mono text-xs text-slate-400 hover:text-white px-3 py-2 rounded-lg"
+              className="font-mono text-xs text-slate-400 hover:text-white px-3 py-2 "
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={handleSave}
-              className="font-mono text-xs font-bold px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg shadow-cyan-950/50"
+              className="font-mono text-xs font-bold px-5 py-2.5  bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg shadow-cyan-950/50"
             >
               {lang === 'am' ? 'አስቀምጥ' : 'Save Changes'}
             </button>
