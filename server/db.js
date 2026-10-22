@@ -203,10 +203,14 @@ export class Database {
       const users = this.getUsers();
       const existingIdx = users.findIndex((u) => u.id === userData.id || u.handle === userData.handle);
 
+      const cleanHandle = typeof userData.handle === 'string' && userData.handle.trim()
+        ? (userData.handle.trim().startsWith('@') ? userData.handle.trim() : `@${userData.handle.trim()}`)
+        : `@${(userData.name || 'dev').toLowerCase().replace(/\s+/g, '_')}`;
+
       const updatedUser = {
         id: userData.id || `user_${Date.now()}`,
         name: userData.name || 'Anonymous Dev',
-        handle: userData.handle.startsWith('@') ? userData.handle : `@${userData.handle}`,
+        handle: cleanHandle,
         gender: userData.gender || 'female',
         lookingFor: userData.lookingFor || 'male',
         location: userData.location || 'Addis Ababa 🇪🇹',
