@@ -103,7 +103,6 @@ export default function HeaderBar({
           }`}
           title="Chat with Virtual / AI Developer Soulmates"
         >
-          <span>🤖</span>
           <span className="hidden sm:inline">AI Soulmates</span>
           <span className="sm:hidden font-bold">AI</span>
         </button>
@@ -122,7 +121,6 @@ export default function HeaderBar({
           title="Match & Chat with Real Online Developers via WebSockets"
         >
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span>🌐</span>
           <span className="hidden sm:inline">Live Match</span>
           <span className="sm:hidden font-bold">Live</span>
         </button>
