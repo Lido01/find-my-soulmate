@@ -59,7 +59,7 @@ export default function App() {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
-  const [showDevRegisterModal, setShowDevRegisterModal] = useState(false);
+  const [showDevRegisterModal, setShowDevRegisterModal] = useState(() => !loadUserProfile()?.isRegistered);
   const [showMobileNav, setShowMobileNav] = useState(false);
   const [loveDrawerOpen, setLoveDrawerOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);

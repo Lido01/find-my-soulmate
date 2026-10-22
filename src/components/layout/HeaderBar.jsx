@@ -78,43 +78,34 @@ export default function HeaderBar({
       )}
 
       {/* Breadcrumb */}
-      <div className="flex items-center gap-1 font-mono text-xs">
-        <span className="text-fuchsia-400 font-bold">find_my_soulmate</span>
+      <div className="flex items-center gap-1 font-mono text-xs min-w-0">
+        <span className="text-cyan-400 font-bold truncate max-w-[100px] sm:max-w-none">find_soulmate</span>
         {isChat && activeCharacter && (
           <>
-            <IconChevronRight className="w-3 h-3 text-slate-600" />
-            <span className="text-slate-400">@{activeCharacter.handle}</span>
+            <IconChevronRight className="w-3 h-3 text-slate-600 hidden sm:inline" />
+            <span className="text-slate-400 hidden sm:inline">@{activeCharacter.handle}</span>
           </>
         )}
       </div>
 
-      {/* Chat phase: partner mood pill & gender */}
-      {isChat && activeCharacter && moodMeta.emoji && (
-        <div className="hidden sm:flex items-center gap-1.5 bg-slate-900 border border-slate-700  px-2.5 py-0.5 ml-1">
-          <span className="text-xs">{moodMeta.emoji}</span>
-          <span className="font-mono text-[10px] text-slate-300 font-bold">{activeCharacter.name}</span>
-          <span className="text-[10px] text-slate-500">
-            {activeCharacter.gender === 'female' ? '👩‍💻 GF' : '👨‍💻 BF'}
-          </span>
-        </div>
-      )}
-
-      {/* Mode Switcher: Virtual AI vs Real WebSocket (Desktop/Tablet) */}
-      <div className="hidden sm:flex items-center bg-slate-900 border border-slate-800  p-0.5 ml-2">
+      {/* Mode Switcher: Virtual AI vs Real WebSocket (Visible on ALL devices) */}
+      <div className="flex items-center bg-slate-900 border border-slate-800 rounded-xl p-0.5 ml-1 sm:ml-2 shrink-0">
         <button
           type="button"
           onClick={() => {
             soundEngine.playHeartbeat();
             onToggleChatMode?.('virtual');
           }}
-          className={`font-mono text-[11px] px-2.5 py-1  transition-all flex items-center gap-1.5 ${
+          className={`font-mono text-[10px] sm:text-[11px] px-2 sm:px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 ${
             chatMode === 'virtual'
-              ? 'bg-fuchsia-950 border border-fuchsia-700 text-fuchsia-300 font-bold shadow-sm'
+              ? 'bg-slate-800 border border-cyan-600 text-cyan-300 font-bold shadow-sm'
               : 'text-slate-400 hover:text-white'
           }`}
           title="Chat with Virtual / AI Developer Soulmates"
         >
-          <span className="hidden md:inline">Computer</span>
+          <span>🤖</span>
+          <span className="hidden sm:inline">AI Soulmates</span>
+          <span className="sm:hidden font-bold">AI</span>
         </button>
 
         <button
@@ -123,14 +114,17 @@ export default function HeaderBar({
             soundEngine.playRomanticChime();
             onToggleChatMode?.('real_ws');
           }}
-          className={`font-mono text-[11px] px-2.5 py-1  transition-all flex items-center gap-1.5 ${
+          className={`font-mono text-[10px] sm:text-[11px] px-2 sm:px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 ${
             chatMode === 'real_ws'
-              ? 'bg-cyan-950 border border-cyan-600 text-cyan-300 font-bold shadow-sm'
+              ? 'bg-cyan-950 border border-cyan-500 text-cyan-200 font-bold shadow-sm'
               : 'text-slate-400 hover:text-white'
           }`}
           title="Match & Chat with Real Online Developers via WebSockets"
         >
-          <span className="hidden md:inline">Live Match</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span>🌐</span>
+          <span className="hidden sm:inline">Live Match</span>
+          <span className="sm:hidden font-bold">Live</span>
         </button>
       </div>
 
