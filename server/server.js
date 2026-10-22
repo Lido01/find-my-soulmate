@@ -26,7 +26,7 @@ function readJsonBody(req) {
     let body = '';
     req.on('data', (chunk) => {
       body += chunk;
-      if (body.length > 1e6) { // 1MB limit
+      if (body.length > 10e6) { // 10MB limit for image attachments & photo uploads
         req.destroy();
         reject(new Error('Request entity too large'));
       }
@@ -272,7 +272,7 @@ function handleClientMessage(ws, msg) {
       // Announce new presence
       broadcastToAll({
         type: 'community:toast',
-        message: `✨ ${user.name} (${user.handle}) is active in the developer lobby!`,
+        message: `${user.name} is active in the developer lobby!`,
         user,
       });
       break;
@@ -317,6 +317,8 @@ function handleClientMessage(ws, msg) {
             bio: peer.bio,
             techStack: peer.techStack,
             emoji: peer.emoji,
+            avatarUrl: peer.avatarUrl || null,
+            quote: peer.quote || '',
             indentation: peer.indentation,
             drink: peer.drink,
             location: peer.location,
@@ -334,6 +336,8 @@ function handleClientMessage(ws, msg) {
             bio: user.bio,
             techStack: user.techStack,
             emoji: user.emoji,
+            avatarUrl: user.avatarUrl || null,
+            quote: user.quote || '',
             indentation: user.indentation,
             drink: user.drink,
             location: user.location,
@@ -415,12 +419,17 @@ function handleClientMessage(ws, msg) {
           senderName: user.name,
           senderHandle: user.handle,
           senderEmoji: user.emoji,
+          senderAvatarUrl: user.avatarUrl || msg.message?.senderAvatarUrl || null,
           text: msg.message?.text || '',
           timestamp: new Date().toISOString(),
           isAudio: Boolean(msg.message?.isAudio),
           audioDuration: msg.message?.audioDuration || null,
           isGift: Boolean(msg.message?.isGift),
           gift: msg.message?.gift || null,
+          isImage: Boolean(msg.message?.isImage),
+          imageUrl: msg.message?.imageUrl || null,
+          isCode: Boolean(msg.message?.isCode),
+          codeLang: msg.message?.codeLang || null,
         },
       });
 

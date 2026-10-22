@@ -34,6 +34,8 @@ export default function HeaderBar({
   apiKeySet = false,
   chatMode = 'virtual',
   onToggleChatMode,
+  theme = 'dark',
+  onToggleTheme,
   t,
 }) {
   const [resetConfirm, setResetConfirm] = useState(false);
@@ -72,7 +74,6 @@ export default function HeaderBar({
           }}
           className="font-mono text-xs text-slate-400 hover:text-white transition-colors px-2 py-1  hover:bg-slate-800 flex items-center gap-1"
         >
-          <span>←</span>
           <span>{t?.back ?? "back"}</span>
         </button>
       )}
@@ -80,12 +81,6 @@ export default function HeaderBar({
       {/* Breadcrumb */}
       <div className="flex items-center gap-1 font-mono text-xs min-w-0">
         <span className="text-cyan-400 font-bold truncate max-w-[100px] sm:max-w-none">find_soulmate</span>
-        {isChat && activeCharacter && (
-          <>
-            <IconChevronRight className="w-3 h-3 text-slate-600 hidden sm:inline" />
-            <span className="text-slate-400 hidden sm:inline">@{activeCharacter.handle}</span>
-          </>
-        )}
       </div>
 
       {/* Mode Switcher: Virtual AI vs Real WebSocket (Visible on ALL devices) */}
@@ -93,6 +88,11 @@ export default function HeaderBar({
         <button
           type="button"
           onClick={() => {
+            if (!userProfile?.isRegistered) {
+              soundEngine.playHeartbeat();
+              onOpenRegister?.();
+              return;
+            }
             soundEngine.playHeartbeat();
             onToggleChatMode?.('virtual');
           }}
@@ -110,6 +110,11 @@ export default function HeaderBar({
         <button
           type="button"
           onClick={() => {
+            if (!userProfile?.isRegistered) {
+              soundEngine.playHeartbeat();
+              onOpenRegister?.();
+              return;
+            }
             soundEngine.playRomanticChime();
             onToggleChatMode?.('real_ws');
           }}
@@ -131,6 +136,19 @@ export default function HeaderBar({
 
       {/* Right cluster */}
       <div className="flex items-center gap-2">
+        {/* Theme Toggle (Light / Dark) */}
+        <button
+          type="button"
+          onClick={() => {
+            soundEngine.playRomanticChime();
+            onToggleTheme?.();
+          }}
+          className="flex items-center gap-1 font-mono text-[11px] px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-900 text-slate-300 hover:text-white transition-colors shadow-sm"
+          title="Toggle Light / Dark Mode"
+        >
+          <span>{theme === 'light' ? '🌙' : '☀️'}</span>
+          <span className="hidden md:inline">{theme === 'light' ? 'Dark' : 'Light'}</span>
+        </button>
         {/* Mobile Hamburger Menu Button (Visible on screens < md) */}
         <button
           type="button"

@@ -216,6 +216,8 @@ export class Database {
         location: userData.location || 'Addis Ababa 🇪🇹',
         techStack: userData.techStack || ['React', 'TypeScript'],
         bio: userData.bio || 'Coding with passion...',
+        quote: userData.quote || '',
+        avatarUrl: userData.avatarUrl || null,
         indentation: userData.indentation || 'Tabs',
         drink: userData.drink || '☕ Ethiopian Bunna',
         emoji: userData.emoji || (userData.gender === 'female' ? '👩‍💻' : '👨‍💻'),

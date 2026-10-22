@@ -1,6 +1,17 @@
 {
   "posts": [
     {
+      "id": "post_1792690105059",
+      "authorId": "dev_1792672057950",
+      "authorName": "Lidex",
+      "authorHandle": "@lidex",
+      "authorEmoji": "👨‍💻",
+      "content": "I wanna be a backend as a lidex engineering",
+      "timestamp": "2026-10-22T17:28:25.059Z",
+      "likes": 1,
+      "comments": 0
+    },
+    {
       "id": "post_1",
       "authorId": "user_meron",
       "authorName": "Meron Tadesse",

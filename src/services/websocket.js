@@ -312,12 +312,17 @@ class WebSocketManager {
       senderName: this.currentUser?.name || 'Me',
       senderHandle: this.currentUser?.handle || '@me',
       senderEmoji: this.currentUser?.emoji || '🧑‍💻',
+      senderAvatarUrl: this.currentUser?.avatarUrl || null,
       text: text.trim(),
       timestamp: new Date().toISOString(),
       isAudio: Boolean(options.isAudio),
       audioDuration: options.audioDuration || null,
       isGift: Boolean(options.isGift),
       gift: options.gift || null,
+      isImage: Boolean(options.isImage),
+      imageUrl: options.imageUrl || null,
+      isCode: Boolean(options.isCode),
+      codeLang: options.codeLang || null,
     };
 
     if (this.ws && this.ws.readyState === WebSocket.OPEN && !this.isSimulated) {
@@ -373,7 +378,11 @@ class WebSocketManager {
       let replyText = "";
       const lower = playerText.toLowerCase();
 
-      if (lower.includes('hi') || lower.includes('hello') || lower.includes('ሰላም')) {
+      if (options.isImage) {
+        replyText = `Whoa, love the photo! 📸 Look at that clarity. Saving this to my favorites! 💖`;
+      } else if (options.isCode) {
+        replyText = `That's clean code! 🔥 Zero memory leaks, pristine logic. Truly a 10x soulmate move.`;
+      } else if (lower.includes('hi') || lower.includes('hello') || lower.includes('ሰላም')) {
         replyText = `Hey ${this.currentUser?.name || 'there'}! 👋 Loved seeing your profile pop up. What are you coding tonight?`;
       } else if (lower.includes('love') || lower.includes('cute') || lower.includes('ቆንጆ') || lower.includes('ፍቅር')) {
         replyText = `Aww, you're so sweet! 🥺💖 My heart just dropped zero packets. Let's finish this sprint together!`;

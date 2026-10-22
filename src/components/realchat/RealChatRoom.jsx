@@ -1,6 +1,6 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // RealChatRoom.jsx — 1-on-1 Real-Time WebSocket Developer Dating Chat Room
-// Clean, space-optimized terminal layout with collapsible chevron quick-prompts
+// Telegram / Social Media Chat UX with Live status, Asset & Photo Sharing, and Text Area
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState, useEffect, useRef } from 'react';
@@ -30,12 +30,28 @@ export default function RealChatRoom({
   const [quickTab, setQuickTab] = useState('icebreakers'); // 'icebreakers' | 'quotes' | 'actions'
   const [showMobileStatsDrawer, setShowMobileStatsDrawer] = useState(false);
 
+  // Asset & Code snippet composer state
+  const [showAssetMenu, setShowAssetMenu] = useState(false);
+  const [showCodeComposer, setShowCodeComposer] = useState(false);
+  const [codeSnippet, setCodeSnippet] = useState("");
+  const [codeLanguage, setCodeLanguage] = useState("TypeScript");
+
   const feedRef = useRef(null);
+  const textareaRef = useRef(null);
+  const fileInputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const recordTimerRef = useRef(null);
   const recognizerRef = useRef(null);
 
   const isAm = lang === 'am';
+
+  // Live status: check if peer is currently connected and active
+  const isPeerOnline = Boolean(
+    peer && (
+      peer.status === 'online' ||
+      allOnlinePeers.some((p) => p.id === peer.id)
+    )
+  );
 
   // Auto-scroll on new message
   useEffect(() => {
@@ -70,6 +86,11 @@ export default function RealChatRoom({
           audioDuration: msg.audioDuration,
           isGift: msg.isGift,
           gift: msg.gift,
+          isImage: msg.isImage,
+          imageUrl: msg.imageUrl,
+          isCode: msg.isCode,
+          codeLang: msg.codeLang,
+          senderAvatarUrl: msg.senderAvatarUrl,
         },
       ]);
     });
@@ -98,7 +119,7 @@ export default function RealChatRoom({
   }, [peer, userProfile, isAm]);
 
   // Handle typing debounce
-  function handleInputChange(e) {
+  function handleTextareaChange(e) {
     setInputText(e.target.value);
     wsService.sendTyping(true);
 
@@ -108,8 +129,14 @@ export default function RealChatRoom({
     }, 1200);
   }
 
-  function handleSendText(e) {
-    e?.preventDefault();
+  function handleKeyDown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendText();
+    }
+  }
+
+  function handleSendText() {
     const text = inputText.trim();
     if (!text) return;
 
@@ -118,6 +145,44 @@ export default function RealChatRoom({
     wsService.sendMessage(text);
     setInputText("");
     setShowQuickDropdown(false);
+    setShowAssetMenu(false);
+  }
+
+  // Handle Photo / Image Upload Attachment (Telegram style)
+  function handleImageSelected(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result;
+      if (dataUrl) {
+        soundEngine.playRomanticChime();
+        wsService.sendMessage(inputText.trim() || 'Shared a photo 📷', {
+          isImage: true,
+          imageUrl: dataUrl,
+        });
+        setInputText("");
+        setShowAssetMenu(false);
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  }
+
+  // Handle Code Snippet Send
+  function handleSendCodeSnippet(e) {
+    e?.preventDefault();
+    if (!codeSnippet.trim()) return;
+
+    soundEngine.playRomanticChime();
+    wsService.sendMessage(codeSnippet.trim(), {
+      isCode: true,
+      codeLang: codeLanguage,
+    });
+    setCodeSnippet("");
+    setShowCodeComposer(false);
+    setShowAssetMenu(false);
   }
 
   // Voice recording handlers
@@ -182,6 +247,7 @@ export default function RealChatRoom({
 
   function handleSendBunna() {
     setShowQuickDropdown(false);
+    setShowAssetMenu(false);
     soundEngine.playRomanticChime();
     wsService.sendMessage(
       isAm
@@ -192,6 +258,7 @@ export default function RealChatRoom({
 
   function handleAddFriendAction() {
     setShowQuickDropdown(false);
+    setShowAssetMenu(false);
     soundEngine.playGiftFanfare();
     wsService.sendSocialAction('add_friend', peer.id);
     wsService.sendMessage(
@@ -243,22 +310,38 @@ export default function RealChatRoom({
       <header className="flex-shrink-0 flex items-center justify-between px-3 py-2 border-b border-slate-800 bg-slate-950/95 backdrop-blur-md gap-2">
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
           <div className="relative shrink-0">
-            <span className="text-xl p-1.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center">
-              {peer?.emoji || (peer?.gender === 'female' ? '👩‍💻' : '👨‍💻')}
+            <span className="text-xl p-1.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center overflow-hidden w-9 h-9">
+              {peer?.avatarUrl ? (
+                <img src={peer.avatarUrl} alt={peer.name} className="w-full h-full object-cover" />
+              ) : (
+                peer?.emoji || (peer?.gender === 'female' ? '👩‍💻' : '👨‍💻')
+              )}
             </span>
-            <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-slate-950" />
+            {/* Live Indicator: Only shown when peer is active online; otherwise blank */}
+            {isPeerOnline && (
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-slate-950" />
+            )}
           </div>
 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <span className="font-bold text-xs sm:text-sm text-white truncate">{peer.name}</span>
               <span className="text-[11px] text-slate-500 hidden sm:inline">{peer.handle}</span>
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-800/80 text-cyan-300 font-bold">
+              
+              {/* Live Icon / Badge (Shows if peer is in live, otherwise blank) */}
+              {isPeerOnline && (
+                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-950/90 border border-emerald-500/50 text-emerald-400 text-[10px] font-bold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Live</span>
+                </span>
+              )}
+
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-800/80 text-cyan-300 font-bold hidden sm:inline">
                 {matchScore}% Match
               </span>
             </div>
             <p className="text-[10px] text-slate-400 truncate max-w-xs sm:max-w-md">
-              {peer.bio || `${peer.indentation || 'Tabs'} · ${sharedTech.join(', ') || 'Developer'}`}
+              {peer.quote ? `"${peer.quote}"` : (peer.bio || `${peer.indentation || 'Tabs'} · ${sharedTech.join(', ') || 'Developer'}`)}
             </p>
           </div>
         </div>
@@ -351,6 +434,122 @@ export default function RealChatRoom({
         </div>
       )}
 
+      {/* Code Snippet Composer Modal / Drawer */}
+      {showCodeComposer && (
+        <div className="shrink-0 bg-slate-900 border-t border-slate-800 p-3 shadow-2xl animate-slide-up space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
+              <span>💻</span>
+              <span>Share Code Snippet (Telegram Style)</span>
+            </span>
+            <div className="flex items-center gap-2">
+              <select
+                value={codeLanguage}
+                onChange={(e) => setCodeLanguage(e.target.value)}
+                className="bg-slate-950 border border-slate-700 text-cyan-300 text-[11px] rounded px-2 py-0.5 focus:outline-none"
+              >
+                <option value="TypeScript">TypeScript</option>
+                <option value="React JSX">React JSX</option>
+                <option value="Python">Python</option>
+                <option value="Rust">Rust</option>
+                <option value="Go">Go</option>
+                <option value="CSS / Tailwind">CSS</option>
+              </select>
+              <button onClick={() => setShowCodeComposer(false)} className="text-slate-500 hover:text-white text-xs">✕</button>
+            </div>
+          </div>
+
+          <textarea
+            rows={3}
+            value={codeSnippet}
+            onChange={(e) => setCodeSnippet(e.target.value)}
+            placeholder="// Paste or write code snippet here..."
+            className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 font-mono text-xs text-cyan-200 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500"
+          />
+
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setShowCodeComposer(false)}
+              className="px-3 py-1 rounded bg-slate-800 text-xs text-slate-400 hover:text-white"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSendCodeSnippet}
+              disabled={!codeSnippet.trim()}
+              className="px-3 py-1 rounded bg-cyan-950 border border-cyan-600 text-xs font-bold text-cyan-300 hover:bg-cyan-900 disabled:opacity-40"
+            >
+              Send Snippet 🚀
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Telegram-style Asset Share Menu (Photos, Code, Bunna) */}
+      {showAssetMenu && (
+        <div className="shrink-0 bg-slate-900 border-t border-slate-800 p-2.5 shadow-2xl animate-slide-up flex flex-wrap items-center gap-2">
+          {/* 1. Share Photo */}
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-cyan-500 text-xs text-cyan-300 font-bold transition-colors"
+          >
+            <span>📷</span>
+            <span>Share Photo</span>
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageSelected}
+            className="hidden"
+          />
+
+          {/* 2. Share Code Snippet */}
+          <button
+            type="button"
+            onClick={() => {
+              setShowCodeComposer(true);
+              setShowAssetMenu(false);
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-cyan-500 text-xs text-cyan-300 font-bold transition-colors"
+          >
+            <span>💻</span>
+            <span>Send Code</span>
+          </button>
+
+          {/* 3. Send Bunna */}
+          <button
+            type="button"
+            onClick={handleSendBunna}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-amber-600 text-xs text-amber-300 font-bold transition-colors"
+          >
+            <span>☕</span>
+            <span>Send Bunna</span>
+          </button>
+
+          {/* 4. Add Friend */}
+          <button
+            type="button"
+            onClick={handleAddFriendAction}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-indigo-600 text-xs text-indigo-300 font-bold transition-colors"
+          >
+            <span>👥</span>
+            <span>+Friend</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowAssetMenu(false)}
+            className="ml-auto text-slate-500 hover:text-white text-xs px-2"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Space-Saving Quick Prompts Popover (Chevron Collapsible) */}
       {showQuickDropdown && (
         <div className="shrink-0 bg-slate-900 border-t border-slate-800 p-2.5 shadow-2xl animate-slide-up space-y-2">
@@ -374,15 +573,6 @@ export default function RealChatRoom({
                 }`}
               >
                 Quotes
-              </button>
-              <button
-                type="button"
-                onClick={() => setQuickTab('actions')}
-                className={`px-2 py-0.5 rounded font-bold transition-colors ${
-                  quickTab === 'actions' ? 'bg-cyan-950 border border-cyan-700 text-cyan-300' : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Actions
               </button>
             </div>
             <button
@@ -427,26 +617,6 @@ export default function RealChatRoom({
               ))}
             </div>
           )}
-
-          {/* Actions: Bunna / Friend */}
-          {quickTab === 'actions' && (
-            <div className="flex items-center gap-2 pt-0.5">
-              <button
-                type="button"
-                onClick={handleSendBunna}
-                className="flex-1 py-1.5 px-3 rounded-lg bg-slate-950 border border-slate-800 hover:border-amber-600 text-amber-300 text-xs font-bold transition-all text-center"
-              >
-                Send Ethiopian Bunna ☕
-              </button>
-              <button
-                type="button"
-                onClick={handleAddFriendAction}
-                className="flex-1 py-1.5 px-3 rounded-lg bg-slate-950 border border-slate-800 hover:border-cyan-600 text-cyan-300 text-xs font-bold transition-all text-center"
-              >
-                +Add to Friends 👥
-              </button>
-            </div>
-          )}
         </div>
       )}
 
@@ -480,19 +650,39 @@ export default function RealChatRoom({
         </button>
       </div>
 
-      {/* Message Input Footer Console */}
+      {/* Real Text Chat Area Console (Telegram / Social Media Look) */}
       <footer className="border-t border-slate-800 bg-slate-950 p-2 sm:p-2.5 shrink-0">
-        <form onSubmit={handleSendText} className="flex items-center gap-1.5 sm:gap-2">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSendText();
+          }}
+          className="flex items-end gap-1.5 sm:gap-2"
+        >
+          {/* Telegram-style Attachment Paperclip Button */}
+          <button
+            type="button"
+            onClick={() => setShowAssetMenu((prev) => !prev)}
+            className={`font-mono text-base px-2.5 py-2 rounded-lg border transition-all shrink-0 ${
+              showAssetMenu
+                ? 'bg-cyan-950 border-cyan-500 text-cyan-300'
+                : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
+            }`}
+            title="Attach photo, code snippet, or gift"
+          >
+            📎
+          </button>
+
+          {/* Comfortable Real Textarea */}
           <div className="relative flex-1">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-cyan-500 select-none">
-              &gt;
-            </span>
-            <input
-              type="text"
+            <textarea
+              ref={textareaRef}
+              rows={1}
               value={inputText}
-              onChange={handleInputChange}
-              placeholder={isAm ? "መልእክት ይተይቡ..." : `Message ${peer.name}...`}
-              className="w-full bg-slate-900 border border-slate-800 focus:border-cyan-500 rounded-lg pl-7 pr-3 py-2 font-mono text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none transition-colors"
+              onChange={handleTextareaChange}
+              onKeyDown={handleKeyDown}
+              placeholder={isAm ? "መልእክት ይተይቡ (Enter ለመላክ)..." : `Message ${peer.name} (Enter to send)...`}
+              className="w-full bg-slate-900 border border-slate-800 focus:border-cyan-500 rounded-xl px-3 py-2 font-mono text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none transition-colors resize-none max-h-24 leading-relaxed"
             />
           </div>
 
@@ -500,7 +690,7 @@ export default function RealChatRoom({
           <button
             type="button"
             onClick={toggleVoiceRecording}
-            className={`font-mono text-xs font-bold px-2.5 py-2 rounded-lg border flex items-center gap-1 transition-all shrink-0 ${
+            className={`font-mono text-xs font-bold px-2.5 py-2 rounded-xl border flex items-center gap-1 transition-all shrink-0 ${
               isRecordingVoice
                 ? 'bg-red-950 border-red-500 text-red-300 animate-pulse'
                 : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
@@ -514,7 +704,7 @@ export default function RealChatRoom({
           <button
             type="submit"
             disabled={!inputText.trim()}
-            className={`font-mono text-xs font-bold px-3 py-2 rounded-lg border flex items-center gap-1.5 transition-all shrink-0 ${
+            className={`font-mono text-xs font-bold px-3 py-2 rounded-xl border flex items-center gap-1.5 transition-all shrink-0 ${
               !inputText.trim()
                 ? 'bg-slate-900 border-slate-800 text-slate-600 cursor-not-allowed'
                 : 'bg-cyan-950 border-cyan-700 text-cyan-300 hover:bg-cyan-900 cursor-pointer shadow-sm'

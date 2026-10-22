@@ -53,6 +53,13 @@ export default function App() {
   const [apiKey, setApiKeyState] = useState(() => loadApiKey());
   const [userProfile, setUserProfileState] = useState(() => loadUserProfile());
   const [audioSettings, setAudioSettingsState] = useState(() => loadAudioSettings());
+  const [theme, setTheme] = useState(() => {
+    try {
+      return localStorage.getItem('fms_theme') || 'dark';
+    } catch {
+      return 'dark';
+    }
+  });
 
   const [showApiModal, setShowApiModal] = useState(false);
   const [showGiftModal, setShowGiftModal] = useState(false);
@@ -60,9 +67,19 @@ export default function App() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [showDevRegisterModal, setShowDevRegisterModal] = useState(() => !loadUserProfile()?.isRegistered);
+  const [defaultRegisterTarget, setDefaultRegisterTarget] = useState(null);
   const [showMobileNav, setShowMobileNav] = useState(false);
   const [loveDrawerOpen, setLoveDrawerOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  const handleToggleTheme = useCallback(() => {
+    soundEngine.playRomanticChime();
+    setTheme((prev) => {
+      const next = prev === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem('fms_theme', next); } catch {}
+      return next;
+    });
+  }, []);
 
   // Mode switcher: 'virtual' (AI Soulmates) vs 'real_ws' (Live WebSocket Real Users)
   const [chatMode, setChatMode] = useState('virtual');
@@ -146,7 +163,9 @@ export default function App() {
   const aiModeActive = Boolean(apiKey);
 
   return (
-    <div className="h-[100dvh] min-h-[100dvh] w-full flex flex-col bg-slate-950 font-mono overflow-hidden select-text">
+    <div className={`h-[100dvh] min-h-[100dvh] w-full flex flex-col font-mono overflow-hidden select-text transition-colors duration-200 ${
+      theme === 'light' ? 'theme-light bg-slate-50 text-slate-900' : 'bg-slate-950 text-slate-200'
+    }`}>
       {/* Top header */}
       <HeaderBar
         phase={phase}
@@ -157,7 +176,10 @@ export default function App() {
         onBack={handleBack}
         onApiKeyClick={() => setShowApiModal(true)}
         onOpenProfile={() => setShowProfileModal(true)}
-        onOpenRegister={() => setShowDevRegisterModal(true)}
+        onOpenRegister={(target) => {
+          setDefaultRegisterTarget(target || null);
+          setShowDevRegisterModal(true);
+        }}
         onOpenAbout={() => setShowAboutModal(true)}
         onOpenMobileMenu={() => setShowMobileNav(true)}
         apiKeySet={aiModeActive}
@@ -166,6 +188,8 @@ export default function App() {
           setChatMode(m);
           if (m === 'virtual') setActiveRealPeer(null);
         }}
+        theme={theme}
+        onToggleTheme={handleToggleTheme}
         t={t}
       />
 
@@ -258,7 +282,10 @@ export default function App() {
               <RealChatLobby
                 userProfile={userProfile}
                 onOpenProfile={() => setShowProfileModal(true)}
-                onOpenRegister={() => setShowDevRegisterModal(true)}
+                onOpenRegister={(target) => {
+                  setDefaultRegisterTarget(target || null);
+                  setShowDevRegisterModal(true);
+                }}
                 onBackToModeSelect={() => setChatMode('virtual')}
                 lang={lang}
               />
@@ -269,9 +296,20 @@ export default function App() {
               allCharStates={gameState.characters}
               onSelect={handleSelectCharacter}
               userProfile={userProfile}
+              onOpenRegister={(target) => {
+                setDefaultRegisterTarget(target || null);
+                setShowDevRegisterModal(true);
+              }}
               onOpenOnboarding={() => setShowOnboarding(true)}
               onOpenAbout={() => setShowAboutModal(true)}
-              onSwitchToRealWs={() => setChatMode('real_ws')}
+              onSwitchToRealWs={() => {
+                if (!userProfile?.isRegistered) {
+                  soundEngine.playHeartbeat();
+                  setShowDevRegisterModal(true);
+                  return;
+                }
+                setChatMode('real_ws');
+              }}
               t={t}
               lang={lang}
             />
@@ -365,10 +403,15 @@ export default function App() {
         }}
         userProfile={userProfile}
         onOpenProfile={() => setShowProfileModal(true)}
-        onOpenRegister={() => setShowDevRegisterModal(true)}
+        onOpenRegister={(target) => {
+          setDefaultRegisterTarget(target || null);
+          setShowDevRegisterModal(true);
+        }}
         onOpenAbout={() => setShowAboutModal(true)}
         onOpenApiKey={() => setShowApiModal(true)}
         apiKeySet={aiModeActive}
+        theme={theme}
+        onToggleTheme={handleToggleTheme}
         onReset={handleReset}
         lang={lang}
       />
@@ -377,6 +420,7 @@ export default function App() {
         onClose={() => setShowDevRegisterModal(false)}
         currentProfile={userProfile}
         onSaveProfile={handleSaveProfile}
+        defaultTarget={defaultRegisterTarget}
         onStartChatNow={() => {
           setChatMode('real_ws');
           soundEngine.playRomanticChime();
@@ -406,6 +450,8 @@ export default function App() {
         audioSettings={audioSettings}
         onSaveAudioSettings={handleSaveAudioSettings}
         onOpenOnboarding={() => setShowOnboarding(true)}
+        theme={theme}
+        onToggleTheme={handleToggleTheme}
         lang={lang}
       />
       <OnboardingModal
