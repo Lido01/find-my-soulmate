@@ -63,31 +63,7 @@ export default function CharacterSelectScreen({
       </div>
 
       <div className="relative z-20 flex flex-col flex-1 items-center px-4 pt-6 pb-12 max-w-5xl mx-auto w-full">
-        {/* Top bar: System online + Guide button + Edit profile badge */}
-        <div className="w-full flex items-center justify-between mb-6 flex-wrap gap-2">
-          <div className="flex items-center gap-2 bg-slate-900/80 border border-slate-700  px-3 py-1.5">
-            <span className="font-mono text-xs text-emerald-400 tracking-widest uppercase">
-              {t?.systemOnline ?? "SYSTEM"}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* Profile badge */}
-            <button
-              type="button"
-              onClick={() => {
-                soundEngine.playHeartbeat();
-                onOpenOnboarding?.();
-              }}
-              className="flex items-center gap-2 font-mono text-xs px-3.5 py-1.5  bg-slate-900/90 border border-slate-700 hover:border-fuchsia-500 text-slate-300 hover:text-white transition-all shadow-md"
-            >
-              <span>{userProfile?.emoji || '🧑‍💻'}</span>
-              <span className="font-bold">{userProfile?.name || 'Profile'}</span>
-              <span className="text-slate-500">·Edit</span>
-            </button>
-          </div>
-        </div>
-
+        
         {/* App title */}
         <div className="text-center mb-2">
           <h1 className="font-mono text-4xl md:text-5xl font-black tracking-tight">

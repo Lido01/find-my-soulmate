@@ -207,58 +207,9 @@ export default function RealChatLobby({
       )}
 
       <div className="max-w-4xl mx-auto w-full space-y-4">
-        {/* Top Header Row */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800 gap-2">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={onBackToModeSelect}
-              className="px-2.5 py-1.5 rounded-lg border border-slate-800 hover:border-slate-700 bg-slate-900 text-slate-300 hover:text-white text-xs flex items-center gap-1 transition-colors"
-            >
-              <span>←</span>
-              <span>{isAm ? "ተመለስ" : "Back"}</span>
-            </button>
-
-            <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-2.5 py-1.5 rounded-lg">
-              <span className={`w-2 h-2 rounded-full ${connectionStatus === 'connected' ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
-              <span className="text-[11px] text-slate-300 font-bold">
-                {connectionStatus === 'connected'
-                  ? (isSimulated ? 'Mesh Network' : 'Live WebSocket')
-                  : 'Connecting...'}
-              </span>
-            </div>
-          </div>
-
-          {/* Quick Edit Card Button */}
-          <button
-            type="button"
-            onClick={onOpenRegister}
-            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-slate-900 border border-cyan-800 hover:border-cyan-600 text-cyan-300 transition-colors"
-            title="Edit your developer dating profile"
-          >
-            <span>{userProfile?.emoji || '🧑‍💻'}</span>
-            <span className="font-bold hidden sm:inline">{userProfile?.name || 'My Profile'}</span>
-            <span className="text-[10px] text-slate-400 sm:hidden">Edit</span>
-          </button>
-        </div>
-
         {/* ── UNIFIED LIVE MATCHMAKING CONTROL (Always Visible & Prominent) ── */}
         <div className="rounded-xl bg-slate-900/90 border border-slate-800 p-3 sm:p-4 shadow-xl space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-cyan-400" />
-                <h2 className="text-sm sm:text-base font-bold text-white tracking-wide">
-                  {isAm ? "የቀጥታ ገንቢ ግጥሚያ (Live Matchmaking)" : "Live Developer Matchmaking"}
-                </h2>
-              </div>
-              <p className="text-xs text-slate-400 mt-0.5">
-                {isAm
-                  ? "በመስፈርቶችዎ መሰረት አሁኑኑ በቀጥታ ከተገናኘ ገንቢ ጋር 1-ለ-1 ውይይት ይጀምሩ"
-                  : "Connect 1-on-1 instantly with an online developer matching your criteria"}
-              </p>
-            </div>
-
             {/* Target Toggle: Girlfriend vs Boyfriend */}
             <div className="flex items-center bg-slate-950 p-1 rounded-lg border border-slate-800 shrink-0 self-start sm:self-auto">
               <button
