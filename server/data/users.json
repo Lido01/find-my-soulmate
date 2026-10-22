@@ -1,0 +1,204 @@
+[
+  {
+    "id": "test_dev",
+    "name": "Dawit Dev",
+    "handle": "@dawit",
+    "gender": "male",
+    "lookingFor": "female",
+    "location": "Addis Ababa 🇪🇹",
+    "techStack": [
+      "React",
+      "TypeScript"
+    ],
+    "bio": "Love React and Bunna",
+    "indentation": "Tabs",
+    "drink": "☕ Ethiopian Bunna",
+    "emoji": "👨‍💻",
+    "likes": 1,
+    "friends": [
+      "dev_1792614125409"
+    ],
+    "status": "online",
+    "currentStatus": "Just registered on DevSoulmate! Say hi 👋",
+    "registeredAt": "2026-10-21T21:00:53.441Z",
+    "updatedAt": "2026-10-21T21:00:53.441Z",
+    "isRegistered": true
+  },
+  {
+    "id": "dev_1792614125409",
+    "name": "LX",
+    "handle": "@lx",
+    "gender": "male",
+    "lookingFor": "female",
+    "location": "Addis Ababa 🇪🇹",
+    "techStack": [
+      "React",
+      "TypeScript",
+      "Python"
+    ],
+    "bio": "Searching for someone whose code compiles as cleanly as our chemistry.",
+    "indentation": "Tabs",
+    "drink": "☕ Ethiopian Bunna",
+    "emoji": "💻",
+    "likes": 1,
+    "friends": [
+      "test_dev"
+    ],
+    "status": "online",
+    "currentStatus": "Just registered on DevSoulmate! Say hi 👋",
+    "registeredAt": "2026-10-21T20:53:59.711Z",
+    "updatedAt": "2026-10-22T08:11:00.446Z",
+    "isRegistered": true
+  },
+  {
+    "id": "user_meron",
+    "name": "Meron Tadesse",
+    "handle": "@meron_dev",
+    "gender": "female",
+    "lookingFor": "male",
+    "location": "Addis Ababa 🇪🇹",
+    "techStack": [
+      "Next.js",
+      "React",
+      "Tailwind",
+      "GraphQL"
+    ],
+    "bio": "Late night frontend builder. Addicted to Ethiopian Bunna and clean component design.",
+    "indentation": "Tabs",
+    "drink": "☕ Ethiopian Bunna",
+    "emoji": "👩‍💻",
+    "likes": 14,
+    "friends": [
+      "user_yonas"
+    ],
+    "status": "online",
+    "currentStatus": "Refactoring auth components with Tailwind... need more bunna ☕",
+    "registeredAt": "2026-10-18T20:52:52.386Z",
+    "isRegistered": true
+  },
+  {
+    "id": "user_hanna",
+    "name": "Hanna Lind",
+    "handle": "@hanna_codes",
+    "gender": "female",
+    "lookingFor": "male",
+    "location": "Stockholm 🇸🇪",
+    "techStack": [
+      "TypeScript",
+      "Vue 3",
+      "Node.js"
+    ],
+    "bio": "Building indie SaaS by day, hunting CSS bugs by night. Looking for a genuine dev partner.",
+    "indentation": "Spaces",
+    "drink": "🍵 Matcha Latte",
+    "emoji": "👩‍💻",
+    "likes": 21,
+    "friends": [],
+    "status": "online",
+    "currentStatus": "Just deployed v1.2 to production without a single error! 🚀",
+    "registeredAt": "2026-10-19T20:52:52.392Z",
+    "isRegistered": true
+  },
+  {
+    "id": "user_selam",
+    "name": "Selamawit Alemayehu",
+    "handle": "@selam_ai",
+    "gender": "female",
+    "lookingFor": "male",
+    "location": "Nairobi 🇰🇪",
+    "techStack": [
+      "Python",
+      "FastAPI",
+      "PyTorch",
+      "Linux"
+    ],
+    "bio": "Training vision models and looking for someone who loves deep talks over bunna.",
+    "indentation": "Tabs",
+    "drink": "☕ Ethiopian Bunna",
+    "emoji": "👩‍💻",
+    "likes": 38,
+    "friends": [
+      "user_alex"
+    ],
+    "status": "online",
+    "currentStatus": "Fine-tuning a local LLM while listening to Tilahun Gessesse 🎶",
+    "registeredAt": "2026-10-16T20:52:52.392Z",
+    "isRegistered": true
+  },
+  {
+    "id": "user_yonas",
+    "name": "Yonas Bekele",
+    "handle": "@yonas_rust",
+    "gender": "male",
+    "lookingFor": "female",
+    "location": "Addis Ababa 🇪🇹",
+    "techStack": [
+      "Rust",
+      "WebAssembly",
+      "Linux",
+      "Go"
+    ],
+    "bio": "Zero memory leaks, 100% devotion. Looking for a smart dev girl to share late night commits with.",
+    "indentation": "Tabs",
+    "drink": "☕ Ethiopian Bunna",
+    "emoji": "👨‍💻",
+    "likes": 27,
+    "friends": [
+      "user_meron"
+    ],
+    "status": "online",
+    "currentStatus": "Async Rust is pure poetry. Who wants to debate tabs vs spaces? 💻",
+    "registeredAt": "2026-10-17T20:52:52.392Z",
+    "isRegistered": true
+  },
+  {
+    "id": "user_alex",
+    "name": "Alex Rivera",
+    "handle": "@alex_fullstack",
+    "gender": "male",
+    "lookingFor": "female",
+    "location": "Austin 🇺🇸",
+    "techStack": [
+      "React",
+      "Go",
+      "Docker",
+      "PostgreSQL"
+    ],
+    "bio": "Mechanical keyboard enthusiast. I make great breakfast burritos and clean git trees.",
+    "indentation": "Spaces",
+    "drink": "🥤 Cold Brew",
+    "emoji": "👨‍💻",
+    "likes": 19,
+    "friends": [
+      "user_selam"
+    ],
+    "status": "online",
+    "currentStatus": "Lubed my mechanical switches today. The typing sounds are divine ⌨️✨",
+    "registeredAt": "2026-10-20T20:52:52.392Z",
+    "isRegistered": true
+  },
+  {
+    "id": "user_kenean",
+    "name": "Kenean Mengistu",
+    "handle": "@kenean_arch",
+    "gender": "male",
+    "lookingFor": "female",
+    "location": "London 🇬🇧",
+    "techStack": [
+      "Elixir",
+      "Distributed Systems",
+      "Tailwind",
+      "Next.js"
+    ],
+    "bio": "Aesthetic enthusiast. I believe in romantic code comments and spontaneous coffee dates.",
+    "indentation": "Tabs",
+    "drink": "☕ Espresso Roast",
+    "emoji": "👨‍💻",
+    "likes": 33,
+    "friends": [],
+    "status": "online",
+    "currentStatus": "Writing software that scales and looking for someone who stays 💖",
+    "registeredAt": "2026-10-15T20:52:52.392Z",
+    "isRegistered": true
+  }
+]
