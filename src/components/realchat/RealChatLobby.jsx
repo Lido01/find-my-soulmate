@@ -133,6 +133,12 @@ export default function RealChatLobby({
   );
 
   function handleStartMatch() {
+    if (!userProfile?.isRegistered) {
+      soundEngine.playHeartbeat();
+      showSocialToast(isAm ? 'እባክዎ የቀጥታ ግጥሚያ ከመጀመርዎ በፊት ይመዝገቡ' : 'Please register your profile before starting live match');
+      onOpenRegister?.(searchTarget);
+      return;
+    }
     soundEngine.playHeartbeat();
     setIsMatching(true);
     wsService.findMatch(searchTarget);
@@ -144,6 +150,12 @@ export default function RealChatLobby({
   }
 
   function handleDirectChat(peer) {
+    if (!userProfile?.isRegistered) {
+      soundEngine.playHeartbeat();
+      showSocialToast(isAm ? 'እባክዎ ውይይት ከመጀመርዎ በፊት ይመዝገቡ' : 'Please register your profile before starting chat');
+      onOpenRegister?.(peer.gender);
+      return;
+    }
     soundEngine.playRomanticChime();
     wsService.startDirectChat(peer);
   }

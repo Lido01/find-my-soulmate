@@ -17,6 +17,8 @@ export default function MobileNavDrawer({
   onOpenAbout,
   onOpenApiKey,
   apiKeySet = false,
+  theme = 'dark',
+  onToggleTheme,
   onReset,
   lang = 'en',
 }) {
@@ -84,27 +86,39 @@ export default function MobileNavDrawer({
             <button
               type="button"
               onClick={() => {
+                if (!userProfile?.isRegistered) {
+                  soundEngine.playHeartbeat();
+                  onClose();
+                  onOpenRegister?.();
+                  return;
+                }
                 soundEngine.playHeartbeat();
                 onToggleChatMode?.('virtual');
                 onClose();
               }}
-              className={`p-2.5  border text-xs font-bold transition-all flex flex-col items-center gap-1 text-center ${
+              className={`p-2.5 rounded-xl border text-xs font-bold transition-all flex flex-col items-center gap-1 text-center ${
                 chatMode === 'virtual'
-                  ? 'bg-fuchsia-950 border-fuchsia-600 text-fuchsia-300 shadow-md'
+                  ? 'bg-cyan-950 border-cyan-600 text-cyan-300 shadow-md'
                   : 'bg-slate-950 border-slate-800 text-slate-400'
               }`}
             >
-              <span>Computer</span>
+              <span>AI Soulmates</span>
             </button>
 
             <button
               type="button"
               onClick={() => {
+                if (!userProfile?.isRegistered) {
+                  soundEngine.playHeartbeat();
+                  onClose();
+                  onOpenRegister?.();
+                  return;
+                }
                 soundEngine.playRomanticChime();
                 onToggleChatMode?.('real_ws');
                 onClose();
               }}
-              className={`p-2.5  border text-xs font-bold transition-all flex flex-col items-center gap-1 text-center ${
+              className={`p-2.5 rounded-xl border text-xs font-bold transition-all flex flex-col items-center gap-1 text-center ${
                 chatMode === 'real_ws'
                   ? 'bg-cyan-950 border-cyan-600 text-cyan-300 shadow-md'
                   : 'bg-slate-950 border-slate-800 text-slate-400'
@@ -113,6 +127,21 @@ export default function MobileNavDrawer({
               <span>Live Match</span>
             </button>
           </div>
+        </div>
+
+        {/* Theme Toggle in Mobile Drawer */}
+        <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+          <span className="text-xs text-slate-300 font-bold flex items-center gap-1.5">
+            <span>{theme === 'light' ? '☀️' : '🌙'}</span>
+            <span>{theme === 'light' ? 'Light Theme' : 'Dark Theme'}</span>
+          </span>
+          <button
+            type="button"
+            onClick={onToggleTheme}
+            className="px-3 py-1 rounded-lg bg-slate-800 border border-slate-700 text-cyan-300 text-xs font-bold"
+          >
+            Switch to {theme === 'light' ? 'Dark' : 'Light'}
+          </button>
         </div>
 
         {/* Menu Buttons List */}

@@ -1,10 +1,10 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// MessageBubble.jsx — Partner Voice Audio, Player Voice Notes, Gifts & Text Copy
+// MessageBubble.jsx — Partner Voice Audio, Photos, Code Snippets & Telegram Look
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState } from 'react';
 import { RARITY_META } from '../../data/gifts.js';
-import { IconGift, IconStar } from '../ui/Icons.jsx';
+import { IconGift, IconStar, IconCheck } from '../ui/Icons.jsx';
 import { soundEngine } from '../../utils/audio.js';
 
 function formatTimestamp(ts) {
@@ -49,17 +49,21 @@ function GiftBadge({ message, lang = "en" }) {
 export default function MessageBubble({ message, character, userProfile, lang = "en" }) {
   const [isPlayingVoice, setIsPlayingVoice] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
 
   const isPlayer = message.sender === "player";
   const isGift = Boolean(message.isGift);
   const isAudio = Boolean(message.isAudio);
+  const isImage = Boolean(message.isImage && message.imageUrl);
+  const isCode = Boolean(message.isCode);
 
-  const initials = character?.avatarInitials || (character?.name
+  const partnerAvatarUrl = character?.avatarUrl || message.senderAvatarUrl || null;
+  const partnerInitials = character?.avatarInitials || (character?.name
     ? character.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
     : "??");
 
   const timeStr = formatTimestamp(message.timestamp);
-  const borderColor = character?.borderColor || "#10b981";
+  const borderColor = character?.borderColor || "#06b6d4";
 
   function handleCopy() {
     if (!message?.text) return;
@@ -83,30 +87,30 @@ export default function MessageBubble({ message, character, userProfile, lang = 
       () => setIsPlayingVoice(false)
     );
 
-    // Safety timeout in case onEnd doesn't fire
     const approxSec = Math.max(3, Math.min(12, message.text.length * 0.08));
     setTimeout(() => {
       setIsPlayingVoice(false);
     }, approxSec * 1000);
   }
 
+  // ── PLAYER MESSAGE (RIGHT ALIGNED) ─────────────────────────────────────────
   if (isPlayer) {
     return (
-      <div className="flex flex-col items-end gap-1 animate-slide-up px-3 group">
-        <div className="max-w-[88%] sm:max-w-[75%]">
+      <div className="flex flex-col items-end gap-1 animate-slide-up px-2 sm:px-3 group">
+        <div className="max-w-[90%] sm:max-w-[75%]">
           {isGift ? (
             <GiftBadge message={message} lang={lang} />
           ) : isAudio ? (
-            /* Player Voice Audio Note */
-            <div className="bg-indigo-950 border border-indigo-600/80 rounded-2xl rounded-tr-sm p-3 shadow-lg space-y-2 select-text">
+            /* Voice Audio Note */
+            <div className="bg-cyan-950/90 border border-cyan-700/80 rounded-2xl rounded-tr-xs p-3 shadow-md space-y-2 select-text">
               <div className="flex items-center justify-between gap-3 text-xs font-mono">
-                <div className="flex items-center gap-2 text-indigo-300">
-                  <span className="p-1.5 rounded-lg bg-indigo-900/80 border border-indigo-700 text-sm">
+                <div className="flex items-center gap-2 text-cyan-300">
+                  <span className="p-1.5 rounded-lg bg-cyan-900/80 border border-cyan-600 text-sm">
                     🎙️
                   </span>
                   <div>
                     <span className="font-bold">Voice Note</span>
-                    <span className="text-[10px] text-indigo-400 block">
+                    <span className="text-[10px] text-cyan-400 block">
                       0:0{message.audioDuration || 3}
                     </span>
                   </div>
@@ -115,17 +119,8 @@ export default function MessageBubble({ message, character, userProfile, lang = 
                 <div className="flex items-center gap-1.5">
                   <button
                     type="button"
-                    onClick={handleCopy}
-                    className="px-2 py-1 rounded-lg bg-indigo-900/80 hover:bg-indigo-800 text-[10px] text-indigo-300 font-mono transition-all"
-                    title="Copy voice transcript"
-                  >
-                    {copied ? '✓ Copied' : '📋 Copy'}
-                  </button>
-
-                  <button
-                    type="button"
                     onClick={() => handlePlayVoice(userProfile?.gender || 'male')}
-                    className="px-2.5 py-1 rounded-lg bg-indigo-900 hover:bg-indigo-800 border border-indigo-600 text-[11px] font-bold text-indigo-200 flex items-center gap-1 transition-all"
+                    className="px-2.5 py-1 rounded-lg bg-cyan-900 hover:bg-cyan-800 border border-cyan-600 text-[11px] font-bold text-cyan-200 flex items-center gap-1 transition-all"
                   >
                     <span>{isPlayingVoice ? '⏹' : '▶'}</span>
                     <span>{isPlayingVoice ? 'Stop' : 'Play'}</span>
@@ -134,118 +129,209 @@ export default function MessageBubble({ message, character, userProfile, lang = 
               </div>
 
               {/* Sound waves animation */}
-              <div className="flex items-center gap-1 h-4 px-1">
-                {[12, 20, 16, 24, 18, 14, 22, 10, 18, 24, 14, 19, 11].map((h, idx) => (
+              <div className="flex items-center gap-1 h-3.5 px-1">
+                {[10, 18, 14, 22, 16, 12, 20, 8, 16, 22, 12, 18, 9].map((h, idx) => (
                   <span
                     key={idx}
                     className={`flex-1 rounded-full transition-all ${
-                      isPlayingVoice
-                        ? 'bg-cyan-400 animate-pulse'
-                        : 'bg-indigo-700/60'
+                      isPlayingVoice ? 'bg-cyan-300 animate-pulse' : 'bg-cyan-700/60'
                     }`}
                     style={{ height: `${h}px` }}
                   />
                 ))}
               </div>
 
-              {/* Transcript text */}
-              <p className="font-mono text-xs text-indigo-100/90 italic pl-1 select-text cursor-text">
+              <p className="font-mono text-xs text-cyan-100/90 italic pl-1 select-text">
                 "{message.text}"
               </p>
             </div>
+          ) : isImage ? (
+            /* Image / Asset Attachment (Telegram Style) */
+            <div className="bg-cyan-950/90 border border-cyan-700/80 rounded-2xl rounded-tr-xs p-1.5 shadow-md space-y-1.5 overflow-hidden">
+              <div 
+                className="rounded-xl overflow-hidden cursor-pointer hover:opacity-95 transition-opacity max-h-64 bg-slate-950 flex items-center justify-center"
+                onClick={() => setShowImageModal(true)}
+              >
+                <img src={message.imageUrl} alt="Asset" className="max-h-64 w-auto object-cover rounded-lg" />
+              </div>
+              {message.text && message.text !== 'Shared a photo 📷' && (
+                <p className="px-2 py-1 font-mono text-xs text-cyan-100 whitespace-pre-wrap select-text">
+                  {message.text}
+                </p>
+              )}
+            </div>
+          ) : isCode ? (
+            /* Code Snippet Attachment */
+            <div className="bg-slate-900 border border-cyan-700/80 rounded-2xl rounded-tr-xs p-3 shadow-md space-y-1.5 max-w-full overflow-hidden">
+              <div className="flex items-center justify-between text-[10px] text-cyan-400 font-bold pb-1 border-b border-slate-800">
+                <span>💻 {message.codeLang || 'Code'}</span>
+                <button onClick={handleCopy} className="text-slate-400 hover:text-white">
+                  {copied ? '✓ Copied' : 'Copy'}
+                </button>
+              </div>
+              <pre className="font-mono text-xs text-cyan-200 overflow-x-auto p-2 rounded bg-slate-950 border border-slate-800/80">
+                <code>{message.text}</code>
+              </pre>
+            </div>
           ) : (
-            <div className="bg-indigo-950/80 border border-indigo-700/60 rounded-2xl rounded-tr-sm px-4 py-2.5 shadow-md relative group/bubble">
-              <p className="font-mono text-sm text-slate-100 leading-relaxed whitespace-pre-wrap select-text cursor-text">
+            /* Standard Text Bubble */
+            <div className="bg-cyan-950/90 border border-cyan-700/70 rounded-2xl rounded-tr-xs px-3.5 py-2 shadow-md relative group/bubble">
+              <p className="font-mono text-xs sm:text-sm text-cyan-50 leading-relaxed whitespace-pre-wrap select-text cursor-text">
                 {message.text}
               </p>
             </div>
           )}
 
-          <div className="flex items-center justify-end gap-2 mt-1">
+          {/* Timestamp & Telegram Read Double Checkmarks */}
+          <div className="flex items-center justify-end gap-1.5 mt-0.5 pr-1">
             <button
               type="button"
               onClick={handleCopy}
               className="text-[10px] font-mono text-slate-500 hover:text-slate-300 transition-colors opacity-0 group-hover:opacity-100"
               title="Copy message"
             >
-              {copied ? '✓ Copied' : '📋 Copy'}
+              {copied ? '✓' : 'Copy'}
             </button>
             {timeStr && (
-              <p className="font-mono text-[10px] text-slate-500">{timeStr}</p>
+              <span className="font-mono text-[10px] text-slate-500">{timeStr}</span>
             )}
+            <span className="text-[10px] text-cyan-400 flex items-center font-bold tracking-tighter" title="Delivered">
+              ✓✓
+            </span>
           </div>
         </div>
+
+        {/* Lightbox Image Preview Modal */}
+        {showImageModal && (
+          <div
+            className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in"
+            onClick={() => setShowImageModal(false)}
+          >
+            <div className="relative max-w-2xl max-h-[90vh] flex flex-col items-center">
+              <img src={message.imageUrl} alt="Full view" className="max-h-[80vh] w-auto rounded-2xl shadow-2xl border border-slate-800 object-contain" />
+              <button
+                onClick={() => setShowImageModal(false)}
+                className="mt-3 px-4 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-xs font-bold"
+              >
+                Close ✕
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
 
-  // Partner message
+  // ── PARTNER MESSAGE (LEFT ALIGNED) ──────────────────────────────────────────
   return (
-    <div className="flex items-start gap-2.5 animate-slide-up px-3 group">
-      {/* Character avatar */}
+    <div className="flex items-start gap-2 sm:gap-2.5 animate-slide-up px-2 sm:px-3 group">
+      {/* Partner Avatar Photo or Initials */}
       <div
-        className={`w-8 h-8 rounded-xl bg-gradient-to-br ${character?.avatarBg || 'from-slate-800 to-slate-950'} flex items-center justify-center shrink-0 text-xs font-mono font-bold text-white border mt-0.5 shadow`}
+        className="w-8 h-8 rounded-xl overflow-hidden shrink-0 border mt-0.5 shadow flex items-center justify-center bg-slate-900 text-xs font-mono font-bold text-white"
         style={{ borderColor: borderColor }}
       >
-        {initials}
+        {partnerAvatarUrl ? (
+          <img src={partnerAvatarUrl} alt={character?.name || 'Partner'} className="w-full h-full object-cover" />
+        ) : character?.emoji ? (
+          <span className="text-base">{character.emoji}</span>
+        ) : (
+          partnerInitials
+        )}
       </div>
 
-      <div className="max-w-[88%] sm:max-w-[78%]">
+      <div className="max-w-[90%] sm:max-w-[78%]">
         {isGift ? (
           <GiftBadge message={message} lang={lang} />
+        ) : isImage ? (
+          /* Partner Shared Photo */
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl rounded-tl-xs p-1.5 shadow-md space-y-1.5 overflow-hidden">
+            <div 
+              className="rounded-xl overflow-hidden cursor-pointer hover:opacity-95 transition-opacity max-h-64 bg-slate-950 flex items-center justify-center"
+              onClick={() => setShowImageModal(true)}
+            >
+              <img src={message.imageUrl} alt="Asset" className="max-h-64 w-auto object-cover rounded-lg" />
+            </div>
+            {message.text && (
+              <p className="px-2 py-1 font-mono text-xs text-slate-200 whitespace-pre-wrap select-text">
+                {message.text}
+              </p>
+            )}
+          </div>
+        ) : isCode ? (
+          /* Partner Code Snippet */
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl rounded-tl-xs p-3 shadow-md space-y-1.5 max-w-full overflow-hidden">
+            <div className="flex items-center justify-between text-[10px] text-cyan-400 font-bold pb-1 border-b border-slate-800">
+              <span>💻 {message.codeLang || 'Code'}</span>
+              <button onClick={handleCopy} className="text-slate-400 hover:text-white">
+                {copied ? '✓ Copied' : 'Copy'}
+              </button>
+            </div>
+            <pre className="font-mono text-xs text-slate-200 overflow-x-auto p-2 rounded bg-slate-950 border border-slate-800">
+              <code>{message.text}</code>
+            </pre>
+          </div>
         ) : (
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl rounded-tl-sm px-4 py-2.5 shadow-md relative">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl rounded-tl-xs px-3.5 py-2 shadow-md relative">
             {message.isAI && (
               <div className="flex items-center gap-1 mb-1 text-[10px] font-mono text-emerald-400">
                 <span>🤖 AI live</span>
               </div>
             )}
-            <p className="font-mono text-sm text-slate-200 leading-relaxed whitespace-pre-wrap select-text cursor-text">
+            <p className="font-mono text-xs sm:text-sm text-slate-200 leading-relaxed whitespace-pre-wrap select-text cursor-text">
               {message.text}
             </p>
 
             {/* Bottom action row: Listen voice & Copy */}
-            <div className="mt-2 pt-1.5 border-t border-slate-800/80 flex items-center justify-between gap-2 flex-wrap">
+            <div className="mt-1.5 pt-1 border-t border-slate-800/80 flex items-center justify-between gap-2 flex-wrap">
               <button
                 type="button"
                 onClick={() => handlePlayVoice(character?.gender || 'female')}
-                className={`flex items-center gap-1.5 text-[11px] font-mono px-2 py-0.5 rounded-lg border transition-all ${
+                className={`flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-lg border transition-all ${
                   isPlayingVoice
                     ? 'bg-fuchsia-950 border-fuchsia-600 text-fuchsia-300 shadow-sm'
-                    : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-fuchsia-300 hover:border-slate-700'
+                    : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-cyan-300'
                 }`}
                 title="Listen to romantic voice narration"
               >
-                <span>{isPlayingVoice ? '⏹️' : '🔊'}</span>
-                <span>{isPlayingVoice ? 'Playing...' : 'Voice audio'}</span>
-                {isPlayingVoice && (
-                  <span className="flex items-center gap-0.5 ml-1">
-                    <span className="w-1 h-2 bg-fuchsia-400 animate-pulse" />
-                    <span className="w-1 h-3.5 bg-fuchsia-400 animate-pulse delay-75" />
-                    <span className="w-1 h-2 bg-fuchsia-400 animate-pulse delay-150" />
-                  </span>
-                )}
+                <span>{isPlayingVoice ? '⏹' : '🔊'}</span>
+                <span>{isPlayingVoice ? 'Playing...' : 'Voice'}</span>
               </button>
 
               <div className="flex items-center gap-2 ml-auto">
                 <button
                   type="button"
                   onClick={handleCopy}
-                  className="text-[10px] font-mono text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-0.5"
+                  className="text-[10px] font-mono text-slate-500 hover:text-slate-300 transition-colors"
                   title="Copy message"
                 >
-                  <span>{copied ? '✓' : '📋'}</span>
-                  <span>{copied ? 'Copied' : 'Copy'}</span>
+                  {copied ? '✓' : 'Copy'}
                 </button>
-
                 {timeStr && (
-                  <p className="font-mono text-[10px] text-slate-600">{timeStr}</p>
+                  <span className="font-mono text-[10px] text-slate-500">{timeStr}</span>
                 )}
               </div>
             </div>
           </div>
         )}
       </div>
+
+      {/* Lightbox Image Preview Modal */}
+      {showImageModal && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setShowImageModal(false)}
+        >
+          <div className="relative max-w-2xl max-h-[90vh] flex flex-col items-center">
+            <img src={message.imageUrl} alt="Full view" className="max-h-[80vh] w-auto rounded-2xl shadow-2xl border border-slate-800 object-contain" />
+            <button
+              onClick={() => setShowImageModal(false)}
+              className="mt-3 px-4 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-xs font-bold"
+            >
+              Close ✕
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

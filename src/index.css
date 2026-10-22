@@ -116,3 +116,93 @@
 .animate-glow-pulse  { animation: glow-pulse 2s ease-in-out infinite; }
 .animate-float       { animation: float 3s ease-in-out infinite; }
 .animate-fade-in-up  { animation: fadeInUp 0.4s ease-out; }
+
+/* ── LIGHT THEME OVERRIDES ─────────────────────────────────────────── */
+.theme-light {
+  color-scheme: light;
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+.theme-light .bg-slate-950,
+.theme-light .bg-slate-950\/95,
+.theme-light .bg-slate-950\/90,
+.theme-light .bg-slate-950\/85,
+.theme-light .bg-slate-950\/80,
+.theme-light .bg-slate-950\/60 {
+  background-color: #f8fafc !important;
+}
+
+.theme-light .bg-slate-900,
+.theme-light .bg-slate-900\/95,
+.theme-light .bg-slate-900\/90,
+.theme-light .bg-slate-900\/80,
+.theme-light .bg-slate-900\/60 {
+  background-color: #ffffff !important;
+}
+
+.theme-light .bg-slate-800 {
+  background-color: #f1f5f9 !important;
+}
+
+.theme-light .border-slate-800,
+.theme-light .border-slate-800\/80,
+.theme-light .border-slate-800\/60,
+.theme-light .border-slate-700,
+.theme-light .border-slate-700\/80 {
+  border-color: #e2e8f0 !important;
+}
+
+.theme-light .text-white {
+  color: #0f172a !important;
+}
+
+.theme-light .text-slate-200,
+.theme-light .text-slate-300 {
+  color: #1e293b !important;
+}
+
+.theme-light .text-slate-400 {
+  color: #475569 !important;
+}
+
+.theme-light .text-slate-500 {
+  color: #64748b !important;
+}
+
+.theme-light .bg-cyan-950,
+.theme-light .bg-cyan-950\/90,
+.theme-light .bg-cyan-950\/80 {
+  background-color: #ecfeff !important;
+  color: #0e7490 !important;
+  border-color: #06b6d4 !important;
+}
+
+.theme-light .bg-fuchsia-950,
+.theme-light .bg-fuchsia-950\/90,
+.theme-light .bg-fuchsia-950\/60 {
+  background-color: #fdf4ff !important;
+  color: #a21caf !important;
+}
+
+.theme-light .bg-indigo-950,
+.theme-light .bg-indigo-950\/90,
+.theme-light .bg-indigo-950\/80,
+.theme-light .bg-indigo-950\/60 {
+  background-color: #eef2ff !important;
+  color: #4338ca !important;
+}
+
+.theme-light .bg-emerald-950,
+.theme-light .bg-emerald-950\/90,
+.theme-light .bg-emerald-950\/80 {
+  background-color: #ecfdf5 !important;
+  color: #047857 !important;
+}
+
+.theme-light .bg-amber-950,
+.theme-light .bg-amber-950\/90,
+.theme-light .bg-amber-950\/80 {
+  background-color: #fffbeb !important;
+  color: #b45309 !important;
+}
