@@ -1,5 +1,104 @@
 [
   {
+    "id": "user_1792693369287_a6831",
+    "name": "CodeSoul",
+    "handle": "@codesoul",
+    "gender": "female",
+    "lookingFor": "female",
+    "location": "Addis Ababa 🇪🇹",
+    "techStack": [
+      "React",
+      "TypeScript"
+    ],
+    "bio": "Searching for someone whose code compiles as cleanly as our chemistry.",
+    "indentation": "Tabs",
+    "drink": "☕ Ethiopian Bunna",
+    "emoji": "🧑‍💻",
+    "likes": 1,
+    "friends": [],
+    "status": "online",
+    "currentStatus": "Just registered on DevSoulmate! Say hi 👋",
+    "registeredAt": "2026-10-22T18:22:49.349Z",
+    "updatedAt": "2026-10-22T18:22:49.349Z",
+    "isRegistered": true
+  },
+  {
+    "id": "user_1792693366636_sdbub",
+    "name": "CodeSoul",
+    "handle": "@codesoul",
+    "gender": "female",
+    "lookingFor": "male",
+    "location": "Addis Ababa 🇪🇹",
+    "techStack": [
+      "React",
+      "TypeScript"
+    ],
+    "bio": "Searching for someone whose code compiles as cleanly as our chemistry.",
+    "indentation": "Tabs",
+    "drink": "☕ Ethiopian Bunna",
+    "emoji": "🧑‍💻",
+    "likes": 1,
+    "friends": [
+      "dev_1792672057950"
+    ],
+    "status": "online",
+    "currentStatus": "Just registered on DevSoulmate! Say hi 👋",
+    "registeredAt": "2026-10-22T18:22:46.760Z",
+    "updatedAt": "2026-10-22T18:22:46.760Z",
+    "isRegistered": true
+  },
+  {
+    "id": "user_1792693351397_5yjxd",
+    "name": "CodeSoul",
+    "handle": "@codesoul",
+    "gender": "female",
+    "lookingFor": "all",
+    "location": "Addis Ababa 🇪🇹",
+    "techStack": [
+      "React",
+      "TypeScript"
+    ],
+    "bio": "Searching for someone whose code compiles as cleanly as our chemistry.",
+    "indentation": "Tabs",
+    "drink": "☕ Ethiopian Bunna",
+    "emoji": "🧑‍💻",
+    "likes": 1,
+    "friends": [],
+    "status": "online",
+    "currentStatus": "Just registered on DevSoulmate! Say hi 👋",
+    "registeredAt": "2026-10-22T18:22:31.529Z",
+    "updatedAt": "2026-10-22T18:22:31.529Z",
+    "isRegistered": true
+  },
+  {
+    "id": "dev_1792672057950",
+    "name": "Lidex",
+    "handle": "@lidex",
+    "gender": "male",
+    "lookingFor": "female",
+    "location": "Addis Ababa 🇪🇹",
+    "techStack": [
+      "React",
+      "TypeScript",
+      "Next.js",
+      "Rust",
+      "Node.js"
+    ],
+    "bio": "Searching for someone whose code compiles as cleanly as our chemistry.",
+    "indentation": "Tabs",
+    "drink": "☕ Ethiopian Bunna",
+    "emoji": "👨‍💻",
+    "likes": 1,
+    "friends": [
+      "user_1792693366636_sdbub"
+    ],
+    "status": "online",
+    "currentStatus": "Just registered on DevSoulmate! Say hi 👋",
+    "registeredAt": "2026-10-22T17:22:40.617Z",
+    "updatedAt": "2026-10-22T18:21:03.391Z",
+    "isRegistered": true
+  },
+  {
     "id": "test_dev",
     "name": "Dawit Dev",
     "handle": "@dawit",

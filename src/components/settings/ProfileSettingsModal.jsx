@@ -14,6 +14,8 @@ export default function ProfileSettingsModal({
   audioSettings,
   onSaveAudioSettings,
   onOpenOnboarding,
+  theme = 'dark',
+  onToggleTheme,
   lang = 'en',
 }) {
   const [profile, setProfile] = useState({ ...userProfile });
@@ -137,6 +139,46 @@ export default function ProfileSettingsModal({
                   </button>
                 ))}
               </div>
+            </div>
+          </div>
+
+          <div className="h-px bg-slate-800" />
+
+          {/* Section: Theme Mode (Light / Dark) */}
+          <div className="space-y-2">
+            <h3 className="font-mono text-xs font-bold text-slate-400 uppercase tracking-widest">
+              // {lang === 'am' ? 'የገጽታ ቀለም (Theme Mode)' : 'Appearance Theme'}
+            </h3>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (theme !== 'dark') onToggleTheme?.();
+                }}
+                className={`py-2 px-3 rounded-xl border text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all ${
+                  theme === 'dark'
+                    ? 'border-cyan-500 bg-cyan-950/60 text-cyan-300 shadow-sm'
+                    : 'border-slate-800 bg-slate-950 text-slate-400 hover:text-white'
+                }`}
+              >
+                <span>🌙</span>
+                <span>Dark Theme</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (theme !== 'light') onToggleTheme?.();
+                }}
+                className={`py-2 px-3 rounded-xl border text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all ${
+                  theme === 'light'
+                    ? 'border-cyan-500 bg-cyan-950/60 text-cyan-300 shadow-sm'
+                    : 'border-slate-800 bg-slate-950 text-slate-400 hover:text-white'
+                }`}
+              >
+                <span>☀️</span>
+                <span>Light Theme</span>
+              </button>
             </div>
           </div>
 

@@ -1,11 +1,11 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // DevRegisterModal.jsx — Developer Dating Registration & Criteria Setup Modal
 // Step 1: Choose Girlfriend or Boyfriend first
-// Step 2: "Tell Me About Yourself" & developer criteria setup
+// Step 2: "Tell Me About Yourself", Profile Photo/Emoji & Special Quote setup
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState } from 'react';
-import { IconX, IconCheck, IconChevronRight } from '../ui/Icons.jsx';
+import { useState, useRef } from 'react';
+import { IconX, IconCheck, IconZap } from '../ui/Icons.jsx';
 import { soundEngine } from '../../utils/audio.js';
 import { wsService } from '../../services/websocket.js';
 
@@ -15,7 +15,7 @@ const AVAILABLE_STACKS = [
   'Svelte', 'Docker', 'GraphQL', 'PostgreSQL'
 ];
 
-const EMOJI_OPTIONS = ['👩‍💻', '👨‍💻', '💻', '⚡', '☕', '🚀', '🧠', '✨', '🔥', '🌸'];
+const EMOJI_OPTIONS = ['👩‍💻', '👨‍💻', '🧑‍💻', '💻', '⚡', '☕', '🚀', '🧠', '✨', '🔥', '🌸', '🤖', '👾', '🎧'];
 
 export default function DevRegisterModal({
   isOpen,
@@ -23,25 +23,31 @@ export default function DevRegisterModal({
   currentProfile,
   onSaveProfile,
   onStartChatNow,
+  defaultTarget = null,
   lang = 'en',
 }) {
   const isAm = lang === 'am';
 
-  // If already registered, start on step 2; otherwise start on step 1 (choose BF/GF)
-  const [step, setStep] = useState(() => (currentProfile?.isRegistered ? 2 : 1));
+  // If defaultTarget is passed or profile already registered, jump to step 2; else step 1
+  const [step, setStep] = useState(() => (currentProfile?.isRegistered || defaultTarget ? 2 : 1));
 
   const [name, setName] = useState(currentProfile?.name || '');
   const [handle, setHandle] = useState(currentProfile?.handle || '');
-  const [gender, setGender] = useState(currentProfile?.gender || 'male');
-  const [lookingFor, setLookingFor] = useState(currentProfile?.lookingFor || 'female');
+  const [gender, setGender] = useState(currentProfile?.gender || (defaultTarget === 'male' ? 'female' : 'male'));
+  const [lookingFor, setLookingFor] = useState(defaultTarget || currentProfile?.lookingFor || 'female');
   const [location, setLocation] = useState(currentProfile?.location || 'Addis Ababa 🇪🇹');
   const [bio, setBio] = useState(currentProfile?.bio || '');
+  const [quote, setQuote] = useState(currentProfile?.quote || '');
   const [indentation, setIndentation] = useState(currentProfile?.indentation || 'Tabs');
   const [drink, setDrink] = useState(currentProfile?.drink || '☕ Ethiopian Bunna');
   const [emoji, setEmoji] = useState(currentProfile?.emoji || '🧑‍💻');
+  const [avatarUrl, setAvatarUrl] = useState(currentProfile?.avatarUrl || null);
   const [techStack, setTechStack] = useState(currentProfile?.techStack || ['React', 'TypeScript']);
   const [isSaving, setIsSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const fileInputRef = useRef(null);
 
   if (!isOpen) return null;
 
@@ -64,31 +70,69 @@ export default function DevRegisterModal({
     }
   }
 
+  // Handle image upload from device
+  function handleImageUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMsg('Image size should be under 5MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result;
+      if (result) {
+        setAvatarUrl(result);
+        setErrorMsg('');
+        soundEngine.playRomanticChime();
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
   async function handleFormSubmit(e) {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!name.trim()) {
+      setErrorMsg(isAm ? 'እባክዎ ስምዎን ያስገቡ' : 'Please provide your name');
+      return;
+    }
+    if (!bio.trim()) {
+      setErrorMsg(isAm ? 'እባክዎ ስለ እርስዎ አጭር መግለጫ ያስገቡ' : 'Please provide your bio');
+      return;
+    }
+    if (techStack.length === 0) {
+      setErrorMsg(isAm ? 'እባክዎ ቢያንስ 1 የቴክኖሎጂ ስብስብ ይምረጡ' : 'Please select at least 1 tech stack');
+      return;
+    }
 
     setIsSaving(true);
+    setErrorMsg('');
     soundEngine.playHeartbeat();
 
+    const cleanName = name.trim();
     const finalHandle = handle.trim().startsWith('@')
       ? handle.trim()
-      : `@${handle.trim() || name.trim().toLowerCase().replace(/\s+/g, '_')}`;
+      : `@${handle.trim() || cleanName.toLowerCase().replace(/\s+/g, '_')}`;
 
     const profileData = {
       id: currentProfile?.id || `dev_${Date.now()}`,
-      name: name.trim(),
+      name: cleanName,
       handle: finalHandle,
       gender,
       lookingFor,
       location: location.trim() || 'Addis Ababa 🇪🇹',
-      bio: bio.trim() || (isAm ? 'ስለ ኮድ እና ቡና ማውራት እወዳለሁ።' : 'Passionate developer looking for genuine connection.'),
+      bio: bio.trim(),
+      quote: quote.trim() || (isAm ? 'ኮድ ከነፍስ ጋር ሲዋሃድ ፍቅር ይፈጠራል።' : 'Tabs over spaces, but you over everything.'),
       indentation,
       drink,
-      emoji,
+      emoji: avatarUrl ? '🧑‍💻' : emoji,
+      avatarUrl: avatarUrl || null,
       techStack,
       isRegistered: true,
-      registeredAt: new Date().toISOString(),
+      registeredAt: currentProfile?.registeredAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     // Save to backend database & WebSocket
@@ -99,7 +143,7 @@ export default function DevRegisterModal({
     setSuccessMsg(
       isAm
         ? "🎉 በተሳካ ሁኔታ ተመዝግቧል! አሁን መፈለግ ጀምረዋል..."
-        : "🎉 Profile saved! Launching your soulmate discovery..."
+        : "🎉 Profile registered! Launching real developer matchmaking..."
     );
 
     setTimeout(() => {
@@ -107,7 +151,7 @@ export default function DevRegisterModal({
       setSuccessMsg('');
       onClose?.();
       onStartChatNow?.();
-    }, 1000);
+    }, 1100);
   }
 
   return (
@@ -117,15 +161,15 @@ export default function DevRegisterModal({
     >
       <div className="w-full max-w-lg max-h-[92vh] bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-scale-up">
         {/* Header Bar */}
-        <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
+        <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/60 shrink-0">
           <div>
             <span className="text-[10px] text-cyan-400 uppercase tracking-widest font-bold">
-              {step === 1 ? (isAm ? "ደረጃ 1" : "Step 1 of 2") : (isAm ? "ደረጃ 2" : "Step 2 of 2")}
+              {step === 1 ? (isAm ? "ደረጃ 1 ከ 2" : "Step 1 of 2") : (isAm ? "ደረጃ 2 ከ 2" : "Step 2 of 2")}
             </span>
             <h2 className="text-base sm:text-lg font-black text-white">
               {step === 1
                 ? (isAm ? "ማንን ማግኘት ይፈልጋሉ?" : "Who are you looking for?")
-                : (isAm ? "ስለ እርስዎ ይንገሩን" : "Tell Me About Yourself")}
+                : (isAm ? "ስለ እርስዎ ይንገሩን (መገለጫ ይመዝገቡ)" : "Tell Me About Yourself")}
             </h2>
           </div>
 
@@ -145,8 +189,8 @@ export default function DevRegisterModal({
           <div className="p-5 sm:p-6 space-y-5 overflow-y-auto">
             <p className="text-xs text-slate-400 text-center max-w-sm mx-auto">
               {isAm
-                ? "በመጀመሪያ የሚፈልጉትን ይምረጡ፤ በመቀጠል ስለ እርስዎ አጭር መግለጫ ያስገባሉ።"
-                : "Choose who you want to meet first, then create your developer dating profile to get matched."}
+                ? "በመጀመሪያ የሚፈልጉትን ይምረጡ፤ በመቀጠል ስለ እርስዎ ሙሉ መገለጫ ሞልተው እውነተኛ ውይይት ይጀምራሉ።"
+                : "Choose who you want to meet first, then register your profile and photo to start real chatting."}
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
@@ -193,7 +237,7 @@ export default function DevRegisterModal({
           </div>
         )}
 
-        {/* ── STEP 2: TELL ME ABOUT YOURSELF ─────────────────────────────────── */}
+        {/* ── STEP 2: TELL ME ABOUT YOURSELF (FULL PROFILE CREATION) ─────────── */}
         {step === 2 && (
           <form onSubmit={handleFormSubmit} className="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs">
             {/* Preference Badge / Change Button */}
@@ -215,6 +259,75 @@ export default function DevRegisterModal({
               </button>
             </div>
 
+            {/* Profile Photo / Avatar Picker */}
+            <div className="space-y-2 p-3 rounded-xl bg-slate-950 border border-slate-800">
+              <label className="text-slate-300 font-bold block">
+                {isAm ? "የመገለጫ ፎቶ ወይም ኢሞጂ ይምረጡ" : "Profile Photo or Emoji Avatar"} *
+              </label>
+
+              <div className="flex items-center gap-3">
+                {/* Current Avatar Preview */}
+                <div className="relative w-14 h-14 rounded-2xl bg-slate-900 border-2 border-cyan-500 overflow-hidden shrink-0 flex items-center justify-center shadow-md">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-3xl">{emoji}</span>
+                  )}
+                </div>
+
+                <div className="flex-1 space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 font-bold text-xs transition-colors"
+                    >
+                      📷 {avatarUrl ? (isAm ? "ፎቶ ቀይር" : "Change Photo") : (isAm ? "ፎቶ ስቀል" : "Upload Photo")}
+                    </button>
+                    {avatarUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setAvatarUrl(null)}
+                        className="px-2 py-1.5 rounded-lg bg-slate-900 text-slate-400 hover:text-red-400 text-[11px]"
+                      >
+                        {isAm ? "አስወግድ" : "Remove"}
+                      </button>
+                    )}
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <p className="text-[10px] text-slate-500">
+                    {avatarUrl ? "Custom photo loaded" : "Or pick a developer avatar emoji below:"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Emoji Options Grid (If no photo or user wants to pick emoji) */}
+              {!avatarUrl && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {EMOJI_OPTIONS.map((em) => (
+                    <button
+                      key={em}
+                      type="button"
+                      onClick={() => setEmoji(em)}
+                      className={`w-8 h-8 rounded-lg border text-lg flex items-center justify-center transition-all ${
+                        emoji === em
+                          ? 'bg-cyan-950 border-cyan-500 scale-110 shadow-sm'
+                          : 'bg-slate-900 border-slate-800 hover:bg-slate-800'
+                      }`}
+                    >
+                      {em}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Name & Handle */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
@@ -233,10 +346,11 @@ export default function DevRegisterModal({
 
               <div className="space-y-1">
                 <label className="text-slate-300 font-bold block">
-                  {isAm ? "የተጠቃሚ መለያ" : "Handle / Nickname"}
+                  {isAm ? "የተጠቃሚ መለያ" : "Handle / Nickname"} *
                 </label>
                 <input
                   type="text"
+                  required
                   value={handle}
                   onChange={(e) => setHandle(e.target.value)}
                   placeholder="@your_handle"
@@ -248,7 +362,7 @@ export default function DevRegisterModal({
             {/* Tell Me About Yourself (Bio) */}
             <div className="space-y-1">
               <label className="text-slate-300 font-bold block">
-                {isAm ? "ስለ እርስዎ ይንገሩን (Tell Me About Yourself)" : "Tell Me About Yourself (Bio)"} *
+                {isAm ? "ስለ እርስዎ ይንገሩን (Bio)" : "Tell Me About Yourself (Bio)"} *
               </label>
               <textarea
                 rows={2}
@@ -264,10 +378,24 @@ export default function DevRegisterModal({
               />
             </div>
 
+            {/* Special Romantic Dev Quote / Motto */}
+            <div className="space-y-1">
+              <label className="text-slate-300 font-bold block">
+                {isAm ? "ልዩ የፍቅር ወይም የኮዲንግ ጥቅስ" : "Special Romantic Dev Quote / Motto"}
+              </label>
+              <input
+                type="text"
+                value={quote}
+                onChange={(e) => setQuote(e.target.value)}
+                placeholder='e.g. "Tabs over spaces, but you over everything."'
+                className="w-full bg-slate-950 border border-slate-800 focus:border-cyan-500 rounded-xl px-3 py-2 text-slate-200 placeholder:text-slate-600 focus:outline-none"
+              />
+            </div>
+
             {/* Tech Stack Pills */}
             <div className="space-y-1">
               <label className="text-slate-300 font-bold flex items-center justify-between">
-                <span>{isAm ? "የሚሰሩባቸው ቴክኖሎጂዎች" : "Your Tech Stack (Pick up to 5)"}</span>
+                <span>{isAm ? "የሚሰሩባቸው ቴክኖሎጂዎች" : "Your Tech Stack (Pick up to 5)"} *</span>
                 <span className="text-[10px] text-cyan-400">{techStack.length}/5 selected</span>
               </label>
               <div className="flex flex-wrap gap-1.5 pt-0.5">
@@ -324,9 +452,17 @@ export default function DevRegisterModal({
                   <option value="☕ Espresso">☕ Espresso</option>
                   <option value="🍵 Green Tea">🍵 Green Tea</option>
                   <option value="🥤 Cold Brew">🥤 Cold Brew</option>
+                  <option value="💧 Pure Water">💧 Pure Water</option>
                 </select>
               </div>
             </div>
+
+            {/* Error Banner */}
+            {errorMsg && (
+              <div className="p-2.5 rounded-xl bg-red-950/80 border border-red-700 text-red-300 text-xs font-bold animate-shake">
+                ⚠ {errorMsg}
+              </div>
+            )}
 
             {/* Success Banner */}
             {successMsg && (
@@ -340,7 +476,7 @@ export default function DevRegisterModal({
             <div className="pt-2">
               <button
                 type="submit"
-                disabled={!name.trim() || isSaving}
+                disabled={!name.trim() || !bio.trim() || isSaving}
                 className={`w-full py-3 rounded-xl font-bold transition-all shadow-md flex items-center justify-center gap-2 text-xs ${
                   isSaving
                     ? 'bg-slate-800 text-slate-400 cursor-wait'
@@ -350,8 +486,8 @@ export default function DevRegisterModal({
                 <span>{isSaving ? '⏳' : '🚀'}</span>
                 <span>
                   {isSaving
-                    ? (isAm ? 'እየተመዘገበ ነው...' : 'Saving...')
-                    : (isAm ? 'ተጠናቋል — መፈለግ ጀምር' : 'Complete & Start Soulmate Discovery')}
+                    ? (isAm ? 'እየተመዘገበ ነው...' : 'Registering in Database...')
+                    : (isAm ? 'ተመዝገብና እውነተኛ ውይይት ጀምር' : 'Register Profile & Start Soulmate Chat')}
                 </span>
               </button>
             </div>

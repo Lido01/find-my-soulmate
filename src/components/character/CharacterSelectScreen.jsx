@@ -12,6 +12,7 @@ export default function CharacterSelectScreen({
   allCharStates = {},
   onSelect,
   userProfile,
+  onOpenRegister,
   onOpenOnboarding,
   onOpenAbout,
   onSwitchToRealWs,
@@ -35,6 +36,11 @@ export default function CharacterSelectScreen({
       : [];
 
   function handleSelectCategory(cat) {
+    if (!userProfile?.isRegistered) {
+      soundEngine.playHeartbeat();
+      onOpenRegister?.(cat);
+      return;
+    }
     soundEngine.playRomanticChime();
     setChosenCategory(cat);
   }
@@ -42,6 +48,16 @@ export default function CharacterSelectScreen({
   function handleBackToGate() {
     soundEngine.playHeartbeat();
     setChosenCategory(null);
+  }
+
+  function handleCardClick(character) {
+    if (!userProfile?.isRegistered) {
+      soundEngine.playHeartbeat();
+      onOpenRegister?.(character.gender);
+      return;
+    }
+    soundEngine.playRomanticChime();
+    onSelect(character.id);
   }
 
   const isAm = lang === 'am';
@@ -240,10 +256,7 @@ export default function CharacterSelectScreen({
                   key={character.id}
                   character={character}
                   charState={allCharStates[character.id] ?? { mood: character.defaultMood ?? "curious", relationship: character.initialRelationship ?? 15 }}
-                  onSelect={(id) => {
-                    soundEngine.playRomanticChime();
-                    onSelect(id);
-                  }}
+                  onSelect={() => handleCardClick(character)}
                   t={t}
                   lang={lang}
                 />
