@@ -11,6 +11,8 @@ import { IconZap, IconRefresh } from '../ui/Icons.jsx';
 
 export default function RealChatLobby({
   userProfile,
+  unreadCounts = {},
+  onSelectPeer,
   onOpenProfile,
   onOpenRegister,
   onBackToModeSelect,
@@ -185,6 +187,7 @@ export default function RealChatLobby({
       return;
     }
     soundEngine.playRomanticChime();
+    onSelectPeer?.(peer);
     wsService.startDirectChat(peer);
   }
 
@@ -444,11 +447,14 @@ export default function RealChatLobby({
                   const isFriend = myFriends.has(user.id);
                   const isLiked = likedUserIds.has(user.id);
                   const isWaved = wavedUserIds.has(user.id);
+                  const unread = unreadCounts[user.id] || 0;
 
                   return (
                     <div
                       key={user.id}
-                      className="p-4 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all flex flex-col justify-between space-y-3 shadow-md"
+                      className={`p-4 rounded-2xl bg-slate-900 border transition-all flex flex-col justify-between space-y-3 shadow-md ${
+                        unread > 0 ? 'border-rose-500 shadow-rose-950/40 shadow-lg ring-1 ring-rose-500/40' : 'border-slate-800 hover:border-slate-700'
+                      }`}
                     >
                       <div className="space-y-2.5">
                         {/* Header: Photo/Avatar, Name, Live/Offline status */}
@@ -466,7 +472,14 @@ export default function RealChatLobby({
                             </div>
 
                             <div className="min-w-0 flex-1">
-                              <h4 className="text-xs font-bold text-white truncate">{user.name}</h4>
+                              <h4 className="text-xs font-bold text-white truncate flex items-center gap-1.5">
+                                <span>{user.name}</span>
+                                {unread > 0 && (
+                                  <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black animate-pulse">
+                                    {unread} new
+                                  </span>
+                                )}
+                              </h4>
                               <p className="text-[11px] text-slate-500 truncate">{user.handle}</p>
                             </div>
                           </div>
@@ -554,10 +567,14 @@ export default function RealChatLobby({
                         <button
                           type="button"
                           onClick={() => handleDirectChat(user)}
-                          className="w-full py-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-cyan-700 text-cyan-300 font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+                          className={`w-full py-2 rounded-xl border font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm ${
+                            unread > 0
+                              ? 'bg-rose-950/90 border-rose-500 text-rose-200 hover:bg-rose-900 shadow-rose-950/50'
+                              : 'bg-slate-950 hover:bg-slate-800 border-slate-800 hover:border-cyan-700 text-cyan-300'
+                          }`}
                         >
                           <span>💬</span>
-                          <span>Chat with {user.name} →</span>
+                          <span>{unread > 0 ? `Open Chat (${unread} unread) →` : `Chat with ${user.name} →`}</span>
                         </button>
                       </div>
                     </div>

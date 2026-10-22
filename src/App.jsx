@@ -87,11 +87,40 @@ export default function App() {
   const [onlinePeers, setOnlinePeers] = useState([]);
   const [chatNotification, setChatNotification] = useState(null);
 
+  // Unread message tracking per peer
+  const [unreadCounts, setUnreadCounts] = useState(() => {
+    try {
+      const raw = localStorage.getItem('fms_unread_counts');
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const totalUnreadCount = Object.values(unreadCounts).reduce((acc, c) => acc + (c || 0), 0);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('fms_unread_counts', JSON.stringify(unreadCounts));
+    } catch {}
+  }, [unreadCounts]);
+
+  const handleOpenPeerChat = useCallback((peer) => {
+    setActiveRealPeer(peer);
+    setChatMode('real_ws');
+    if (peer?.id) {
+      setUnreadCounts((prev) => ({ ...prev, [peer.id]: 0 }));
+    }
+  }, []);
+
   // Listen for room entry, presence and incoming chat notifications from WebSocket service
   useEffect(() => {
     const unbindRoom = wsService.on('room:entered', ({ peer }) => {
       setActiveRealPeer(peer);
       setChatMode('real_ws');
+      if (peer?.id) {
+        setUnreadCounts((prev) => ({ ...prev, [peer.id]: 0 }));
+      }
     });
 
     const unbindPresence = wsService.on('presence:update', (data) => {
@@ -101,6 +130,13 @@ export default function App() {
     const unbindIncoming = wsService.on('chat:message', (msg) => {
       if (msg.senderId !== (userProfile?.id || 'me')) {
         soundEngine.playMessageBeep();
+
+        setUnreadCounts((prev) => {
+          const isActivelyChatting = chatMode === 'real_ws' && activeRealPeer?.id === msg.senderId;
+          const nextCount = isActivelyChatting ? 0 : (prev[msg.senderId] || 0) + 1;
+          return { ...prev, [msg.senderId]: nextCount };
+        });
+
         setChatNotification({
           id: msg.id,
           senderId: msg.senderId,
@@ -113,7 +149,7 @@ export default function App() {
 
         setTimeout(() => {
           setChatNotification((prev) => (prev?.id === msg.id ? null : prev));
-        }, 5000);
+        }, 6000);
       }
     });
 
@@ -122,7 +158,7 @@ export default function App() {
       unbindPresence();
       unbindIncoming();
     };
-  }, [userProfile]);
+  }, [userProfile, chatMode, activeRealPeer]);
 
   const [moodToast, setMoodToast] = useState({ mood: null, visible: false });
 
@@ -205,6 +241,7 @@ export default function App() {
         onOpenMobileMenu={() => setShowMobileNav(true)}
         apiKeySet={aiModeActive}
         chatMode={chatMode}
+        unreadCount={totalUnreadCount}
         onToggleChatMode={(m) => {
           setChatMode(m);
           if (m === 'virtual') setActiveRealPeer(null);
@@ -239,7 +276,8 @@ export default function App() {
               peer={activeRealPeer}
               userProfile={userProfile}
               allOnlinePeers={onlinePeers}
-              onSwitchPeer={(newPeer) => setActiveRealPeer(newPeer)}
+              unreadCounts={unreadCounts}
+              onSwitchPeer={(newPeer) => handleOpenPeerChat(newPeer)}
               onWave={(p) => wsService.sendSocialAction('wave', p.id)}
               onLike={(p) => wsService.sendSocialAction('like', p.id)}
               onAddFriend={(p) => wsService.sendSocialAction('add_friend', p.id)}
@@ -295,13 +333,16 @@ export default function App() {
                 peer={activeRealPeer}
                 userProfile={userProfile}
                 allOnlinePeers={onlinePeers}
-                onSwitchPeer={(p) => setActiveRealPeer(p)}
+                onSwitchPeer={(p) => handleOpenPeerChat(p)}
                 onLeave={() => setActiveRealPeer(null)}
+                onOpenGiftModal={() => setShowGiftModal(true)}
                 lang={lang}
               />
             ) : (
               <RealChatLobby
                 userProfile={userProfile}
+                unreadCounts={unreadCounts}
+                onSelectPeer={(peer) => handleOpenPeerChat(peer)}
                 onOpenProfile={() => setShowProfileModal(true)}
                 onOpenRegister={(target) => {
                   setDefaultRegisterTarget(target || null);
@@ -422,6 +463,7 @@ export default function App() {
           setChatMode(m);
           if (m === 'virtual') setActiveRealPeer(null);
         }}
+        unreadCount={totalUnreadCount}
         userProfile={userProfile}
         onOpenProfile={() => setShowProfileModal(true)}
         onOpenRegister={(target) => {
@@ -495,7 +537,7 @@ export default function App() {
       <MoodToast mood={moodToast.mood} visible={moodToast.visible} t={t} lang={lang} />
       <LoveWordBubble lang={lang} />
 
-      {/* Real-Time Incoming Social Chat Notification Toast */}
+      {/* Real-Time Incoming Social Chat Notification Toast (Clickable with Unread Count) */}
       {chatNotification && (
         <div
           onClick={() => {
@@ -506,33 +548,54 @@ export default function App() {
               emoji: chatNotification.senderEmoji,
               avatarUrl: chatNotification.senderAvatarUrl,
             };
-            setActiveRealPeer(peer);
-            setChatMode('real_ws');
+            handleOpenPeerChat(peer);
             setChatNotification(null);
           }}
-          className="fixed top-14 right-3 sm:right-6 z-50 max-w-sm w-full bg-slate-900 border border-cyan-500 rounded-2xl p-3 shadow-2xl flex items-center gap-3 animate-slide-up cursor-pointer hover:border-cyan-400 transition-all font-mono"
+          className="fixed top-14 right-3 sm:right-6 z-50 max-w-sm w-full bg-slate-900 border-2 border-cyan-400 rounded-2xl p-3 shadow-2xl flex items-center gap-3 animate-slide-up cursor-pointer hover:bg-slate-850 hover:scale-[1.02] transition-all font-mono"
+          title="Click to view message and start chat"
         >
-          <div className="w-10 h-10 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center overflow-hidden shrink-0">
-            {chatNotification.senderAvatarUrl ? (
-              <img src={chatNotification.senderAvatarUrl} alt={chatNotification.senderName} className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-xl">{chatNotification.senderEmoji}</span>
-            )}
+          <div className="relative shrink-0">
+            <div className="w-11 h-11 rounded-xl bg-slate-950 border border-slate-700 flex items-center justify-center overflow-hidden">
+              {chatNotification.senderAvatarUrl ? (
+                <img src={chatNotification.senderAvatarUrl} alt={chatNotification.senderName} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-2xl">{chatNotification.senderEmoji}</span>
+              )}
+            </div>
+            {/* Pulsing indicator */}
+            <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-rose-500 animate-ping" />
+            <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-rose-500" />
           </div>
+
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
-              <h4 className="font-bold text-xs text-white truncate">{chatNotification.senderName}</h4>
-              <span className="text-[10px] text-cyan-400 font-bold">New Chat</span>
+              <h4 className="font-bold text-xs text-white truncate flex items-center gap-1.5">
+                <span>{chatNotification.senderName}</span>
+                <span className="text-[10px] text-slate-400">{chatNotification.senderHandle}</span>
+              </h4>
+              <div className="flex items-center gap-1">
+                {(unreadCounts[chatNotification.senderId] || 1) > 1 && (
+                  <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black">
+                    {unreadCounts[chatNotification.senderId]} msgs
+                  </span>
+                )}
+                <span className="text-[10px] text-cyan-400 font-bold">New</span>
+              </div>
             </div>
-            <p className="text-[11px] text-slate-300 truncate">{chatNotification.text}</p>
+            <p className="text-[11px] text-slate-300 truncate mt-0.5">{chatNotification.text}</p>
+            <span className="text-[10px] text-cyan-300 font-bold block mt-1 hover:underline">
+              {lang === 'am' ? 'መልእክት ይመልከቱ →' : 'Click to reply in chat →'}
+            </span>
           </div>
+
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               setChatNotification(null);
             }}
-            className="text-slate-500 hover:text-white text-xs px-1"
+            className="text-slate-400 hover:text-white text-xs p-1 rounded-lg bg-slate-850 border border-slate-800"
+            title="Dismiss notification"
           >
             ✕
           </button>

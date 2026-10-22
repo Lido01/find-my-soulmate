@@ -7,6 +7,7 @@ const API_KEY_STORAGE = 'fms_gemini_api_key';
 const LANG_STORAGE = 'fms_language';
 const PROFILE_STORAGE = 'fms_user_profile';
 const AUDIO_SETTINGS_STORAGE = 'fms_audio_settings';
+const CHAT_HISTORY_PREFIX = 'fms_chat_history_';
 
 export const DEFAULT_USER_PROFILE = {
   name: 'CodeSoul',
@@ -83,6 +84,37 @@ export function loadAudioSettings() {
 
 export function saveAudioSettings(settings) {
   try { localStorage.setItem(AUDIO_SETTINGS_STORAGE, JSON.stringify(settings)); } catch { /* */ }
+}
+
+// ── Persistent Chat History per Peer ─────────────────────────────────────────
+export function loadChatHistory(peerId) {
+  if (!peerId) return [];
+  try {
+    const raw = localStorage.getItem(`${CHAT_HISTORY_PREFIX}${peerId}`);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveChatHistory(peerId, messages) {
+  if (!peerId || !Array.isArray(messages)) return;
+  try {
+    // Keep up to 200 messages to prevent storage overflow while retaining rich history
+    const trimmed = messages.slice(-200);
+    localStorage.setItem(`${CHAT_HISTORY_PREFIX}${peerId}`, JSON.stringify(trimmed));
+  } catch {
+    /* fail silently */
+  }
+}
+
+export function clearChatHistory(peerId) {
+  if (!peerId) return;
+  try {
+    localStorage.removeItem(`${CHAT_HISTORY_PREFIX}${peerId}`);
+  } catch {
+    /* */
+  }
 }
 
 export function buildInitialState(characters) {
