@@ -85,8 +85,9 @@ export default function App() {
   const [chatMode, setChatMode] = useState('virtual');
   const [activeRealPeer, setActiveRealPeer] = useState(null);
   const [onlinePeers, setOnlinePeers] = useState([]);
+  const [chatNotification, setChatNotification] = useState(null);
 
-  // Listen for room entry and presence from WebSocket service
+  // Listen for room entry, presence and incoming chat notifications from WebSocket service
   useEffect(() => {
     const unbindRoom = wsService.on('room:entered', ({ peer }) => {
       setActiveRealPeer(peer);
@@ -97,11 +98,31 @@ export default function App() {
       setOnlinePeers(data.users || []);
     });
 
+    const unbindIncoming = wsService.on('chat:message', (msg) => {
+      if (msg.senderId !== (userProfile?.id || 'me')) {
+        soundEngine.playMessageBeep();
+        setChatNotification({
+          id: msg.id,
+          senderId: msg.senderId,
+          senderName: msg.senderName || 'Developer',
+          senderHandle: msg.senderHandle || '@dev',
+          senderEmoji: msg.senderEmoji || '👩‍💻',
+          senderAvatarUrl: msg.senderAvatarUrl || null,
+          text: msg.text || (msg.isImage ? 'Shared a photo 📷' : msg.isCode ? 'Sent code 💻' : 'New message'),
+        });
+
+        setTimeout(() => {
+          setChatNotification((prev) => (prev?.id === msg.id ? null : prev));
+        }, 5000);
+      }
+    });
+
     return () => {
       unbindRoom();
       unbindPresence();
+      unbindIncoming();
     };
-  }, []);
+  }, [userProfile]);
 
   const [moodToast, setMoodToast] = useState({ mood: null, visible: false });
 
@@ -473,6 +494,50 @@ export default function App() {
       {/* Ambient overlays */}
       <MoodToast mood={moodToast.mood} visible={moodToast.visible} t={t} lang={lang} />
       <LoveWordBubble lang={lang} />
+
+      {/* Real-Time Incoming Social Chat Notification Toast */}
+      {chatNotification && (
+        <div
+          onClick={() => {
+            const peer = onlinePeers.find((p) => p.id === chatNotification.senderId) || {
+              id: chatNotification.senderId,
+              name: chatNotification.senderName,
+              handle: chatNotification.senderHandle,
+              emoji: chatNotification.senderEmoji,
+              avatarUrl: chatNotification.senderAvatarUrl,
+            };
+            setActiveRealPeer(peer);
+            setChatMode('real_ws');
+            setChatNotification(null);
+          }}
+          className="fixed top-14 right-3 sm:right-6 z-50 max-w-sm w-full bg-slate-900 border border-cyan-500 rounded-2xl p-3 shadow-2xl flex items-center gap-3 animate-slide-up cursor-pointer hover:border-cyan-400 transition-all font-mono"
+        >
+          <div className="w-10 h-10 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center overflow-hidden shrink-0">
+            {chatNotification.senderAvatarUrl ? (
+              <img src={chatNotification.senderAvatarUrl} alt={chatNotification.senderName} className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-xl">{chatNotification.senderEmoji}</span>
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between">
+              <h4 className="font-bold text-xs text-white truncate">{chatNotification.senderName}</h4>
+              <span className="text-[10px] text-cyan-400 font-bold">New Chat</span>
+            </div>
+            <p className="text-[11px] text-slate-300 truncate">{chatNotification.text}</p>
+          </div>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setChatNotification(null);
+            }}
+            className="text-slate-500 hover:text-white text-xs px-1"
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -75,24 +75,69 @@ export default function RealChatRoom({
 
     const unbindMsg = wsService.on('chat:message', (msg) => {
       soundEngine.playMessageBeep();
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: msg.id,
-          sender: msg.senderId === (userProfile?.id || 'me') ? 'player' : 'partner',
-          text: msg.text,
-          timestamp: msg.timestamp,
-          isAudio: msg.isAudio,
-          audioDuration: msg.audioDuration,
-          isGift: msg.isGift,
-          gift: msg.gift,
-          isImage: msg.isImage,
-          imageUrl: msg.imageUrl,
-          isCode: msg.isCode,
-          codeLang: msg.codeLang,
-          senderAvatarUrl: msg.senderAvatarUrl,
-        },
-      ]);
+      const isMe = msg.senderId === (userProfile?.id || 'me');
+
+      setMessages((prev) => {
+        // If partner just replied, mark all earlier player messages as seen
+        const updatedPrev = !isMe
+          ? prev.map((m) => (m.sender === 'player' ? { ...m, status: 'seen' } : m))
+          : prev;
+
+        return [
+          ...updatedPrev,
+          {
+            id: msg.id,
+            sender: isMe ? 'player' : 'partner',
+            text: msg.text,
+            timestamp: msg.timestamp,
+            isAudio: msg.isAudio,
+            audioDuration: msg.audioDuration,
+            isGift: msg.isGift,
+            gift: msg.gift,
+            isImage: msg.isImage,
+            imageUrl: msg.imageUrl,
+            isCode: msg.isCode,
+            codeLang: msg.codeLang,
+            senderAvatarUrl: msg.senderAvatarUrl,
+            status: isMe ? 'sent' : undefined,
+          },
+        ];
+      });
+
+      // Realistic social media read receipt transitions: sent -> delivered -> seen
+      if (isMe) {
+        setTimeout(() => {
+          setMessages((prev) =>
+            prev.map((m) => (m.id === msg.id && m.status === 'sent' ? { ...m, status: 'delivered' } : m))
+          );
+        }, 500);
+
+        if (isPeerOnline) {
+          setTimeout(() => {
+            setMessages((prev) =>
+              prev.map((m) => (m.id === msg.id ? { ...m, status: 'seen' } : m))
+            );
+          }, 1400);
+        } else {
+          // If peer is currently offline, acknowledge delivery and simulate friendly inbox reply
+          setTimeout(() => {
+            setMessages((prev) => [
+              ...prev.map((m) => (m.id === msg.id ? { ...m, status: 'delivered' } : m)),
+              {
+                id: `offline_ack_${Date.now()}`,
+                sender: 'partner',
+                text: isAm
+                  ? `ሰላም @${userProfile?.handle || 'dev'}! መልእክትዎ ደርሶኛል ✨ አሁን ኮድ ላይ ስለሆንኩ ቆይቼ እመልስልሃለሁ/ሻለሁ!`
+                  : `Hey @${userProfile?.handle || 'dev'}! I received your message in my inbox ✨ Deep in a coding session right now, will reply soon!`,
+                timestamp: new Date().toISOString(),
+                senderAvatarUrl: peer?.avatarUrl || null,
+                senderEmoji: peer?.emoji || '👩‍💻',
+              },
+            ]);
+            soundEngine.playRomanticChime();
+          }, 2400);
+        }
+      }
     });
 
     const unbindTyping = wsService.on('chat:typing', (data) => {
@@ -328,11 +373,15 @@ export default function RealChatRoom({
               <span className="font-bold text-xs sm:text-sm text-white truncate">{peer.name}</span>
               <span className="text-[11px] text-slate-500 hidden sm:inline">{peer.handle}</span>
               
-              {/* Live Icon / Badge (Shows if peer is in live, otherwise blank) */}
-              {isPeerOnline && (
+              {/* Live Icon / Badge (Shows if peer is in live, otherwise displays offline inbox info) */}
+              {isPeerOnline ? (
                 <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-950/90 border border-emerald-500/50 text-emerald-400 text-[10px] font-bold">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   <span>Live</span>
+                </span>
+              ) : (
+                <span className="text-[10px] text-slate-500 font-mono px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800">
+                  Offline · Inbox Active
                 </span>
               )}
 

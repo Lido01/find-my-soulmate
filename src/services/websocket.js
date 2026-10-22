@@ -431,6 +431,17 @@ class WebSocketManager {
     return profile;
   }
 
+  async fetchRegisteredUsers() {
+    try {
+      const res = await fetch(`${getApiBase()}/api/users`);
+      if (res.ok) {
+        const data = await res.json();
+        return data.users || [];
+      }
+    } catch {}
+    return this.simulatedPeers || [];
+  }
+
   async fetchCommunityPosts() {
     try {
       const res = await fetch(`${getApiBase()}/api/social/feed`);

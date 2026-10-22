@@ -182,7 +182,7 @@ export default function MessageBubble({ message, character, userProfile, lang = 
             </div>
           )}
 
-          {/* Timestamp & Telegram Read Double Checkmarks */}
+          {/* Timestamp & Social Media Read Receipt (Sent ✓, Delivered ✓✓, Seen ✓✓ in cyan) */}
           <div className="flex items-center justify-end gap-1.5 mt-0.5 pr-1">
             <button
               type="button"
@@ -195,9 +195,22 @@ export default function MessageBubble({ message, character, userProfile, lang = 
             {timeStr && (
               <span className="font-mono text-[10px] text-slate-500">{timeStr}</span>
             )}
-            <span className="text-[10px] text-cyan-400 flex items-center font-bold tracking-tighter" title="Delivered">
-              ✓✓
-            </span>
+
+            {/* Read Receipt */}
+            {message.status === 'seen' ? (
+              <span className="text-[11px] text-cyan-400 flex items-center gap-0.5 font-bold tracking-tighter" title="Seen by partner">
+                <span>✓✓</span>
+                <span className="text-[9px] uppercase font-mono">Seen</span>
+              </span>
+            ) : message.status === 'delivered' ? (
+              <span className="text-[11px] text-slate-400 flex items-center font-bold tracking-tighter" title="Delivered">
+                ✓✓
+              </span>
+            ) : (
+              <span className="text-[11px] text-slate-500 flex items-center font-bold" title="Sent">
+                ✓
+              </span>
+            )}
           </div>
         </div>
 
