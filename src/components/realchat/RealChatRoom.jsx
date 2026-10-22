@@ -7,9 +7,11 @@ import { useState, useEffect, useRef } from 'react';
 import { wsService } from '../../services/websocket.js';
 import { soundEngine, createSpeechRecognizer } from '../../utils/audio.js';
 import { getRomanticQuotes } from '../../data/romanticLove.js';
+import { loadChatHistory, saveChatHistory, clearChatHistory } from '../../utils/storage.js';
 import MessageBubble from '../chat/MessageBubble.jsx';
 import { IconSend, IconChevronDown, IconChevronUp, IconZap, IconGift } from '../ui/Icons.jsx';
 import RealPeerSidebar from './RealPeerSidebar.jsx';
+import PartnerProfileModal from './PartnerProfileModal.jsx';
 
 export default function RealChatRoom({
   peer,
@@ -20,7 +22,25 @@ export default function RealChatRoom({
   onOpenGiftModal,
   lang = 'en',
 }) {
-  const [messages, setMessages] = useState([]);
+  const isAm = lang === 'am';
+
+  // Initialize messages from persistent local storage for this peer
+  const [messages, setMessages] = useState(() => {
+    if (!peer?.id) return [];
+    const saved = loadChatHistory(peer.id);
+    if (saved && saved.length > 0) return saved;
+    return [
+      {
+        id: `sys_${Date.now()}`,
+        sender: 'system',
+        text: isAm
+          ? `⚡ የቀጥታ ግንኙነት ተመስርቷል። ከ @${peer.handle} ጋር ውይይት ጀምረዋል!`
+          : `⚡ Secure connection established with ${peer.name} (${peer.handle})! Say hi!`,
+        timestamp: new Date().toISOString(),
+      },
+    ];
+  });
+
   const [inputText, setInputText] = useState("");
   const [peerTyping, setPeerTyping] = useState(false);
   const [isRecordingVoice, setIsRecordingVoice] = useState(false);
@@ -29,6 +49,10 @@ export default function RealChatRoom({
   const [showQuickDropdown, setShowQuickDropdown] = useState(false);
   const [quickTab, setQuickTab] = useState('icebreakers'); // 'icebreakers' | 'quotes' | 'actions'
   const [showMobileStatsDrawer, setShowMobileStatsDrawer] = useState(false);
+  const [showPartnerProfileModal, setShowPartnerProfileModal] = useState(false);
+  const [clearConfirm, setClearConfirm] = useState(false);
+  const [isFriend, setIsFriend] = useState(() => (userProfile?.friends || []).includes(peer?.id));
+  const [isLiked, setIsLiked] = useState(false);
 
   // Asset & Code snippet composer state
   const [showAssetMenu, setShowAssetMenu] = useState(false);
@@ -42,8 +66,6 @@ export default function RealChatRoom({
   const typingTimeoutRef = useRef(null);
   const recordTimerRef = useRef(null);
   const recognizerRef = useRef(null);
-
-  const isAm = lang === 'am';
 
   // Live status: check if peer is currently connected and active
   const isPeerOnline = Boolean(
@@ -60,19 +82,54 @@ export default function RealChatRoom({
     }
   }, [messages, peerTyping]);
 
+  // Load persistent history whenever active peer changes
   useEffect(() => {
-    // Initial welcome message from room
-    setMessages([
-      {
-        id: `sys_${Date.now()}`,
-        sender: 'system',
-        text: isAm
-          ? `⚡ የቀጥታ WebSocket ግንኙነት ተመስርቷል። ከ @${peer.handle} ጋር ውይይት ጀምረዋል!`
-          : `⚡ Secure WebSocket connection established with ${peer.name} (${peer.handle})! Say hi!`,
-        timestamp: new Date().toISOString(),
-      },
-    ]);
+    if (peer?.id) {
+      const saved = loadChatHistory(peer.id);
+      if (saved && saved.length > 0) {
+        setMessages(saved);
+      } else {
+        setMessages([
+          {
+            id: `sys_${Date.now()}`,
+            sender: 'system',
+            text: isAm
+              ? `⚡ የቀጥታ WebSocket ግንኙነት ተመስርቷል። ከ @${peer.handle} ጋር ውይይት ጀምረዋል!`
+              : `⚡ Secure WebSocket connection established with ${peer.name} (${peer.handle})! Say hi!`,
+            timestamp: new Date().toISOString(),
+          },
+        ]);
+      }
+    }
+  }, [peer?.id, isAm]);
 
+  // Persist messages whenever updated
+  useEffect(() => {
+    if (peer?.id && messages.length > 0) {
+      saveChatHistory(peer.id, messages);
+    }
+  }, [peer?.id, messages]);
+
+  function handleClearHistory() {
+    if (clearConfirm) {
+      soundEngine.playHeartbeat();
+      clearChatHistory(peer.id);
+      setMessages([
+        {
+          id: `sys_${Date.now()}`,
+          sender: 'system',
+          text: isAm ? '🗑️ የውይይት ታሪክ ፀድቷል።' : '🗑️ Chat history cleared.',
+          timestamp: new Date().toISOString(),
+        },
+      ]);
+      setClearConfirm(false);
+    } else {
+      setClearConfirm(true);
+      setTimeout(() => setClearConfirm(false), 3000);
+    }
+  }
+
+  useEffect(() => {
     const unbindMsg = wsService.on('chat:message', (msg) => {
       soundEngine.playMessageBeep();
       const isMe = msg.senderId === (userProfile?.id || 'me');
@@ -144,13 +201,16 @@ export default function RealChatRoom({
       setPeerTyping(Boolean(data.isTyping));
     });
 
+    // When peer leaves or disconnects: PRESERVE full chat history
     const unbindLeave = wsService.on('room:peer_left', () => {
       setMessages((prev) => [
         ...prev,
         {
           id: `sys_left_${Date.now()}`,
           sender: 'system',
-          text: isAm ? `👋 @${peer.handle} ውይይቱን ለቋል።` : `👋 ${peer.name} has left the chat.`,
+          text: isAm
+            ? `👋 @${peer.handle} ውይይቱን ለቋል/ከመስመር ወጥቷል። የውይይት ታሪክዎ እንደተጠበቀ ይቆያል!`
+            : `👋 ${peer.name} has left the session. Your chat history is preserved!`,
           timestamp: new Date().toISOString(),
         },
       ]);
@@ -161,7 +221,7 @@ export default function RealChatRoom({
       unbindTyping();
       unbindLeave();
     };
-  }, [peer, userProfile, isAm]);
+  }, [peer, userProfile, isAm, isPeerOnline]);
 
   // Handle typing debounce
   function handleTextareaChange(e) {
@@ -353,9 +413,13 @@ export default function RealChatRoom({
     <div className="flex-1 flex flex-col h-full min-h-0 bg-slate-950 font-mono overflow-hidden select-text">
       {/* Clean, Space-Efficient Room Header */}
       <header className="flex-shrink-0 flex items-center justify-between px-3 py-2 border-b border-slate-800 bg-slate-950/95 backdrop-blur-md gap-2">
-        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+        <div
+          onClick={() => setShowPartnerProfileModal(true)}
+          className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer group hover:bg-slate-900/60 p-1.5 -ml-1 rounded-2xl transition-all border border-transparent hover:border-slate-800"
+          title="Click to view full partner profile card & dev info"
+        >
           <div className="relative shrink-0">
-            <span className="text-xl p-1.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center overflow-hidden w-9 h-9">
+            <span className="text-xl p-1.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center overflow-hidden w-9 h-9 group-hover:border-cyan-500 transition-all">
               {peer?.avatarUrl ? (
                 <img src={peer.avatarUrl} alt={peer.name} className="w-full h-full object-cover" />
               ) : (
@@ -369,8 +433,10 @@ export default function RealChatRoom({
           </div>
 
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-xs sm:text-sm text-white truncate">{peer.name}</span>
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <span className="font-bold text-xs sm:text-sm text-white truncate group-hover:text-cyan-300 transition-colors">
+                {peer.name}
+              </span>
               <span className="text-[11px] text-slate-500 hidden sm:inline">{peer.handle}</span>
               
               {/* Live Icon / Badge (Shows if peer is in live, otherwise displays offline inbox info) */}
@@ -388,6 +454,10 @@ export default function RealChatRoom({
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-800/80 text-cyan-300 font-bold hidden sm:inline">
                 {matchScore}% Match
               </span>
+
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-400 group-hover:text-cyan-300 group-hover:border-cyan-600 transition-all flex items-center gap-0.5">
+                <span>Profile 👤</span>
+              </span>
             </div>
             <p className="text-[10px] text-slate-400 truncate max-w-xs sm:max-w-md">
               {peer.quote ? `"${peer.quote}"` : (peer.bio || `${peer.indentation || 'Tabs'} · ${sharedTech.join(', ') || 'Developer'}`)}
@@ -397,6 +467,31 @@ export default function RealChatRoom({
 
         {/* Action Controls Right: Clean & Uncluttered */}
         <div className="flex items-center gap-1.5 shrink-0">
+          {/* View Profile Button (Accessible button) */}
+          <button
+            type="button"
+            onClick={() => setShowPartnerProfileModal(true)}
+            className="flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-cyan-300 hover:border-cyan-700 transition-colors shadow-sm"
+            title="Inspect partner profile and tech details"
+          >
+            <span>👤</span>
+            <span className="hidden sm:inline">Profile</span>
+          </button>
+
+          {/* Clear Chat History Button */}
+          <button
+            type="button"
+            onClick={handleClearHistory}
+            className={`px-2 py-1.5 rounded-lg border text-[11px] font-bold transition-all ${
+              clearConfirm
+                ? 'bg-red-950 border-red-600 text-red-300 animate-pulse'
+                : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-red-400 hover:border-red-800'
+            }`}
+            title="Clear saved chat history with this partner"
+          >
+            <span>{clearConfirm ? (isAm ? 'አረጋግጥ?' : 'Confirm?') : '🗑️'}</span>
+          </button>
+
           {/* Mobile Partner Info Button */}
           <button
             type="button"
@@ -404,7 +499,7 @@ export default function RealChatRoom({
             className="md:hidden flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-cyan-300 transition-colors"
             title="View partner stats & dev details"
           >
-            <span>Info</span>
+            <span>Stats</span>
           </button>
 
           {/* Leave Button */}
@@ -792,6 +887,28 @@ export default function RealChatRoom({
           </div>
         </div>
       )}
+      {/* In-Depth Partner Profile Modal (Inspect who you're chatting with) */}
+      <PartnerProfileModal
+        isOpen={showPartnerProfileModal}
+        onClose={() => setShowPartnerProfileModal(false)}
+        peer={peer}
+        userProfile={userProfile}
+        isOnline={isPeerOnline}
+        onSendBunna={handleSendBunna}
+        onAddFriend={() => {
+          setIsFriend((prev) => !prev);
+          handleAddFriendAction();
+        }}
+        onLike={() => {
+          setIsLiked(true);
+          soundEngine.playHeartbeat();
+          wsService.sendSocialAction('like', peer.id);
+        }}
+        onOpenGiftModal={onOpenGiftModal}
+        isFriend={isFriend}
+        isLiked={isLiked}
+        lang={lang}
+      />
     </div>
   );
 }

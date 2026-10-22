@@ -11,6 +11,7 @@ export default function MobileNavDrawer({
   onClose,
   chatMode = 'virtual',
   onToggleChatMode,
+  unreadCount = 0,
   userProfile,
   onOpenProfile,
   onOpenRegister,
@@ -124,7 +125,14 @@ export default function MobileNavDrawer({
                   : 'bg-slate-950 border-slate-800 text-slate-400'
               }`}
             >
-              <span>Live Match</span>
+              <span className="flex items-center gap-1.5">
+                <span>Live Match</span>
+                {unreadCount > 0 && (
+                  <span className="bg-rose-500 text-white text-[9px] px-1.5 py-0.2 rounded-full font-black animate-pulse">
+                    {unreadCount}
+                  </span>
+                )}
+              </span>
             </button>
           </div>
         </div>
