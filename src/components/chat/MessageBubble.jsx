@@ -253,19 +253,18 @@ export default function MessageBubble({ message, character, userProfile, onReply
               <span className="font-mono text-[10px] text-slate-500">{timeStr}</span>
             )}
 
-            {/* Read Receipt */}
+            {/* Telegram-style Read Receipt */}
             {message.status === 'seen' ? (
-              <span className="text-[11px] text-cyan-400 flex items-center gap-0.5 font-bold tracking-tighter" title="Seen by partner">
-                <span>✓✓</span>
-                <span className="text-[9px] uppercase font-mono">Seen</span>
+              <span className="text-[12px] text-cyan-400 flex items-center font-black tracking-tighter" title="Read by partner (Seen)">
+                <span className="leading-none text-cyan-400">✓✓</span>
               </span>
             ) : message.status === 'delivered' ? (
-              <span className="text-[11px] text-slate-400 flex items-center font-bold tracking-tighter" title="Delivered">
-                ✓✓
+              <span className="text-[12px] text-slate-400 flex items-center font-black tracking-tighter" title="Delivered">
+                <span className="leading-none">✓✓</span>
               </span>
             ) : (
-              <span className="text-[11px] text-slate-500 flex items-center font-bold" title="Sent">
-                ✓
+              <span className="text-[12px] text-slate-500 flex items-center font-bold" title="Sent">
+                <span className="leading-none">✓</span>
               </span>
             )}
           </div>
