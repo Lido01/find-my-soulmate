@@ -27,7 +27,8 @@
     "currentStatus": "Just registered on DevSoulmate! Say hi",
     "registeredAt": "2026-10-22T22:15:27.789Z",
     "updatedAt": "2026-10-23T00:07:24.519Z",
-    "isRegistered": true
+    "isRegistered": true,
+    "loveCode": "LOVE-J6QV-2K7Y"
   },
   {
     "id": "dev_1792698282784",
@@ -56,10 +57,11 @@
       "test_dev"
     ],
     "status": "online",
-    "currentStatus": "Just registered on DevSoulmate! Say hi 👋",
+    "currentStatus": "Just registered on DevSoulmate! Say hi",
     "registeredAt": "2026-10-22T19:44:43.571Z",
-    "updatedAt": "2026-10-23T00:06:09.971Z",
-    "isRegistered": true
+    "updatedAt": "2026-10-23T05:30:58.762Z",
+    "isRegistered": true,
+    "loveCode": "LOVE-GCVR-AURU"
   },
   {
     "id": "dev_1792696832234",
@@ -89,7 +91,8 @@
     "currentStatus": "Just registered on DevSoulmate! Say hi 👋",
     "registeredAt": "2026-10-22T19:20:32.354Z",
     "updatedAt": "2026-10-22T21:01:48.300Z",
-    "isRegistered": true
+    "isRegistered": true,
+    "loveCode": "LOVE-L3IV-I80U"
   },
   {
     "id": "user_1792693369287_a6831",
@@ -112,7 +115,8 @@
     "currentStatus": "Just registered on DevSoulmate! Say hi 👋",
     "registeredAt": "2026-10-22T18:22:49.349Z",
     "updatedAt": "2026-10-22T18:22:49.349Z",
-    "isRegistered": true
+    "isRegistered": true,
+    "loveCode": "LOVE-NV9D-LLNH"
   },
   {
     "id": "user_1792693366636_sdbub",
@@ -137,7 +141,8 @@
     "currentStatus": "Just registered on DevSoulmate! Say hi 👋",
     "registeredAt": "2026-10-22T18:22:46.760Z",
     "updatedAt": "2026-10-22T18:22:46.760Z",
-    "isRegistered": true
+    "isRegistered": true,
+    "loveCode": "LOVE-V1R2-TQLJ"
   },
   {
     "id": "user_1792693351397_5yjxd",
@@ -160,7 +165,8 @@
     "currentStatus": "Just registered on DevSoulmate! Say hi 👋",
     "registeredAt": "2026-10-22T18:22:31.529Z",
     "updatedAt": "2026-10-22T18:22:31.529Z",
-    "isRegistered": true
+    "isRegistered": true,
+    "loveCode": "LOVE-D6S8-KBCS"
   },
   {
     "id": "dev_1792672057950",
@@ -190,7 +196,8 @@
     "updatedAt": "2026-10-22T19:37:36.357Z",
     "isRegistered": true,
     "quote": "",
-    "avatarUrl": null
+    "avatarUrl": null,
+    "loveCode": "LOVE-SJCJ-QECR"
   },
   {
     "id": "test_dev",
@@ -216,7 +223,8 @@
     "currentStatus": "Just registered on DevSoulmate! Say hi 👋",
     "registeredAt": "2026-10-21T21:00:53.441Z",
     "updatedAt": "2026-10-21T21:00:53.441Z",
-    "isRegistered": true
+    "isRegistered": true,
+    "loveCode": "LOVE-MLET-8UGQ"
   },
   {
     "id": "dev_1792614125409",
@@ -242,7 +250,8 @@
     "currentStatus": "Just registered on DevSoulmate! Say hi 👋",
     "registeredAt": "2026-10-21T20:53:59.711Z",
     "updatedAt": "2026-10-22T08:11:00.446Z",
-    "isRegistered": true
+    "isRegistered": true,
+    "loveCode": "LOVE-KMMX-R3N8"
   },
   {
     "id": "user_meron",
@@ -268,7 +277,8 @@
     "status": "online",
     "currentStatus": "Refactoring auth components with Tailwind... need more bunna ☕",
     "registeredAt": "2026-10-18T20:52:52.386Z",
-    "isRegistered": true
+    "isRegistered": true,
+    "loveCode": "LOVE-BWQC-PWBW"
   },
   {
     "id": "user_hanna",
@@ -291,7 +301,8 @@
     "status": "online",
     "currentStatus": "Just deployed v1.2 to production without a single error! 🚀",
     "registeredAt": "2026-10-19T20:52:52.392Z",
-    "isRegistered": true
+    "isRegistered": true,
+    "loveCode": "LOVE-R9YV-GC9R"
   },
   {
     "id": "user_selam",
@@ -317,7 +328,8 @@
     "status": "online",
     "currentStatus": "Fine-tuning a local LLM while listening to Tilahun Gessesse 🎶",
     "registeredAt": "2026-10-16T20:52:52.392Z",
-    "isRegistered": true
+    "isRegistered": true,
+    "loveCode": "LOVE-R5DU-5HSE"
   },
   {
     "id": "user_yonas",
@@ -343,7 +355,8 @@
     "status": "online",
     "currentStatus": "Async Rust is pure poetry. Who wants to debate tabs vs spaces? 💻",
     "registeredAt": "2026-10-17T20:52:52.392Z",
-    "isRegistered": true
+    "isRegistered": true,
+    "loveCode": "LOVE-LG5U-UCC7"
   },
   {
     "id": "user_alex",
@@ -369,7 +382,8 @@
     "status": "online",
     "currentStatus": "Lubed my mechanical switches today. The typing sounds are divine ⌨️✨",
     "registeredAt": "2026-10-20T20:52:52.392Z",
-    "isRegistered": true
+    "isRegistered": true,
+    "loveCode": "LOVE-EKQQ-BTEF"
   },
   {
     "id": "user_kenean",
@@ -393,6 +407,7 @@
     "status": "online",
     "currentStatus": "Writing software that scales and looking for someone who stays 💖",
     "registeredAt": "2026-10-15T20:52:52.392Z",
-    "isRegistered": true
+    "isRegistered": true,
+    "loveCode": "LOVE-JPYS-KGBG"
   }
 ]
