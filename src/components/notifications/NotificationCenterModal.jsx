@@ -13,6 +13,7 @@ export default function NotificationCenterModal({
   notifications = [],
   onUpdateNotifications,
   userProfile,
+  onUpdateUserProfile,
   onOpenChatWithPeer,
   onInspectProfile,
   lang = 'en',
@@ -25,13 +26,19 @@ export default function NotificationCenterModal({
   const friendCount = userProfile?.friends?.length || 0;
   const likeCount = userProfile?.likes || 1;
 
+  // Distinguish incoming notifications vs outgoing pending requests
+  const incomingNotifs = notifications.filter((n) => n.targetUserId === userProfile?.id);
+  const outgoingRequests = notifications.filter(
+    (n) => n.fromUser?.id === userProfile?.id && n.type === 'friend_request'
+  );
+
   const filteredNotifs = notifications.filter((n) => {
     if (activeTab === 'requests') return n.type === 'friend_request';
     if (activeTab === 'social') return n.type === 'wave' || n.type === 'like' || n.type === 'friend_accept';
     return true;
   });
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = incomingNotifs.filter((n) => !n.read).length;
 
   async function handleAcceptFriend(notif) {
     soundEngine.playGiftFanfare();
@@ -40,6 +47,11 @@ export default function NotificationCenterModal({
       onUpdateNotifications?.((prev) =>
         prev.map((n) => (n.id === notif.id ? { ...n, status: 'accepted', read: true } : n))
       );
+      if (userProfile && notif.fromUser?.id) {
+        const nextFriends = Array.from(new Set([...(userProfile.friends || []), notif.fromUser.id]));
+        const updatedProfile = { ...userProfile, friends: nextFriends };
+        onUpdateUserProfile?.(updatedProfile);
+      }
     }
   }
 
@@ -58,7 +70,9 @@ export default function NotificationCenterModal({
     if (userProfile?.id) {
       await wsService.markNotificationsRead(userProfile.id);
     }
-    onUpdateNotifications?.((prev) => prev.map((n) => ({ ...n, read: true })));
+    onUpdateNotifications?.((prev) =>
+      prev.map((n) => (n.targetUserId === userProfile?.id ? { ...n, read: true } : n))
+    );
   }
 
   return (

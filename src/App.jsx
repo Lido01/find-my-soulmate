@@ -538,6 +538,7 @@ export default function App() {
         notifications={notifications}
         onUpdateNotifications={setNotifications}
         userProfile={userProfile}
+        onUpdateUserProfile={handleSaveProfile}
         onOpenChatWithPeer={(peer) => {
           setShowNotificationsModal(false);
           handleOpenPeerChat(peer);
