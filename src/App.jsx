@@ -116,6 +116,14 @@ export default function App() {
     }
   }, []);
 
+  // Establish live WebSocket connection if user profile is registered
+  useEffect(() => {
+    if (userProfile?.isRegistered) {
+      wsService.connect();
+      wsService.registerProfile(userProfile);
+    }
+  }, [userProfile?.id, userProfile?.isRegistered]);
+
   // Listen for room entry, presence and incoming chat notifications from WebSocket service
   useEffect(() => {
     const unbindRoom = wsService.on('room:entered', ({ peer }) => {

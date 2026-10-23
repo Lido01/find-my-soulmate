@@ -187,6 +187,26 @@ class WebSocketManager {
     }
   }
 
+  // ── Clean Disconnect & Session Reset ───────────────────────────────────────
+  disconnect() {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+    if (this.ws) {
+      try {
+        this.ws.close();
+      } catch {}
+      this.ws = null;
+    }
+    this.connected = false;
+    this.currentUser = null;
+    this.currentPeer = null;
+    this.currentRoomId = null;
+    this.emit('connection:status', { status: 'disconnected', isSimulated: false });
+    console.log('[WS-Client] 🔌 Disconnected cleanly from server and wiped session.');
+  }
+
   // Fallback to local simulated peer network if server is not running
   fallbackToSimulation() {
     this.isSimulated = true;
