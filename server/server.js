@@ -304,7 +304,7 @@ function broadcastOnlineUsers() {
     const liveUser = connectedMap.get(u.id);
     return {
       ...u,
-      status: 'online',
+      status: isLiveConnected ? 'online' : 'offline',
       isLiveSocket: isLiveConnected,
       inChat: Boolean(liveUser?.roomId),
     };
