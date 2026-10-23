@@ -37,6 +37,7 @@ import ProfileSettingsModal from './components/settings/ProfileSettingsModal.jsx
 import OnboardingModal from './components/onboarding/OnboardingModal.jsx';
 import AboutGuideModal from './components/guide/AboutGuideModal.jsx';
 import DevRegisterModal from './components/realchat/DevRegisterModal.jsx';
+import NotificationCenterModal from './components/notifications/NotificationCenterModal.jsx';
 
 // UI components
 import MoodToast from './components/ui/MoodToast.jsx';
@@ -69,6 +70,8 @@ export default function App() {
   const [showDevRegisterModal, setShowDevRegisterModal] = useState(() => !loadUserProfile()?.isRegistered);
   const [defaultRegisterTarget, setDefaultRegisterTarget] = useState(null);
   const [showMobileNav, setShowMobileNav] = useState(false);
+  const [showNotificationsModal, setShowNotificationsModal] = useState(false);
+  const [notifications, setNotifications] = useState([]);
   const [loveDrawerOpen, setLoveDrawerOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
@@ -160,6 +163,28 @@ export default function App() {
     };
   }, [userProfile, chatMode, activeRealPeer]);
 
+  // Fetch persistent notifications on profile load
+  useEffect(() => {
+    if (userProfile?.id) {
+      wsService.fetchNotifications(userProfile.id).then((notifs) => {
+        if (Array.isArray(notifs)) setNotifications(notifs);
+      });
+    }
+  }, [userProfile?.id]);
+
+  // Listen for real-time incoming notifications (friend requests, waves, likes)
+  useEffect(() => {
+    const unbindNotif = wsService.on('notification:new', (notif) => {
+      setNotifications((prev) => [notif, ...prev.filter((n) => n.id !== notif.id)]);
+      soundEngine.playRomanticChime();
+    });
+    return () => {
+      unbindNotif();
+    };
+  }, []);
+
+  const unreadNotifCount = notifications.filter((n) => !n.read).length;
+
   const [moodToast, setMoodToast] = useState({ mood: null, visible: false });
 
   // Sync sound engine config on load
@@ -184,6 +209,17 @@ export default function App() {
     handleSelectCharacter, handleChoice, handleCustomMessage, handleGift,
     handleSwitchCharacter, handleBack, handleReset,
   } = useGameState({ apiKey, lang, onMoodChange: handleMoodChange });
+
+  // Clean Logout: clears user session and returns to selection without clearing backend database
+  const handleLogout = useCallback(() => {
+    soundEngine.playHeartbeat();
+    wsService.disconnect();
+    saveUserProfile(null);
+    setUserProfileState(null);
+    setActiveRealPeer(null);
+    setChatMode('virtual');
+    handleReset();
+  }, [handleReset]);
 
   // API key management
   const handleApiKeySave = useCallback((key) => {
@@ -230,6 +266,7 @@ export default function App() {
         charState={activeCharState}
         userProfile={userProfile}
         onReset={handleReset}
+        onLogout={handleLogout}
         onBack={handleBack}
         onApiKeyClick={() => setShowApiModal(true)}
         onOpenProfile={() => setShowProfileModal(true)}
@@ -238,6 +275,8 @@ export default function App() {
           setShowDevRegisterModal(true);
         }}
         onOpenAbout={() => setShowAboutModal(true)}
+        onOpenNotifications={() => setShowNotificationsModal(true)}
+        unreadNotifCount={unreadNotifCount}
         onOpenMobileMenu={() => setShowMobileNav(true)}
         apiKeySet={aiModeActive}
         chatMode={chatMode}
@@ -464,6 +503,8 @@ export default function App() {
           if (m === 'virtual') setActiveRealPeer(null);
         }}
         unreadCount={totalUnreadCount}
+        unreadNotifCount={unreadNotifCount}
+        onOpenNotifications={() => setShowNotificationsModal(true)}
         userProfile={userProfile}
         onOpenProfile={() => setShowProfileModal(true)}
         onOpenRegister={(target) => {
@@ -475,7 +516,20 @@ export default function App() {
         apiKeySet={aiModeActive}
         theme={theme}
         onToggleTheme={handleToggleTheme}
+        onLogout={handleLogout}
         onReset={handleReset}
+        lang={lang}
+      />
+      <NotificationCenterModal
+        isOpen={showNotificationsModal}
+        onClose={() => setShowNotificationsModal(false)}
+        notifications={notifications}
+        onUpdateNotifications={setNotifications}
+        userProfile={userProfile}
+        onOpenChatWithPeer={(peer) => {
+          setShowNotificationsModal(false);
+          handleOpenPeerChat(peer);
+        }}
         lang={lang}
       />
       <DevRegisterModal

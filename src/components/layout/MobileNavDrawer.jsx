@@ -12,6 +12,8 @@ export default function MobileNavDrawer({
   chatMode = 'virtual',
   onToggleChatMode,
   unreadCount = 0,
+  unreadNotifCount = 0,
+  onOpenNotifications,
   userProfile,
   onOpenProfile,
   onOpenRegister,
@@ -20,6 +22,7 @@ export default function MobileNavDrawer({
   apiKeySet = false,
   theme = 'dark',
   onToggleTheme,
+  onLogout,
   onReset,
   lang = 'en',
 }) {
@@ -154,6 +157,28 @@ export default function MobileNavDrawer({
 
         {/* Menu Buttons List */}
         <div className="space-y-2 pt-1 text-xs">
+          {/* Notifications Center */}
+          <button
+            type="button"
+            onClick={() => {
+              onClose();
+              onOpenNotifications?.();
+            }}
+            className="w-full p-2.5  bg-slate-950 hover:bg-slate-800 border border-slate-800 text-left text-slate-300 hover:text-white flex items-center justify-between transition-colors"
+          >
+            <span className="flex items-center gap-2">
+              <span>🔔</span>
+              <span>{isAm ? "ማሳወቂያዎች" : "Notifications"}</span>
+            </span>
+            {unreadNotifCount > 0 ? (
+              <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px] font-black animate-pulse">
+                {unreadNotifCount}
+              </span>
+            ) : (
+              <span>→</span>
+            )}
+          </button>
+
           {/* About & Guide */}
           <button
             type="button"
@@ -164,6 +189,7 @@ export default function MobileNavDrawer({
             className="w-full p-2.5  bg-slate-950 hover:bg-slate-800 border border-slate-800 text-left text-slate-300 hover:text-white flex items-center justify-between transition-colors"
           >
             <span className="flex items-center gap-2">
+              <span>📖</span>
               <span>{isAm ? "ስለ መተግበሪያው እና መመሪያ" : "About & Dating Guide"}</span>
             </span>
             <span>→</span>
@@ -210,19 +236,20 @@ export default function MobileNavDrawer({
           <LanguageToggle />
         </div>
 
-        {/* Hard Reset Button */}
+        {/* Logout Button */}
         <div className="pt-auto mt-auto">
           <button
             type="button"
             onClick={() => {
-              if (window.confirm("Are you sure you want to reset all game state and cache?")) {
-                onReset?.();
+              if (window.confirm("Are you sure you want to logout? Your profile and Love Code are saved in the database!")) {
+                onLogout?.();
                 onClose();
               }
             }}
-            className="w-full py-2.5  bg-red-950/40 hover:bg-red-900 border border-red-800/60 text-red-300 text-xs font-bold transition-all"
+            className="w-full py-2.5 rounded-xl border border-red-900/60 bg-red-950/40 text-red-300 hover:bg-red-950 text-xs font-bold transition-all flex items-center justify-center gap-1.5"
           >
-            ⚠️ Reset All Data
+            <span>🚪</span>
+            <span>{isAm ? "ከመለያ ውጣ (Logout)" : "Logout"}</span>
           </button>
         </div>
       </div>

@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react';
 import { wsService } from '../../services/websocket.js';
 import { soundEngine } from '../../utils/audio.js';
 import { IconZap, IconRefresh } from '../ui/Icons.jsx';
+import PartnerProfileModal from './PartnerProfileModal.jsx';
 
 export default function RealChatLobby({
   userProfile,
@@ -25,6 +26,11 @@ export default function RealChatLobby({
   const [isMatching, setIsMatching] = useState(false);
   const [activeTab, setActiveTab] = useState('discover'); // 'discover' | 'friends' | 'feed'
   const [matchingSeconds, setMatchingSeconds] = useState(0);
+
+  // Search and filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'online' | 'shared_tech' | 'bunna' | 'tabs' | 'spaces'
+  const [inspectPeer, setInspectPeer] = useState(null);
 
   // Locked strictly to user's registered target preference
   const searchTarget = userProfile?.lookingFor === 'male' ? 'male' : 'female';
@@ -156,6 +162,33 @@ export default function RealChatLobby({
     (u) => u.gender === searchTarget && u.id !== userProfile?.id
   );
 
+  // Search query & filter pills refinement
+  const searchedUsers = filteredUsers.filter((u) => {
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      const matchName = u.name?.toLowerCase().includes(q);
+      const matchHandle = u.handle?.toLowerCase().includes(q);
+      const matchBio = u.bio?.toLowerCase().includes(q);
+      const matchQuote = u.quote?.toLowerCase().includes(q);
+      const matchLoc = u.location?.toLowerCase().includes(q);
+      const matchTech = (u.techStack || []).some((t) => t.toLowerCase().includes(q));
+      if (!matchName && !matchHandle && !matchBio && !matchQuote && !matchLoc && !matchTech) {
+        return false;
+      }
+    }
+
+    if (activeFilter === 'online') return u.isLiveNow;
+    if (activeFilter === 'shared_tech') {
+      const myTech = userProfile?.techStack || ['React', 'TypeScript'];
+      return (u.techStack || []).some((t) => myTech.includes(t));
+    }
+    if (activeFilter === 'bunna') return u.drink?.includes('Bunna') || u.drink?.includes('Ethiopian');
+    if (activeFilter === 'tabs') return u.indentation === 'Tabs';
+    if (activeFilter === 'spaces') return u.indentation === 'Spaces';
+
+    return true;
+  });
+
   // Filter for Friends tab
   const friendsList = combinedUsers.filter(
     (u) => myFriends.has(u.id) || (userProfile?.friends && userProfile.friends.includes(u.id))
@@ -285,96 +318,9 @@ export default function RealChatLobby({
           </button>
         </div>
 
-        {/* ── UNIFIED LIVE MATCHMAKING CONTROL (Strictly locked to chosen target) ── */}
-        <div className="rounded-2xl bg-slate-900/90 border border-slate-800 p-3.5 sm:p-4 shadow-xl space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-cyan-400" />
-                <h2 className="text-sm sm:text-base font-bold text-white tracking-wide">
-                  {isAm ? "የቀጥታ ገንቢ ግጥሚያ (Live Matchmaking)" : "Live Developer Matchmaking"}
-                </h2>
-              </div>
-              <p className="text-xs text-slate-400 mt-0.5">
-                {isAm
-                  ? "በመስፈርቶችዎ መሰረት አሁኑኑ በቀጥታ ከተገናኘ ገንቢ ጋር 1-ለ-1 ውይይት ይጀምሩ"
-                  : "Connect 1-on-1 instantly with an online developer matching your criteria"}
-              </p>
-            </div>
 
-            {/* Locked Target Badge (No non-chosen shown, edit in profile/settings) */}
-            <div className="flex items-center gap-2 self-start sm:self-auto">
-              <span className="text-xs text-slate-400">{isAm ? "ዒላማ:" : "Target:"}</span>
-              <span className="px-3 py-1 rounded-xl bg-cyan-950 border border-cyan-600 text-cyan-200 text-xs font-bold shadow-sm flex items-center gap-1.5">
-                <span>{searchTarget === 'male' ? '👨‍💻' : '👩‍💻'}</span>
-                <span>{searchTarget === 'male' ? 'Boyfriends' : 'Girlfriends'}</span>
-              </span>
-            </div>
-          </div>
 
-          {/* Action Button & Match State */}
-          <div className="pt-1">
-            {isMatching ? (
-              <div className="p-3 rounded-xl bg-slate-950 border border-cyan-800 flex items-center justify-between gap-3 animate-pulse">
-                <div className="flex items-center gap-2.5">
-                  <IconRefresh className="w-4 h-4 text-cyan-400 animate-spin" />
-                  <div>
-                    <span className="text-xs font-bold text-cyan-300">
-                      Scanning WebSocket for matching {searchTarget === 'female' ? 'Girlfriend' : 'Boyfriend'}...
-                    </span>
-                    <span className="text-[10px] text-slate-400 block">
-                      Searching matching criteria ({matchingSeconds}s)
-                    </span>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleCancelMatch}
-                  className="px-3 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-300 hover:text-white"
-                >
-                  Cancel
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={handleStartMatch}
-                className="w-full py-2.5 px-4 rounded-xl bg-cyan-950 hover:bg-cyan-900 border border-cyan-700 hover:border-cyan-500 text-cyan-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-md group cursor-pointer"
-              >
-                <IconZap className="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform" />
-                <span>
-                  {isAm
-                    ? `አሁኑኑ በቀጥታ ግጥሚያ ጀምር (${filteredUsers.length} ዝግጁ ናቸው)`
-                    : `Start Live Match (${filteredUsers.length} ${searchTarget === 'female' ? 'Girlfriends' : 'Boyfriends'} Available)`}
-                </span>
-              </button>
-            )}
-          </div>
-        </div>
 
-        {/* Compact User Profile Bar */}
-        <div className="p-2.5 sm:p-3 rounded-2xl bg-slate-900/60 border border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="text-xl">{userProfile?.emoji || '🧑‍💻'}</span>
-            <span className="font-bold text-white truncate">{userProfile?.name}</span>
-            <span className="text-slate-500 text-[11px] hidden sm:inline">{userProfile?.handle}</span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-950 border border-slate-800 text-cyan-400 font-bold">
-              {userProfile?.indentation || 'Tabs'}
-            </span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-950 border border-slate-800 text-amber-400 hidden sm:inline">
-              {userProfile?.drink || '☕ Bunna'}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
-            <span>Stack:</span>
-            {(userProfile?.techStack || ['React', 'TypeScript']).slice(0, 3).map((t, i) => (
-              <span key={i} className="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-800 text-slate-300">
-                {t}
-              </span>
-            ))}
-          </div>
-        </div>
 
         {/* Clean Segmented Tabs */}
         <div className="flex items-center gap-1 border-b border-slate-800 pb-2">
@@ -426,24 +372,102 @@ export default function RealChatLobby({
 
         {/* ── TAB 1: ALL REGISTERED & ONLINE PEERS (No fixed position, fully scrollable) ── */}
         {activeTab === 'discover' && (
-          <div className="space-y-3 animate-fade-in pb-8">
-            {filteredUsers.length === 0 ? (
+          <div className="space-y-3.5 animate-fade-in pb-8">
+            {/* Search Input & Filter Chips */}
+            <div className="space-y-2">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="relative flex-1">
+                  <span className="absolute left-3 top-2.5 text-xs text-slate-500">🔍</span>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={
+                      isAm
+                        ? 'በስም፣ በቴክኖሎጂ፣ በቦታ ወይም በመግለጫ ፈልግ...'
+                        : 'Search by name, tech stack, bio, location...'
+                    }
+                    className="w-full pl-8 pr-8 py-2 bg-slate-900 border border-slate-800 focus:border-cyan-500 rounded-xl text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none transition-colors"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-2.5 top-2 text-xs text-slate-400 hover:text-white"
+                      title="Clear search"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
+                {/* Filter Chips */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] shrink-0">
+                  {[
+                    { id: 'all', label: isAm ? 'ሁሉም' : 'All' },
+                    { id: 'online', label: 'Online' },
+                    { id: 'shared_tech', label: 'Shared Tech' },
+                    { id: 'bunna', label: 'Bunna' },
+                    { id: 'tabs', label: 'Tabs' },
+                    { id: 'spaces', label: 'Spaces' },
+                  ].map((f) => (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => setActiveFilter(f.id)}
+                      className={`px-2.5 py-1.5 rounded-xl border font-bold transition-all whitespace-nowrap ${
+                        activeFilter === f.id
+                          ? 'bg-cyan-950 border-cyan-500 text-cyan-300 shadow-sm'
+                          : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {searchedUsers.length === 0 ? (
               <div className="p-8 rounded-2xl bg-slate-900/60 border border-slate-800 text-center space-y-2">
-                <p className="text-sm text-slate-400">
-                  No {searchTarget === 'female' ? 'girlfriends' : 'boyfriends'} currently found in this category.
+                <p className="text-sm text-slate-300 font-bold">
+                  {searchQuery || activeFilter !== 'all'
+                    ? (isAm ? 'ምንም የሚስማማ ገንቢ አልተገኘም' : 'No developers matched your filters')
+                    : (isAm ? 'በዚህ ምድብ ውስጥ የተመዘገበ ሰው የለም' : `No ${searchTarget === 'female' ? 'girlfriends' : 'boyfriends'} found.`)}
                 </p>
                 <p className="text-xs text-slate-500">
-                  Register cards to populate the network or change preference in Settings!
+                  {searchQuery || activeFilter !== 'all' ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery('');
+                        setActiveFilter('all');
+                      }}
+                      className="text-cyan-400 underline font-bold"
+                    >
+                      {isAm ? 'ፍለጋውን አጽዳ' : 'Clear search and filters'}
+                    </button>
+                  ) : (
+                    isAm
+                      ? 'መለያ በመመዝገብ አዳዲስ ሰዎችን ያግኙ ወይም በቅንብሮች ውስጥ የሚፈልጉትን ይቀይሩ!'
+                      : 'Register cards to populate the network or change preference in Settings!'
+                  )}
                 </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                {filteredUsers.map((user) => {
+                {searchedUsers.map((user) => {
                   const sharedTech = (user.techStack || []).filter((t) =>
                     (userProfile?.techStack || ['React', 'TypeScript']).includes(t)
                   );
-                  const sameIndent = user.indentation && userProfile?.indentation && user.indentation === userProfile.indentation;
-                  const matchScore = Math.min(99, 65 + sharedTech.length * 12 + (sameIndent ? 10 : 0));
+                  const sameIndent =
+                    user.indentation &&
+                    userProfile?.indentation &&
+                    user.indentation === userProfile.indentation;
+                  const matchScore = Math.min(
+                    99,
+                    65 + sharedTech.length * 12 + (sameIndent ? 10 : 0)
+                  );
                   const isFriend = myFriends.has(user.id);
                   const isLiked = likedUserIds.has(user.id);
                   const isWaved = wavedUserIds.has(user.id);
@@ -453,18 +477,31 @@ export default function RealChatLobby({
                     <div
                       key={user.id}
                       className={`p-4 rounded-2xl bg-slate-900 border transition-all flex flex-col justify-between space-y-3 shadow-md ${
-                        unread > 0 ? 'border-rose-500 shadow-rose-950/40 shadow-lg ring-1 ring-rose-500/40' : 'border-slate-800 hover:border-slate-700'
+                        unread > 0
+                          ? 'border-rose-500 shadow-rose-950/40 shadow-lg ring-1 ring-rose-500/40'
+                          : 'border-slate-800 hover:border-slate-700'
                       }`}
                     >
                       <div className="space-y-2.5">
                         {/* Header: Photo/Avatar, Name, Live/Offline status */}
                         <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <div className="relative w-10 h-10 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center overflow-hidden shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => setInspectPeer(user)}
+                            className="flex items-center gap-2.5 min-w-0 text-left group cursor-pointer"
+                            title="Click to view full developer profile"
+                          >
+                            <div className="relative w-10 h-10 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center overflow-hidden shrink-0 group-hover:border-cyan-500 transition-colors">
                               {user.avatarUrl ? (
-                                <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+                                <img
+                                  src={user.avatarUrl}
+                                  alt={user.name}
+                                  className="w-full h-full object-cover"
+                                />
                               ) : (
-                                <span className="text-xl">{user.emoji || (user.gender === 'female' ? '👩‍💻' : '👨‍💻')}</span>
+                                <span className="text-xl">
+                                  {user.emoji || (user.gender === 'female' ? '👩‍💻' : '👨‍💻')}
+                                </span>
                               )}
                               {user.isLiveNow && (
                                 <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-slate-950" />
@@ -472,7 +509,7 @@ export default function RealChatLobby({
                             </div>
 
                             <div className="min-w-0 flex-1">
-                              <h4 className="text-xs font-bold text-white truncate flex items-center gap-1.5">
+                              <h4 className="text-xs font-bold text-white truncate flex items-center gap-1.5 group-hover:text-cyan-300 transition-colors">
                                 <span>{user.name}</span>
                                 {unread > 0 && (
                                   <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black animate-pulse">
@@ -482,7 +519,7 @@ export default function RealChatLobby({
                               </h4>
                               <p className="text-[11px] text-slate-500 truncate">{user.handle}</p>
                             </div>
-                          </div>
+                          </button>
 
                           <div className="flex flex-col items-end gap-1 shrink-0">
                             {user.isLiveNow ? (
@@ -563,19 +600,31 @@ export default function RealChatLobby({
                           </button>
                         </div>
 
-                        {/* Always opens chat and allows sending message (never refuses) */}
-                        <button
-                          type="button"
-                          onClick={() => handleDirectChat(user)}
-                          className={`w-full py-2 rounded-xl border font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm ${
-                            unread > 0
-                              ? 'bg-rose-950/90 border-rose-500 text-rose-200 hover:bg-rose-900 shadow-rose-950/50'
-                              : 'bg-slate-950 hover:bg-slate-800 border-slate-800 hover:border-cyan-700 text-cyan-300'
-                          }`}
-                        >
-                          <span>💬</span>
-                          <span>{unread > 0 ? `Open Chat (${unread} unread) →` : `Chat with ${user.name} →`}</span>
-                        </button>
+                        {/* Inspect Profile & Chat Buttons */}
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setInspectPeer(user)}
+                            className="px-2.5 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-cyan-600 text-slate-300 hover:text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1 shrink-0"
+                            title="Inspect Developer Profile & Stats"
+                          >
+                            <span>👤</span>
+                            <span className="hidden sm:inline">Profile</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleDirectChat(user)}
+                            className={`flex-1 py-2 rounded-xl border font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm ${
+                              unread > 0
+                                ? 'bg-rose-950/90 border-rose-500 text-rose-200 hover:bg-rose-900 shadow-rose-950/50'
+                                : 'bg-slate-950 hover:bg-slate-800 border-slate-800 hover:border-cyan-700 text-cyan-300'
+                            }`}
+                          >
+                            <span>💬</span>
+                            <span>{unread > 0 ? `Chat (${unread}) →` : `Chat with ${user.name} →`}</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
@@ -684,6 +733,21 @@ export default function RealChatLobby({
           </div>
         )}
       </div>
+
+      {/* Inspect Partner Full Profile Modal */}
+      <PartnerProfileModal
+        isOpen={Boolean(inspectPeer)}
+        onClose={() => setInspectPeer(null)}
+        peer={inspectPeer}
+        userProfile={userProfile}
+        isOnline={inspectPeer?.isLiveNow}
+        onSendBunna={() => inspectPeer && handleWave(inspectPeer)}
+        onAddFriend={() => inspectPeer && handleToggleFriend(inspectPeer)}
+        onLike={() => inspectPeer && handleLike(inspectPeer)}
+        isFriend={inspectPeer ? myFriends.has(inspectPeer.id) : false}
+        isLiked={inspectPeer ? likedUserIds.has(inspectPeer.id) : false}
+        lang={lang}
+      />
     </div>
   );
 }

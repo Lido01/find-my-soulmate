@@ -129,6 +129,37 @@ const server = http.createServer(async (req, res) => {
       const { action, fromUser, targetUserId, metadata } = body;
       const targetUser = db.interact(action, fromUser, targetUserId);
 
+      // Create notification for target user
+      if (targetUserId) {
+        let notifText = '';
+        let notifType = action;
+        if (action === 'wave') notifText = `${fromUser.name} sent you a warm coffee wave ☕`;
+        else if (action === 'like') notifText = `${fromUser.name} liked your developer card 💖`;
+        else if (action === 'add_friend' || action === 'friend_request') {
+          notifText = `${fromUser.name} sent you a developer friend request 👥`;
+          notifType = 'friend_request';
+        }
+
+        if (notifText) {
+          const newNotif = db.addNotification({
+            type: notifType,
+            fromUser,
+            targetUserId,
+            text: notifText,
+          });
+
+          // Forward notification to live websocket of target if online
+          for (const [otherWs, otherUser] of clients) {
+            if (otherUser && otherUser.id === targetUserId && otherWs.readyState === WebSocket.OPEN) {
+              otherWs.send(JSON.stringify({
+                type: 'notification:new',
+                notification: newNotif,
+              }));
+            }
+          }
+        }
+      }
+
       // Real-time broadcast of wave or like
       broadcastToAll({
         type: 'social:action',
@@ -139,6 +170,93 @@ const server = http.createServer(async (req, res) => {
       });
 
       sendJson(res, 200, { ok: true, action, targetUser });
+    } catch (err) {
+      sendJson(res, 400, { ok: false, error: err.message });
+    }
+    return;
+  }
+
+  // ── REST: Login via Love Code ─────────────────────────────────────────────
+  if (req.method === 'POST' && url.pathname === '/api/auth/login-code') {
+    try {
+      const body = await readJsonBody(req);
+      const user = db.getUserByLoveCode(body.loveCode);
+      if (!user) {
+        sendJson(res, 404, { ok: false, error: 'Love Code not found. Please check and try again!' });
+        return;
+      }
+      sendJson(res, 200, { ok: true, user });
+    } catch (err) {
+      sendJson(res, 400, { ok: false, error: err.message });
+    }
+    return;
+  }
+
+  // ── REST: Get Conversation Messages ───────────────────────────────────────
+  if (req.method === 'GET' && url.pathname === '/api/chat/messages') {
+    const user1 = url.searchParams.get('user1');
+    const user2 = url.searchParams.get('user2');
+    if (!user1 || !user2) {
+      sendJson(res, 400, { ok: false, error: 'user1 and user2 required' });
+      return;
+    }
+    const messages = db.getMessages(user1, user2);
+    sendJson(res, 200, { ok: true, messages });
+    return;
+  }
+
+  // ── REST: Notifications API ───────────────────────────────────────────────
+  if (req.method === 'GET' && url.pathname === '/api/notifications') {
+    const userId = url.searchParams.get('userId');
+    if (!userId) {
+      sendJson(res, 400, { ok: false, error: 'userId required' });
+      return;
+    }
+    const notifications = db.getNotifications(userId);
+    sendJson(res, 200, { ok: true, notifications });
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/notifications/respond') {
+    try {
+      const body = await readJsonBody(req);
+      const { notificationId, action, userId } = body; // action: 'accepted' | 'declined'
+      const updatedNotif = db.respondToFriendRequest(notificationId, action, userId);
+
+      if (action === 'accepted' && updatedNotif) {
+        // Broadcast presence update with updated friends lists
+        broadcastOnlineUsers();
+
+        // Notify the requester
+        for (const [otherWs, otherUser] of clients) {
+          if (otherUser && otherUser.id === updatedNotif.fromUser?.id && otherWs.readyState === WebSocket.OPEN) {
+            otherWs.send(JSON.stringify({
+              type: 'notification:new',
+              notification: {
+                id: `notif_${Date.now()}`,
+                type: 'friend_accept',
+                fromUser: { id: userId, name: 'Developer friend' },
+                targetUserId: otherUser.id,
+                text: `🎉 Your developer friend request was accepted!`,
+                timestamp: new Date().toISOString(),
+              },
+            }));
+          }
+        }
+      }
+
+      sendJson(res, 200, { ok: true, notification: updatedNotif });
+    } catch (err) {
+      sendJson(res, 400, { ok: false, error: err.message });
+    }
+    return;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/notifications/mark-read') {
+    try {
+      const body = await readJsonBody(req);
+      db.markNotificationsRead(body.userId);
+      sendJson(res, 200, { ok: true });
     } catch (err) {
       sendJson(res, 400, { ok: false, error: err.message });
     }
@@ -264,7 +382,7 @@ function handleClientMessage(ws, msg) {
       Object.assign(user, savedUser);
       clients.set(ws, user);
 
-      console.log(`[Soulmate-WS] 👤 Profile registered: ${user.name} (${user.handle}) in Database`);
+      console.log(`[Soulmate-WS] Profile registered: ${user.name} (${user.handle}) in Database`);
 
       ws.send(JSON.stringify({ type: 'profile:ack', profile: user }));
       broadcastOnlineUsers();
@@ -281,7 +399,7 @@ function handleClientMessage(ws, msg) {
     // ── 2. Instant Matchmaking ──────────────────────────────────────────────
     case 'match:find': {
       const targetGender = msg.lookingFor || user.lookingFor || 'female';
-      console.log(`[Soulmate-WS] ⚡ Matchmaking request from ${user.handle} looking for ${targetGender}`);
+      console.log(`[Soulmate-WS] Matchmaking request from ${user.handle} looking for ${targetGender}`);
 
       const candidateQueue = matchmakingQueues[targetGender] || new Set();
       let matchedPeerWs = null;
@@ -389,9 +507,22 @@ function handleClientMessage(ws, msg) {
           inviter: user,
         }));
 
+        // Send persistent conversation history from database
+        const history = db.getMessages(user.id, targetUserId);
+        ws.send(JSON.stringify({
+          type: 'chat:history',
+          peerId: targetUserId,
+          messages: history,
+        }));
+        targetWs.send(JSON.stringify({
+          type: 'chat:history',
+          peerId: user.id,
+          messages: history,
+        }));
+
         broadcastOnlineUsers();
       } else {
-        // Target is in database, launch simulated room with database profile
+        // Target is in database, launch room with database profile
         const targetDbUser = db.getUserById(targetUserId);
         if (targetDbUser) {
           const roomId = `sim_room_${Date.now()}`;
@@ -401,6 +532,13 @@ function handleClientMessage(ws, msg) {
             roomId,
             peer: targetDbUser,
           }));
+
+          const history = db.getMessages(user.id, targetUserId);
+          ws.send(JSON.stringify({
+            type: 'chat:history',
+            peerId: targetUserId,
+            messages: history,
+          }));
         }
       }
       break;
@@ -409,31 +547,82 @@ function handleClientMessage(ws, msg) {
     // ── 4. Chat Message in Room ─────────────────────────────────────────────
     case 'chat:send': {
       const roomId = msg.roomId || user.roomId;
-      if (!roomId) return;
+      const targetUserId = msg.targetUserId || msg.message?.targetUserId;
+
+      const formattedMessage = {
+        id: msg.message?.id || `msg_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+        senderId: user.id,
+        senderName: user.name,
+        senderHandle: user.handle,
+        senderEmoji: user.emoji,
+        senderAvatarUrl: user.avatarUrl || msg.message?.senderAvatarUrl || null,
+        targetUserId: targetUserId,
+        text: msg.message?.text || '',
+        timestamp: new Date().toISOString(),
+        replyTo: msg.message?.replyTo || null,
+        isAudio: Boolean(msg.message?.isAudio),
+        audioUrl: msg.message?.audioUrl || null,
+        audioDuration: msg.message?.audioDuration || null,
+        isGift: Boolean(msg.message?.isGift),
+        gift: msg.message?.gift || null,
+        isImage: Boolean(msg.message?.isImage),
+        imageUrl: msg.message?.imageUrl || null,
+        isCode: Boolean(msg.message?.isCode),
+        codeLang: msg.message?.codeLang || null,
+        status: 'sent',
+      };
+
+      // Determine recipient peer
+      let peerUser = null;
+      if (roomId && rooms.has(roomId)) {
+        const roomMembers = rooms.get(roomId);
+        for (const memberWs of roomMembers) {
+          if (memberWs !== ws) {
+            peerUser = clients.get(memberWs);
+            break;
+          }
+        }
+      } else if (targetUserId) {
+        peerUser = db.getUserById(targetUserId);
+      }
+
+      const peerId = peerUser?.id || targetUserId;
+      if (peerId) {
+        db.saveMessage(user.id, peerId, formattedMessage);
+
+        // Check if recipient is NOT currently active in room, create offline chat notification
+        let peerOnlineInRoom = false;
+        if (roomId && rooms.has(roomId)) {
+          for (const memberWs of rooms.get(roomId)) {
+            if (memberWs !== ws && memberWs.readyState === WebSocket.OPEN) {
+              peerOnlineInRoom = true;
+              break;
+            }
+          }
+        }
+
+        if (!peerOnlineInRoom && peerId) {
+          db.addNotification({
+            type: 'chat_message',
+            fromUser: {
+              id: user.id,
+              name: user.name,
+              handle: user.handle,
+              emoji: user.emoji,
+              avatarUrl: user.avatarUrl,
+            },
+            targetUserId: peerId,
+            text: formattedMessage.text || (formattedMessage.isAudio ? 'Sent a voice note 🎙️' : 'Sent you a message 💬'),
+          });
+        }
+      }
 
       const messagePayload = JSON.stringify({
         type: 'chat:message',
-        message: {
-          id: msg.message?.id || `msg_${Date.now()}`,
-          senderId: user.id,
-          senderName: user.name,
-          senderHandle: user.handle,
-          senderEmoji: user.emoji,
-          senderAvatarUrl: user.avatarUrl || msg.message?.senderAvatarUrl || null,
-          text: msg.message?.text || '',
-          timestamp: new Date().toISOString(),
-          isAudio: Boolean(msg.message?.isAudio),
-          audioDuration: msg.message?.audioDuration || null,
-          isGift: Boolean(msg.message?.isGift),
-          gift: msg.message?.gift || null,
-          isImage: Boolean(msg.message?.isImage),
-          imageUrl: msg.message?.imageUrl || null,
-          isCode: Boolean(msg.message?.isCode),
-          codeLang: msg.message?.codeLang || null,
-        },
+        message: formattedMessage,
       });
 
-      const roomMembers = rooms.get(roomId);
+      const roomMembers = roomId ? rooms.get(roomId) : null;
       if (roomMembers) {
         for (const memberWs of roomMembers) {
           if (memberWs.readyState === WebSocket.OPEN) {
@@ -441,8 +630,31 @@ function handleClientMessage(ws, msg) {
           }
         }
       } else {
-        // Echo to self for simulated rooms
+        // Echo to self for simulated or direct inbox rooms
         ws.send(messagePayload);
+      }
+      break;
+    }
+
+    // ── Real Read Receipts (chat:seen) ──────────────────────────────────────
+    case 'chat:seen': {
+      const { peerId, messageIds } = msg;
+      if (!peerId) return;
+
+      const updatedIds = db.markMessagesSeen(user.id, peerId, user.id, messageIds || []);
+
+      const seenPayload = JSON.stringify({
+        type: 'chat:seen',
+        readerId: user.id,
+        peerId: peerId,
+        messageIds: updatedIds.length ? updatedIds : (messageIds || []),
+      });
+
+      // Send to peer's active websocket so their UI marks message as seen
+      for (const [otherWs, otherUser] of clients) {
+        if (otherUser && otherUser.id === peerId && otherWs.readyState === WebSocket.OPEN) {
+          otherWs.send(seenPayload);
+        }
       }
       break;
     }
@@ -467,10 +679,43 @@ function handleClientMessage(ws, msg) {
       break;
     }
 
-    // ── 6. Social Action (Wave, Like, Coffee) ──────────────────────────────
+    // ── 6. Social Action (Wave, Like, Coffee, Friend Request) ──────────────────
     case 'social:interact': {
       const { action, targetUserId } = msg;
       const targetUser = db.interact(action, user, targetUserId);
+
+      // Create notification
+      let notifText = '';
+      if (action === 'wave') notifText = `${user.name} sent you a warm coffee wave ☕`;
+      else if (action === 'like') notifText = `${user.name} liked your developer card 💖`;
+      else if (action === 'add_friend' || action === 'friend_request') {
+        notifText = `${user.name} sent you a developer friend request 👥`;
+      }
+
+      if (targetUserId && notifText) {
+        const notif = db.addNotification({
+          type: action === 'add_friend' ? 'friend_request' : action,
+          fromUser: {
+            id: user.id,
+            name: user.name,
+            handle: user.handle,
+            emoji: user.emoji,
+            avatarUrl: user.avatarUrl || null,
+          },
+          targetUserId,
+          text: notifText,
+        });
+
+        // Send to target live websocket
+        for (const [otherWs, otherUser] of clients) {
+          if (otherUser && otherUser.id === targetUserId && otherWs.readyState === WebSocket.OPEN) {
+            otherWs.send(JSON.stringify({
+              type: 'notification:new',
+              notification: notif,
+            }));
+          }
+        }
+      }
 
       broadcastToAll({
         type: 'social:action',
