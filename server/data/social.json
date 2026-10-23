@@ -1,0 +1,49 @@
+{
+  "posts": [
+    {
+      "id": "post_1792690105059",
+      "authorId": "dev_1792672057950",
+      "authorName": "Lidex",
+      "authorHandle": "@lidex",
+      "authorEmoji": "👨‍💻",
+      "content": "I wanna be a backend as a lidex engineering",
+      "timestamp": "2026-10-22T17:28:25.059Z",
+      "likes": 1,
+      "comments": 0
+    },
+    {
+      "id": "post_1",
+      "authorId": "user_meron",
+      "authorName": "Meron Tadesse",
+      "authorHandle": "@meron_dev",
+      "authorEmoji": "👩‍💻",
+      "content": "Nothing hits better than a fresh cup of Ethiopian Bunna while fixing a complex state management bug",
+      "timestamp": "2026-10-21T18:52:52.392Z",
+      "likes": 8,
+      "comments": 3
+    },
+    {
+      "id": "post_2",
+      "authorId": "user_yonas",
+      "authorName": "Yonas Bekele",
+      "authorHandle": "@yonas_rust",
+      "authorEmoji": "👨‍💻",
+      "content": "Just convinced another engineer to switch to Tabs. The world is healing!",
+      "timestamp": "2026-10-21T15:52:52.392Z",
+      "likes": 12,
+      "comments": 5
+    },
+    {
+      "id": "post_3",
+      "authorId": "user_selam",
+      "authorName": "Selamawit Alemayehu",
+      "authorHandle": "@selam_ai",
+      "authorEmoji": "👩‍💻",
+      "content": "Looking for a coding partner to build an open-source Ethiopian language AI dataset. Say hi! 🇪🇹",
+      "timestamp": "2026-10-21T11:52:52.392Z",
+      "likes": 15,
+      "comments": 7
+    }
+  ],
+  "waves": []
+}

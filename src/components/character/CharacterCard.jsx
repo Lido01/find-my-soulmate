@@ -36,7 +36,7 @@ export default function CharacterCard({ character, charState, onSelect, t, lang 
   return (
     <div
       onClick={() => onSelect?.(character.id)}
-      className="group relative w-full text-left rounded-3xl border-2 bg-slate-900/90 p-5 overflow-hidden transition-all duration-300 hover:scale-[1.02] cursor-pointer shadow-xl flex flex-col justify-between"
+      className="group relative w-full text-left  border-2 bg-slate-900/90 p-5 overflow-hidden transition-all duration-300 hover:scale-[1.02] cursor-pointer shadow-xl flex flex-col justify-between"
       style={moodGlow}
     >
       {/* Gradient background overlay */}
@@ -49,7 +49,7 @@ export default function CharacterCard({ character, charState, onSelect, t, lang 
         <div className="flex items-start gap-3.5">
           {/* Avatar */}
           <div
-            className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${character.avatarBg || 'from-slate-800 to-slate-950'} flex items-center justify-center shrink-0 text-xl font-mono font-black text-white border-2 shadow-lg`}
+            className={`w-14 h-14  bg-gradient-to-br ${character.avatarBg || 'from-slate-800 to-slate-950'} flex items-center justify-center shrink-0 text-xl font-mono font-black text-white border-2 shadow-lg`}
             style={{
               borderColor: borderColor,
               boxShadow: `0 0 14px ${borderColor}50`,
@@ -65,7 +65,7 @@ export default function CharacterCard({ character, charState, onSelect, t, lang 
                 {character.name}
               </h3>
               {character.nationality && <span className="text-sm">{character.nationality}</span>}
-              <span className="font-mono text-[10px] text-fuchsia-300 border border-fuchsia-800/80 bg-fuchsia-950/60 rounded px-1.5 py-0.5">
+              <span className="font-mono text-[10px] text-fuchsia-300 border border-fuchsia-800/80 bg-fuchsia-950/60  px-1.5 py-0.5">
                 {character.gender === 'female' ? 'Girlfriend 👩‍💻' : 'Boyfriend 👨‍💻'}
               </span>
             </div>
@@ -79,7 +79,7 @@ export default function CharacterCard({ character, charState, onSelect, t, lang 
 
         {/* Mood description pill */}
         <div
-          className={`flex items-center justify-between rounded-xl px-3 py-1.5 border border-slate-700/50 ${moodMeta.bgClass || 'bg-slate-800/50'}`}
+          className={`flex items-center justify-between  px-3 py-1.5 border border-slate-700/50 ${moodMeta.bgClass || 'bg-slate-800/50'}`}
         >
           <div className="flex items-center gap-1.5">
             <span className="text-sm">{moodMeta.emoji || "🤔"}</span>
@@ -105,7 +105,7 @@ export default function CharacterCard({ character, charState, onSelect, t, lang 
             {personalities.map((tag, i) => (
               <span
                 key={i}
-                className="font-mono text-[10px] bg-slate-950 border border-slate-800 text-slate-400 rounded-md px-2 py-0.5"
+                className="font-mono text-[10px] bg-slate-950 border border-slate-800 text-slate-400  px-2 py-0.5"
               >
                 {tag}
               </span>
@@ -115,7 +115,7 @@ export default function CharacterCard({ character, charState, onSelect, t, lang 
 
         {/* Fun fact preview */}
         {randomFact && (
-          <p className="font-mono text-[11px] text-slate-400 italic bg-slate-950/60 border border-slate-800/60 rounded-xl p-2.5 leading-relaxed">
+          <p className="font-mono text-[11px] text-slate-400 italic bg-slate-950/60 border border-slate-800/60  p-2.5 leading-relaxed">
             💡 {randomFact}
           </p>
         )}
@@ -123,7 +123,7 @@ export default function CharacterCard({ character, charState, onSelect, t, lang 
 
       {/* Action button */}
       <div
-        className="relative z-10 w-full text-center py-2.5 rounded-2xl font-mono text-xs font-bold transition-all duration-200 border mt-4 flex items-center justify-center gap-2 group-hover:bg-slate-800/90"
+        className="relative z-10 w-full text-center py-2.5  font-mono text-xs font-bold transition-all duration-200 border mt-4 flex items-center justify-center gap-2 group-hover:bg-slate-800/90"
         style={{ borderColor: borderColor, color: borderColor }}
       >
         <span>{t?.openChannel ?? "OPEN CHANNEL"}</span>

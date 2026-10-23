@@ -1,9 +1,12 @@
-// Commit: feat(settings): add ApiKeyModal for Gemini API key configuration
+// ─────────────────────────────────────────────────────────────────────────────
+// ApiKeyModal.jsx — Resilient Gemini API key setup with detailed diagnostics
+// ─────────────────────────────────────────────────────────────────────────────
 
 import { useState } from "react";
 import { IconKey, IconX, IconCheck } from "../ui/Icons.jsx";
+import { cleanApiKey, testGeminiApiKey } from "../../utils/gemini.js";
+import { soundEngine } from "../../utils/audio.js";
 
-// Simple eye SVG icons inline (no external deps)
 function IconEye({ className = "w-4 h-4" }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -31,149 +34,209 @@ export default function ApiKeyModal({ isOpen, onClose, onSave, currentKey = "", 
   const [inputKey, setInputKey] = useState("");
   const [showKey, setShowKey] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState(null); // null | 'success' | 'error'
-  const [errorMsg, setErrorMsg] = useState("");
+  const [status, setStatus] = useState(null); // null | 'success' | 'warning' | 'error'
+  const [feedback, setFeedback] = useState("");
+  const [allowForceSave, setAllowForceSave] = useState(false);
 
   if (!isOpen) return null;
 
   const hasKey = Boolean(currentKey);
 
-  async function handleSave() {
-    const key = inputKey.trim();
-    if (!key) return;
+  // Primary: Test and Save
+  async function handleTestAndSave() {
+    const raw = inputKey.trim();
+    if (!raw) return;
+
+    const cleaned = cleanApiKey(raw);
+    if (!cleaned) return;
+
     setLoading(true);
     setStatus(null);
+    setFeedback("");
+    setAllowForceSave(false);
+
     try {
-      const result = await onSave?.(key);
-      if (result === false) {
-        setStatus("error");
-        setErrorMsg(t?.apiKeyError ?? "Invalid key or connection failed.");
-      } else {
+      const testResult = await testGeminiApiKey(cleaned);
+
+      if (testResult.success) {
+        soundEngine.playRomanticChime();
+        onSave?.(cleaned);
         setStatus("success");
+        setFeedback(`✓ Connected successfully to Google Gemini (${testResult.workingModel}${testResult.modelsCount ? ` · ${testResult.modelsCount} models auto-enabled` : ''})!`);
         setTimeout(() => {
           onClose?.();
           setStatus(null);
           setInputKey("");
-        }, 1200);
+        }, 1400);
+      } else {
+        setStatus("warning");
+        setFeedback(testResult.error || "Connection test failed. Google returned an error.");
+        setAllowForceSave(true);
       }
-    } catch {
-      setStatus("error");
-      setErrorMsg(t?.apiKeyError ?? "Connection failed. Check your key.");
+    } catch (err) {
+      setStatus("warning");
+      setFeedback(err.message || "Network error testing connection.");
+      setAllowForceSave(true);
     } finally {
       setLoading(false);
     }
   }
 
+  // Fallback: Save directly without blocking
+  function handleForceSave() {
+    const cleaned = cleanApiKey(inputKey);
+    if (cleaned) {
+      soundEngine.playHeartbeat();
+      onSave?.(cleaned);
+      setStatus("success");
+      setFeedback("✓ Key saved! AI Mode is now active.");
+      setTimeout(() => {
+        onClose?.();
+        setStatus(null);
+        setInputKey("");
+        setAllowForceSave(false);
+      }, 1000);
+    }
+  }
+
   function handleDisconnect() {
     onSave?.("");
+    setStatus(null);
+    setFeedback("");
     onClose?.();
   }
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.70)", backdropFilter: "blur(6px)" }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in"
       onClick={(e) => e.target === e.currentTarget && onClose?.()}
     >
-      <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">
+      <div className="w-full max-w-md bg-slate-900 border border-slate-700  shadow-2xl overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
           <div className="flex items-center gap-2">
-            <IconKey className="w-4 h-4 text-emerald-400" />
+            <IconKey className="w-5 h-5 text-emerald-400" />
             <h2 className="font-mono font-bold text-sm text-white">
-              {t?.apiKeyTitle ?? "AI Mode — Gemini API Key"}
+              {t?.apiKeyTitle ?? "Connect Gemini AI Chat"}
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-500 hover:text-slate-200 p-1 rounded hover:bg-slate-800 transition-colors"
+            className="text-slate-500 hover:text-white p-1  hover:bg-slate-800 transition-colors"
           >
             <IconX className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="p-5 space-y-4">
+        <div className="p-6 space-y-4">
           {/* Explanation */}
           <p className="font-mono text-xs text-slate-400 leading-relaxed">
-            Connect your Gemini API key to enable real AI conversation with your soulmate instead of scripted dialogues.
+            Connect your Gemini API key to unlock unscripted, real-time AI roleplay with your soulmates in English or Amharic!
           </p>
 
-          {/* If key already set */}
+          {/* Current key indicator */}
           {hasKey && (
-            <div className="bg-emerald-950/50 border border-emerald-700/50 rounded-lg px-4 py-3 flex items-center justify-between">
-              <div>
-                <p className="font-mono text-xs text-emerald-300 font-bold mb-0.5">✓ API Key Connected</p>
-                <p className="font-mono text-[10px] text-emerald-600">{maskKey(currentKey)}</p>
+            <div className="flex items-center justify-between p-3  bg-emerald-950/40 border border-emerald-700/60">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2  bg-emerald-400 animate-pulse" />
+                <span className="font-mono text-xs text-emerald-300 font-bold">Active Key:</span>
+                <span className="font-mono text-xs text-slate-400">{maskKey(currentKey)}</span>
               </div>
               <button
+                type="button"
                 onClick={handleDisconnect}
-                className="font-mono text-xs text-red-400 hover:text-red-300 border border-red-800 hover:border-red-600 px-2 py-1 rounded transition-all"
+                className="font-mono text-[10px] text-red-400 hover:text-red-300 underline"
               >
-                Disconnect AI
+                Disconnect
               </button>
             </div>
           )}
 
-          {/* Key input */}
-          <div className="space-y-2">
-            <label className="font-mono text-xs text-slate-400">{t?.apiKeyLabel ?? "Gemini API Key"}</label>
+          {/* Input field */}
+          <div className="space-y-1.5">
+            <label className="font-mono text-[11px] text-slate-400 block font-bold">
+              Gemini API Key:
+            </label>
             <div className="relative">
               <input
                 type={showKey ? "text" : "password"}
                 value={inputKey}
-                onChange={(e) => setInputKey(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSave()}
-                placeholder={t?.apiKeyPlaceholder ?? "AIza..."}
-                className="w-full font-mono text-sm bg-slate-800 border border-slate-700 focus:border-emerald-600 focus:outline-none rounded-lg px-3 py-2.5 pr-10 text-slate-100 placeholder-slate-600 transition-colors"
+                onChange={(e) => {
+                  setInputKey(e.target.value);
+                  setStatus(null);
+                  setFeedback("");
+                }}
+                placeholder="Paste API key (starts with AIzaSy...)"
+                className="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500  px-3.5 py-2.5 pr-10 font-mono text-xs text-white placeholder:text-slate-600 focus:outline-none transition-colors"
               />
               <button
                 type="button"
-                onClick={() => setShowKey((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+                onClick={() => setShowKey(!showKey)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
               >
                 {showKey ? <IconEyeOff className="w-4 h-4" /> : <IconEye className="w-4 h-4" />}
               </button>
             </div>
+            <p className="font-mono text-[10px] text-slate-500 pt-0.5">
+              Get your free key at{" "}
+              <a
+                href="https://aistudio.google.com"
+                target="_blank"
+                rel="noreferrer"
+                className="text-cyan-400 hover:underline"
+              >
+                aistudio.google.com
+              </a>
+            </p>
           </div>
 
-          {/* Hint link */}
-          <p className="font-mono text-[10px] text-slate-600">
-            {t?.apiKeyHint ?? "Get your key at"}{" "}
-            <a
-              href="https://aistudio.google.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-emerald-500 hover:text-emerald-300 underline transition-colors"
+          {/* Status feedback block */}
+          {feedback && (
+            <div
+              className={`p-3  font-mono text-xs leading-relaxed border ${
+                status === "success"
+                  ? "bg-emerald-950/60 border-emerald-700 text-emerald-300"
+                  : "bg-amber-950/60 border-amber-700 text-amber-300"
+              }`}
             >
-              aistudio.google.com
-            </a>
-          </p>
-
-          {/* Status */}
-          {status === "success" && (
-            <div className="flex items-center gap-2 text-emerald-400 font-mono text-xs">
-              <IconCheck className="w-4 h-4" />
-              {t?.apiKeySuccess ?? "Connected! AI mode enabled."}
+              <p>{feedback}</p>
+              {allowForceSave && (
+                <div className="mt-2 pt-2 border-t border-amber-800/80 flex items-center justify-between">
+                  <span className="text-[10px] text-slate-400">If you know this key is correct:</span>
+                  <button
+                    type="button"
+                    onClick={handleForceSave}
+                    className="px-2.5 py-1  bg-amber-800/60 hover:bg-amber-700/80 text-white font-bold text-[10px]"
+                  >
+                    Save Key Anyway →
+                  </button>
+                </div>
+              )}
             </div>
           )}
-          {status === "error" && (
-            <p className="font-mono text-xs text-red-400">{errorMsg}</p>
-          )}
 
-          {/* Test & Connect button */}
-          <button
-            onClick={handleSave}
-            disabled={loading || !inputKey.trim()}
-            className={`
-              w-full font-mono text-sm font-bold py-2.5 rounded-lg border transition-all duration-200
-              ${loading || !inputKey.trim()
-                ? "opacity-40 cursor-not-allowed border-slate-700 text-slate-500 bg-slate-800"
-                : "border-emerald-600 text-emerald-300 bg-emerald-950/50 hover:bg-emerald-900/60 hover:text-white"
-              }
-            `}
-          >
-            {loading ? "Validating..." : (t?.apiKeyConnect ?? "Test & Connect")}
-          </button>
+          {/* Action buttons */}
+          <div className="flex items-center gap-2 pt-2">
+            <button
+              type="button"
+              disabled={loading || !inputKey.trim()}
+              onClick={handleTestAndSave}
+              className={`flex-1 py-2.5  font-mono text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                loading || !inputKey.trim()
+                  ? "bg-slate-800 text-slate-500 cursor-not-allowed"
+                  : "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-950/50 cursor-pointer"
+              }`}
+            >
+              {loading ? (
+                <span>Testing connection with Gemini...</span>
+              ) : (
+                <>
+                  <IconCheck className="w-4 h-4" />
+                  <span>Connect & Save Key</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>
