@@ -11,6 +11,7 @@ import {
   clearApiKey,
   loadUserProfile,
   saveUserProfile,
+  clearUserProfile,
   loadAudioSettings,
   saveAudioSettings,
 } from './utils/storage.js';
@@ -68,6 +69,7 @@ export default function App() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [showDevRegisterModal, setShowDevRegisterModal] = useState(() => !loadUserProfile()?.isRegistered);
+  const [registerModalAuthMode, setRegisterModalAuthMode] = useState('register');
   const [defaultRegisterTarget, setDefaultRegisterTarget] = useState(null);
   const [showMobileNav, setShowMobileNav] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
@@ -222,11 +224,13 @@ export default function App() {
   const handleLogout = useCallback(() => {
     soundEngine.playHeartbeat();
     wsService.disconnect();
-    saveUserProfile(null);
+    clearUserProfile();
     setUserProfileState(null);
     setActiveRealPeer(null);
     setChatMode('virtual');
     handleReset();
+    setRegisterModalAuthMode('login'); // Prompt immediately with Love Code login
+    setShowDevRegisterModal(true);
   }, [handleReset]);
 
   // API key management
@@ -546,6 +550,7 @@ export default function App() {
         currentProfile={userProfile}
         onSaveProfile={handleSaveProfile}
         defaultTarget={defaultRegisterTarget}
+        initialAuthMode={registerModalAuthMode}
         onStartChatNow={() => {
           setChatMode('real_ws');
           soundEngine.playRomanticChime();
