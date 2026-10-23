@@ -3,7 +3,7 @@
 // Handles friend requests (Accept/Decline), Waves, Likes, and Message Alerts
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { soundEngine } from '../../utils/audio.js';
 import { wsService } from '../../services/websocket.js';
 
@@ -21,8 +21,6 @@ export default function NotificationCenterModal({
   const [activeTab, setActiveTab] = useState('all'); // 'all' | 'requests' | 'social'
   const isAm = lang === 'am';
 
-  if (!isOpen) return null;
-
   const friendCount = userProfile?.friends?.length || 0;
   const likeCount = userProfile?.likes || 1;
 
@@ -39,6 +37,18 @@ export default function NotificationCenterModal({
   });
 
   const unreadCount = incomingNotifs.filter((n) => !n.read).length;
+
+  // Auto-mark notifications as read when opening center so unread badge clears
+  useEffect(() => {
+    if (isOpen && userProfile?.id && unreadCount > 0) {
+      wsService.markNotificationsRead(userProfile.id);
+      onUpdateNotifications?.((prev) =>
+        prev.map((n) => (n.targetUserId === userProfile.id ? { ...n, read: true } : n))
+      );
+    }
+  }, [isOpen, userProfile?.id]);
+
+  if (!isOpen) return null;
 
   async function handleAcceptFriend(notif) {
     soundEngine.playGiftFanfare();
