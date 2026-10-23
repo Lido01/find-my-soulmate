@@ -17,6 +17,7 @@ export default function PartnerProfileModal({
   onLike,
   onOpenGiftModal,
   isFriend = false,
+  isRequested = false,
   isLiked = false,
   lang = 'en',
 }) {
@@ -234,18 +235,27 @@ export default function PartnerProfileModal({
             {/* Friend Button */}
             <button
               type="button"
+              disabled={isRequested}
               onClick={() => {
                 onAddFriend?.();
               }}
               className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-bold transition-all shadow ${
                 isFriend
                   ? 'bg-emerald-950/80 border-emerald-500 text-emerald-300'
+                  : isRequested
+                  ? 'bg-amber-950/50 border-amber-600/50 text-amber-300 cursor-not-allowed opacity-80'
                   : 'bg-slate-900 border-slate-700 hover:border-slate-500 text-slate-200'
               }`}
-              title="Add or remove friend"
+              title={isFriend ? 'Friend' : isRequested ? 'Request Pending' : 'Add friend'}
             >
-              <span>👥</span>
-              <span className="truncate">{isFriend ? (isAm ? 'ጓደኛ ነው' : 'Friends') : (isAm ? 'ጓደኛ አድርግ' : 'Add Friend')}</span>
+              <span>{isFriend ? '✓' : isRequested ? '⏳' : '👥'}</span>
+              <span className="truncate">
+                {isFriend
+                  ? (isAm ? 'ጓደኛ ነው' : 'Friends')
+                  : isRequested
+                  ? (isAm ? 'ተልኳል' : 'Requested')
+                  : (isAm ? 'ጓደኛ አድርግ' : 'Add Friend')}
+              </span>
             </button>
 
             {/* Like Button */}
