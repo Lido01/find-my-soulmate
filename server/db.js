@@ -11,6 +11,14 @@ const __dirname = path.dirname(__filename);
 const DATA_DIR = path.join(__dirname, 'data');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const SOCIAL_FILE = path.join(DATA_DIR, 'social.json');
+const MESSAGES_FILE = path.join(DATA_DIR, 'messages.json');
+const NOTIFICATIONS_FILE = path.join(DATA_DIR, 'notifications.json');
+
+export function generateLoveCode() {
+  const p1 = Math.random().toString(36).substring(2, 6).toUpperCase();
+  const p2 = Math.random().toString(36).substring(2, 6).toUpperCase();
+  return `LOVE-${p1}-${p2}`;
+}
 
 const INITIAL_USERS = [
   {
@@ -181,6 +189,12 @@ export class Database {
       if (!fs.existsSync(SOCIAL_FILE)) {
         fs.writeFileSync(SOCIAL_FILE, JSON.stringify({ posts: INITIAL_POSTS, waves: [] }, null, 2), 'utf-8');
       }
+      if (!fs.existsSync(MESSAGES_FILE)) {
+        fs.writeFileSync(MESSAGES_FILE, JSON.stringify({}, null, 2), 'utf-8');
+      }
+      if (!fs.existsSync(NOTIFICATIONS_FILE)) {
+        fs.writeFileSync(NOTIFICATIONS_FILE, JSON.stringify([], null, 2), 'utf-8');
+      }
     } catch (err) {
       console.error('[DB] Error initializing database files:', err.message);
     }
@@ -207,6 +221,9 @@ export class Database {
         ? (userData.handle.trim().startsWith('@') ? userData.handle.trim() : `@${userData.handle.trim()}`)
         : `@${(userData.name || 'dev').toLowerCase().replace(/\s+/g, '_')}`;
 
+      const existingLoveCode = existingIdx >= 0 ? users[existingIdx].loveCode : null;
+      const loveCode = userData.loveCode || existingLoveCode || generateLoveCode();
+
       const updatedUser = {
         id: userData.id || `user_${Date.now()}`,
         name: userData.name || 'Anonymous Dev',
@@ -223,8 +240,9 @@ export class Database {
         emoji: userData.emoji || (userData.gender === 'female' ? '👩‍💻' : '👨‍💻'),
         likes: userData.likes || (existingIdx >= 0 ? users[existingIdx].likes : 1),
         friends: userData.friends || (existingIdx >= 0 ? users[existingIdx].friends : []),
+        loveCode: loveCode,
         status: 'online',
-        currentStatus: userData.currentStatus || 'Just registered on DevSoulmate! Say hi 👋',
+        currentStatus: userData.currentStatus || 'Just registered on DevSoulmate! Say hi',
         registeredAt: existingIdx >= 0 ? users[existingIdx].registeredAt : new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         isRegistered: true,
@@ -237,7 +255,7 @@ export class Database {
       }
 
       fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), 'utf-8');
-      console.log(`[DB] 💾 User saved to database: ${updatedUser.name} (${updatedUser.handle})`);
+      console.log(`[DB] 💾 User saved to database: ${updatedUser.name} (${updatedUser.handle}) [LoveCode: ${updatedUser.loveCode}]`);
       return updatedUser;
     } catch (err) {
       console.error('[DB] Error saving user:', err.message);
@@ -248,6 +266,183 @@ export class Database {
   getUserById(id) {
     const users = this.getUsers();
     return users.find((u) => u.id === id);
+  }
+
+  getUserByLoveCode(loveCode) {
+    if (!loveCode) return null;
+    const clean = loveCode.trim().toUpperCase();
+    const users = this.getUsers();
+    return users.find((u) => u.loveCode && u.loveCode.toUpperCase() === clean);
+  }
+
+  // ── Conversation Key Helper ───────────────────────────────────────────────
+  getConversationKey(u1, u2) {
+    if (!u1 || !u2) return null;
+    return [String(u1), String(u2)].sort().join('___');
+  }
+
+  // ── Message Persistence ───────────────────────────────────────────────────
+  getMessages(u1, u2) {
+    try {
+      this.ensureInitialized();
+      const key = this.getConversationKey(u1, u2);
+      if (!key) return [];
+      if (!fs.existsSync(MESSAGES_FILE)) return [];
+      const content = fs.readFileSync(MESSAGES_FILE, 'utf-8');
+      const allMessages = JSON.parse(content) || {};
+      return allMessages[key] || [];
+    } catch (err) {
+      console.error('[DB] Error reading messages:', err.message);
+      return [];
+    }
+  }
+
+  saveMessage(u1, u2, message) {
+    try {
+      this.ensureInitialized();
+      const key = this.getConversationKey(u1, u2);
+      if (!key) return message;
+      const content = fs.existsSync(MESSAGES_FILE) ? fs.readFileSync(MESSAGES_FILE, 'utf-8') : '{}';
+      const allMessages = JSON.parse(content) || {};
+      if (!allMessages[key]) allMessages[key] = [];
+
+      // Avoid duplicates
+      const exists = allMessages[key].some((m) => m.id === message.id);
+      if (!exists) {
+        allMessages[key].push(message);
+        // Keep max 250 messages per conversation
+        if (allMessages[key].length > 250) {
+          allMessages[key] = allMessages[key].slice(-250);
+        }
+        fs.writeFileSync(MESSAGES_FILE, JSON.stringify(allMessages, null, 2), 'utf-8');
+      }
+      return message;
+    } catch (err) {
+      console.error('[DB] Error saving message:', err.message);
+      return message;
+    }
+  }
+
+  markMessagesSeen(u1, u2, readerId, messageIds = []) {
+    try {
+      this.ensureInitialized();
+      const key = this.getConversationKey(u1, u2);
+      if (!key || !fs.existsSync(MESSAGES_FILE)) return [];
+      const content = fs.readFileSync(MESSAGES_FILE, 'utf-8');
+      const allMessages = JSON.parse(content) || {};
+      if (!allMessages[key]) return [];
+
+      let modified = false;
+      const updatedIds = [];
+
+      allMessages[key] = allMessages[key].map((m) => {
+        // If message was sent to readerId and is in messageIds (or mark all unread from partner)
+        if (m.senderId !== readerId) {
+          if (!messageIds.length || messageIds.includes(m.id)) {
+            if (m.status !== 'seen') {
+              modified = true;
+              updatedIds.push(m.id);
+              return { ...m, status: 'seen' };
+            }
+          }
+        }
+        return m;
+      });
+
+      if (modified) {
+        fs.writeFileSync(MESSAGES_FILE, JSON.stringify(allMessages, null, 2), 'utf-8');
+      }
+      return updatedIds;
+    } catch (err) {
+      console.error('[DB] Error marking messages seen:', err.message);
+      return [];
+    }
+  }
+
+  // ── Notification Persistence ──────────────────────────────────────────────
+  getNotifications(userId) {
+    try {
+      this.ensureInitialized();
+      if (!fs.existsSync(NOTIFICATIONS_FILE)) return [];
+      const content = fs.readFileSync(NOTIFICATIONS_FILE, 'utf-8');
+      const list = JSON.parse(content) || [];
+      return list.filter((n) => n.targetUserId === userId);
+    } catch (err) {
+      console.error('[DB] Error reading notifications:', err.message);
+      return [];
+    }
+  }
+
+  addNotification(notif) {
+    try {
+      this.ensureInitialized();
+      const content = fs.existsSync(NOTIFICATIONS_FILE) ? fs.readFileSync(NOTIFICATIONS_FILE, 'utf-8') : '[]';
+      const list = JSON.parse(content) || [];
+      const item = {
+        id: notif.id || `notif_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+        type: notif.type || 'info', // 'friend_request' | 'friend_accept' | 'wave' | 'like' | 'chat_message'
+        targetUserId: notif.targetUserId,
+        fromUser: notif.fromUser,
+        text: notif.text,
+        timestamp: new Date().toISOString(),
+        read: false,
+        status: notif.type === 'friend_request' ? 'pending' : 'read',
+      };
+      list.unshift(item);
+      // Keep max 150 notifications
+      const trimmed = list.slice(0, 150);
+      fs.writeFileSync(NOTIFICATIONS_FILE, JSON.stringify(trimmed, null, 2), 'utf-8');
+      return item;
+    } catch (err) {
+      console.error('[DB] Error adding notification:', err.message);
+      return null;
+    }
+  }
+
+  respondToFriendRequest(notificationId, action, userId) {
+    try {
+      this.ensureInitialized();
+      if (!fs.existsSync(NOTIFICATIONS_FILE)) return null;
+      const content = fs.readFileSync(NOTIFICATIONS_FILE, 'utf-8');
+      const list = JSON.parse(content) || [];
+      const targetNotif = list.find((n) => n.id === notificationId);
+      if (!targetNotif) return null;
+
+      targetNotif.status = action; // 'accepted' | 'declined'
+      targetNotif.read = true;
+
+      if (action === 'accepted') {
+        // Mutual friend addition in users database
+        this.interact('add_friend', { id: targetNotif.fromUser.id }, targetNotif.targetUserId);
+      }
+
+      fs.writeFileSync(NOTIFICATIONS_FILE, JSON.stringify(list, null, 2), 'utf-8');
+      return targetNotif;
+    } catch (err) {
+      console.error('[DB] Error responding to friend request:', err.message);
+      return null;
+    }
+  }
+
+  markNotificationsRead(userId) {
+    try {
+      this.ensureInitialized();
+      if (!fs.existsSync(NOTIFICATIONS_FILE)) return;
+      const content = fs.readFileSync(NOTIFICATIONS_FILE, 'utf-8');
+      const list = JSON.parse(content) || [];
+      let updated = false;
+      for (const n of list) {
+        if (n.targetUserId === userId && !n.read) {
+          n.read = true;
+          updated = true;
+        }
+      }
+      if (updated) {
+        fs.writeFileSync(NOTIFICATIONS_FILE, JSON.stringify(list, null, 2), 'utf-8');
+      }
+    } catch (err) {
+      console.error('[DB] Error marking notifications read:', err.message);
+    }
   }
 
   // Social interactions: like, wave, friend

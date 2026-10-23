@@ -247,6 +247,18 @@ class WebSocketManager {
         this.emit('social:new_post', msg.post);
         break;
 
+      case 'chat:history':
+        this.emit('chat:history', msg);
+        break;
+
+      case 'chat:seen':
+        this.emit('chat:seen', msg);
+        break;
+
+      case 'notification:new':
+        this.emit('notification:new', msg.notification);
+        break;
+
       case 'room:peer_left':
         this.emit('room:peer_left', msg);
         this.currentRoomId = null;
@@ -313,9 +325,12 @@ class WebSocketManager {
       senderHandle: this.currentUser?.handle || '@me',
       senderEmoji: this.currentUser?.emoji || '🧑‍💻',
       senderAvatarUrl: this.currentUser?.avatarUrl || null,
+      targetUserId: options.targetUserId || this.currentPeer?.id || null,
       text: text.trim(),
       timestamp: new Date().toISOString(),
+      replyTo: options.replyTo || null,
       isAudio: Boolean(options.isAudio),
+      audioUrl: options.audioUrl || null,
       audioDuration: options.audioDuration || null,
       isGift: Boolean(options.isGift),
       gift: options.gift || null,
@@ -323,12 +338,14 @@ class WebSocketManager {
       imageUrl: options.imageUrl || null,
       isCode: Boolean(options.isCode),
       codeLang: options.codeLang || null,
+      status: 'sent',
     };
 
     if (this.ws && this.ws.readyState === WebSocket.OPEN && !this.isSimulated) {
       this.ws.send(JSON.stringify({
         type: 'chat:send',
         roomId: this.currentRoomId,
+        targetUserId: msgPayload.targetUserId,
         message: msgPayload,
       }));
     } else {
@@ -337,6 +354,77 @@ class WebSocketManager {
 
       // Trigger simulated reply from peer after human delay
       this.triggerSimulatedReply(text, options);
+    }
+  }
+
+  sendSeen(peerId, messageIds = []) {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN && !this.isSimulated) {
+      this.ws.send(JSON.stringify({
+        type: 'chat:seen',
+        peerId,
+        messageIds,
+      }));
+    }
+  }
+
+  async fetchMessages(user1, user2) {
+    try {
+      const res = await fetch(`${getApiBase()}/api/chat/messages?user1=${encodeURIComponent(user1)}&user2=${encodeURIComponent(user2)}`);
+      if (res.ok) {
+        const data = await res.json();
+        return data.messages || [];
+      }
+    } catch {}
+    return [];
+  }
+
+  async fetchNotifications(userId) {
+    try {
+      const res = await fetch(`${getApiBase()}/api/notifications?userId=${encodeURIComponent(userId)}`);
+      if (res.ok) {
+        const data = await res.json();
+        return data.notifications || [];
+      }
+    } catch {}
+    return [];
+  }
+
+  async respondToFriendRequest(notificationId, action, userId) {
+    try {
+      const res = await fetch(`${getApiBase()}/api/notifications/respond`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notificationId, action, userId }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return data.notification;
+      }
+    } catch {}
+    return null;
+  }
+
+  async markNotificationsRead(userId) {
+    try {
+      await fetch(`${getApiBase()}/api/notifications/mark-read`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      });
+    } catch {}
+  }
+
+  async loginWithLoveCode(loveCode) {
+    try {
+      const res = await fetch(`${getApiBase()}/api/auth/login-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ loveCode }),
+      });
+      const data = await res.json();
+      return data;
+    } catch (err) {
+      return { ok: false, error: err.message || 'Connection error' };
     }
   }
 

@@ -25,11 +25,14 @@ export default function HeaderBar({
   charState,
   userProfile,
   onReset,
+  onLogout,
   onBack,
   onApiKeyClick,
   onOpenProfile,
   onOpenRegister,
   onOpenAbout,
+  onOpenNotifications,
+  unreadNotifCount = 0,
   onOpenMobileMenu,
   apiKeySet = false,
   chatMode = 'virtual',
@@ -39,21 +42,21 @@ export default function HeaderBar({
   onToggleTheme,
   t,
 }) {
-  const [resetConfirm, setResetConfirm] = useState(false);
+  const [logoutConfirm, setLogoutConfirm] = useState(false);
   const clock = useClock();
 
   const isChat = phase === "chat";
   const mood = charState?.mood;
   const moodMeta = MOOD_META[mood] ?? {};
 
-  function handleResetClick() {
-    if (resetConfirm) {
+  function handleLogoutClick() {
+    if (logoutConfirm) {
       soundEngine.playHeartbeat();
-      onReset?.();
-      setResetConfirm(false);
+      onLogout?.();
+      setLogoutConfirm(false);
     } else {
-      setResetConfirm(true);
-      setTimeout(() => setResetConfirm(false), 3000);
+      setLogoutConfirm(true);
+      setTimeout(() => setLogoutConfirm(false), 3500);
     }
   }
 
@@ -146,6 +149,24 @@ export default function HeaderBar({
 
       {/* Right cluster */}
       <div className="flex items-center gap-2">
+        {/* Notification Bell (All devices) */}
+        <button
+          type="button"
+          onClick={() => {
+            soundEngine.playHeartbeat();
+            onOpenNotifications?.();
+          }}
+          className="relative flex items-center justify-center p-1.5 rounded-lg border border-slate-700 bg-slate-900 text-slate-300 hover:text-white hover:border-cyan-500 transition-all shadow-sm"
+          title="Notifications & Friend Requests"
+        >
+          <span className="text-sm">🔔</span>
+          {unreadNotifCount > 0 && (
+            <span className="absolute -top-1 -right-1 px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black animate-pulse shadow">
+              {unreadNotifCount}
+            </span>
+          )}
+        </button>
+
         {/* Theme Toggle (Light / Dark) */}
         <button
           type="button"
@@ -159,6 +180,7 @@ export default function HeaderBar({
           <span>{theme === 'light' ? '🌙' : '☀️'}</span>
           <span className="hidden md:inline">{theme === 'light' ? 'Dark' : 'Light'}</span>
         </button>
+
         {/* Mobile Hamburger Menu Button (Visible on screens < md) */}
         <button
           type="button"
@@ -232,19 +254,19 @@ export default function HeaderBar({
         {/* Clock */}
         <span className="hidden lg:inline font-mono text-xs text-slate-500 px-1">{clock}</span>
 
-        {/* Reset button (Desktop) */}
+        {/* Logout Button (Desktop) */}
         <button
-          onClick={handleResetClick}
-          className={`hidden md:flex items-center gap-1 font-mono text-xs px-2.5 py-1  border transition-all duration-200
-            ${resetConfirm
-              ? "bg-red-950/80 border-red-600 text-red-300 animate-pulse font-bold"
-              : "bg-slate-900 border-slate-800 text-slate-500 hover:border-slate-600 hover:text-slate-300"
+          onClick={handleLogoutClick}
+          className={`hidden md:flex items-center gap-1.5 font-mono text-xs px-2.5 py-1 rounded-lg border transition-all duration-200
+            ${logoutConfirm
+              ? "bg-red-950 border-red-500 text-red-200 animate-pulse font-bold shadow-md"
+              : "bg-slate-900 border-slate-800 text-slate-400 hover:border-red-800 hover:text-red-300"
             }
           `}
-          title="Hard reset simulation data in localStorage"
+          title="Logout from platform"
         >
-          <IconRefresh className="w-3 h-3" />
-          <span>{resetConfirm ? (t?.wipeCacheConfirm ?? "CONFIRM?") : (t?.wipeCacheBtn ?? "Reset")}</span>
+          <span>🚪</span>
+          <span>{logoutConfirm ? "Confirm Logout?" : "Logout"}</span>
         </button>
       </div>
     </header>

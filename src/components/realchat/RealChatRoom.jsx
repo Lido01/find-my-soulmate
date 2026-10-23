@@ -53,6 +53,7 @@ export default function RealChatRoom({
   const [clearConfirm, setClearConfirm] = useState(false);
   const [isFriend, setIsFriend] = useState(() => (userProfile?.friends || []).includes(peer?.id));
   const [isLiked, setIsLiked] = useState(false);
+  const [replyingTo, setReplyingTo] = useState(null);
 
   // Asset & Code snippet composer state
   const [showAssetMenu, setShowAssetMenu] = useState(false);
@@ -65,7 +66,9 @@ export default function RealChatRoom({
   const fileInputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const recordTimerRef = useRef(null);
-  const recognizerRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const mediaStreamRef = useRef(null);
 
   // Live status: check if peer is currently connected and active
   const isPeerOnline = Boolean(
@@ -82,31 +85,66 @@ export default function RealChatRoom({
     }
   }, [messages, peerTyping]);
 
-  // Load persistent history whenever active peer changes
+  // Load persistent history whenever active peer changes (from localStorage & backend database)
   useEffect(() => {
-    if (peer?.id) {
-      const saved = loadChatHistory(peer.id);
-      if (saved && saved.length > 0) {
-        setMessages(saved);
-      } else {
-        setMessages([
-          {
-            id: `sys_${Date.now()}`,
-            sender: 'system',
-            text: isAm
-              ? `⚡ የቀጥታ WebSocket ግንኙነት ተመስርቷል። ከ @${peer.handle} ጋር ውይይት ጀምረዋል!`
-              : `⚡ Secure WebSocket connection established with ${peer.name} (${peer.handle})! Say hi!`,
-            timestamp: new Date().toISOString(),
-          },
-        ]);
-      }
+    if (!peer?.id) return;
+
+    // 1. Initial load from local cache
+    const saved = loadChatHistory(peer.id);
+    if (saved && saved.length > 0) {
+      setMessages(saved);
+    } else {
+      setMessages([
+        {
+          id: `sys_${Date.now()}`,
+          sender: 'system',
+          text: isAm
+            ? `⚡ የቀጥታ ግንኙነት ተመስርቷል። ከ @${peer.handle} ጋር ውይይት ጀምረዋል!`
+            : `⚡ Secure connection established with ${peer.name} (${peer.handle})! Say hi!`,
+          timestamp: new Date().toISOString(),
+        },
+      ]);
     }
-  }, [peer?.id, isAm]);
+
+    // 2. Fetch server database history to sync across devices/refreshes
+    if (userProfile?.id) {
+      wsService.fetchMessages(userProfile.id, peer.id).then((serverMsgs) => {
+        if (serverMsgs && serverMsgs.length > 0) {
+          setMessages((prev) => {
+            const map = new Map();
+            for (const m of prev) map.set(m.id, m);
+            for (const sm of serverMsgs) {
+              const isMe = sm.senderId === userProfile.id;
+              map.set(sm.id, {
+                ...sm,
+                sender: isMe ? 'player' : 'partner',
+              });
+            }
+            const merged = Array.from(map.values());
+            saveChatHistory(peer.id, merged);
+            return merged;
+          });
+        }
+      });
+    }
+  }, [peer?.id, userProfile?.id, isAm]);
 
   // Persist messages whenever updated
   useEffect(() => {
     if (peer?.id && messages.length > 0) {
       saveChatHistory(peer.id, messages);
+    }
+  }, [peer?.id, messages]);
+
+  // Send seen notification to partner for unread messages
+  useEffect(() => {
+    if (peer?.id && messages.length > 0) {
+      const unreadPartnerMsgs = messages
+        .filter((m) => m.sender === 'partner' && m.status !== 'seen')
+        .map((m) => m.id);
+      if (unreadPartnerMsgs.length > 0) {
+        wsService.sendSeen(peer.id, unreadPartnerMsgs);
+      }
     }
   }, [peer?.id, messages]);
 
@@ -130,78 +168,86 @@ export default function RealChatRoom({
   }
 
   useEffect(() => {
+    // 1. Incoming Message
     const unbindMsg = wsService.on('chat:message', (msg) => {
       soundEngine.playMessageBeep();
       const isMe = msg.senderId === (userProfile?.id || 'me');
 
       setMessages((prev) => {
-        // If partner just replied, mark all earlier player messages as seen
-        const updatedPrev = !isMe
-          ? prev.map((m) => (m.sender === 'player' ? { ...m, status: 'seen' } : m))
-          : prev;
+        // Prevent duplicate
+        if (prev.some((m) => m.id === msg.id)) return prev;
 
-        return [
-          ...updatedPrev,
-          {
-            id: msg.id,
-            sender: isMe ? 'player' : 'partner',
-            text: msg.text,
-            timestamp: msg.timestamp,
-            isAudio: msg.isAudio,
-            audioDuration: msg.audioDuration,
-            isGift: msg.isGift,
-            gift: msg.gift,
-            isImage: msg.isImage,
-            imageUrl: msg.imageUrl,
-            isCode: msg.isCode,
-            codeLang: msg.codeLang,
-            senderAvatarUrl: msg.senderAvatarUrl,
-            status: isMe ? 'sent' : undefined,
-          },
-        ];
-      });
+        const newMsg = {
+          id: msg.id,
+          sender: isMe ? 'player' : 'partner',
+          senderName: msg.senderName,
+          text: msg.text,
+          timestamp: msg.timestamp,
+          replyTo: msg.replyTo,
+          isAudio: msg.isAudio,
+          audioUrl: msg.audioUrl,
+          audioDuration: msg.audioDuration,
+          isGift: msg.isGift,
+          gift: msg.gift,
+          isImage: msg.isImage,
+          imageUrl: msg.imageUrl,
+          isCode: msg.isCode,
+          codeLang: msg.codeLang,
+          senderAvatarUrl: msg.senderAvatarUrl,
+          status: isMe ? (isPeerOnline ? 'delivered' : 'sent') : undefined,
+        };
 
-      // Realistic social media read receipt transitions: sent -> delivered -> seen
-      if (isMe) {
-        setTimeout(() => {
-          setMessages((prev) =>
-            prev.map((m) => (m.id === msg.id && m.status === 'sent' ? { ...m, status: 'delivered' } : m))
-          );
-        }, 500);
-
-        if (isPeerOnline) {
-          setTimeout(() => {
-            setMessages((prev) =>
-              prev.map((m) => (m.id === msg.id ? { ...m, status: 'seen' } : m))
-            );
-          }, 1400);
-        } else {
-          // If peer is currently offline, acknowledge delivery and simulate friendly inbox reply
-          setTimeout(() => {
-            setMessages((prev) => [
-              ...prev.map((m) => (m.id === msg.id ? { ...m, status: 'delivered' } : m)),
-              {
-                id: `offline_ack_${Date.now()}`,
-                sender: 'partner',
-                text: isAm
-                  ? `ሰላም @${userProfile?.handle || 'dev'}! መልእክትዎ ደርሶኛል ✨ አሁን ኮድ ላይ ስለሆንኩ ቆይቼ እመልስልሃለሁ/ሻለሁ!`
-                  : `Hey @${userProfile?.handle || 'dev'}! I received your message in my inbox ✨ Deep in a coding session right now, will reply soon!`,
-                timestamp: new Date().toISOString(),
-                senderAvatarUrl: peer?.avatarUrl || null,
-                senderEmoji: peer?.emoji || '👩‍💻',
-              },
-            ]);
-            soundEngine.playRomanticChime();
-          }, 2400);
+        // If from partner, send immediate seen receipt back to partner
+        if (!isMe && peer?.id) {
+          wsService.sendSeen(peer.id, [msg.id]);
         }
+
+        return [...prev, newMsg];
+      });
+    });
+
+    // 2. Real Read Receipt (chat:seen from peer)
+    const unbindSeen = wsService.on('chat:seen', (data) => {
+      if (data.readerId === peer?.id || data.peerId === userProfile?.id) {
+        setMessages((prev) =>
+          prev.map((m) => {
+            if (m.sender === 'player') {
+              if (!data.messageIds?.length || data.messageIds.includes(m.id)) {
+                return { ...m, status: 'seen' };
+              }
+            }
+            return m;
+          })
+        );
       }
     });
 
+    // 3. Conversation History Sync from WebSocket
+    const unbindHistory = wsService.on('chat:history', (data) => {
+      if (data.peerId === peer?.id && Array.isArray(data.messages)) {
+        setMessages((prev) => {
+          const map = new Map();
+          for (const m of prev) map.set(m.id, m);
+          for (const sm of data.messages) {
+            const isMe = sm.senderId === userProfile?.id;
+            map.set(sm.id, {
+              ...sm,
+              sender: isMe ? 'player' : 'partner',
+            });
+          }
+          const merged = Array.from(map.values());
+          saveChatHistory(peer.id, merged);
+          return merged;
+        });
+      }
+    });
+
+    // 4. Typing indicator
     const unbindTyping = wsService.on('chat:typing', (data) => {
       setPeerTyping(Boolean(data.isTyping));
     });
 
-    // When peer leaves or disconnects: PRESERVE full chat history
+    // 5. When peer leaves or disconnects: PRESERVE full chat history
     const unbindLeave = wsService.on('room:peer_left', () => {
       setMessages((prev) => [
         ...prev,
@@ -218,6 +264,8 @@ export default function RealChatRoom({
 
     return () => {
       unbindMsg();
+      unbindSeen();
+      unbindHistory();
       unbindTyping();
       unbindLeave();
     };
@@ -247,8 +295,20 @@ export default function RealChatRoom({
 
     soundEngine.playHeartbeat();
     wsService.sendTyping(false);
-    wsService.sendMessage(text);
+
+    const replyPayload = replyingTo ? {
+      id: replyingTo.id,
+      senderName: replyingTo.sender === 'player' ? (userProfile?.name || 'Me') : peer.name,
+      text: replyingTo.text || (replyingTo.isImage ? 'Photo' : 'Attachment'),
+    } : null;
+
+    wsService.sendMessage(text, {
+      replyTo: replyPayload,
+      targetUserId: peer.id,
+    });
+
     setInputText("");
+    setReplyingTo(null);
     setShowQuickDropdown(false);
     setShowAssetMenu(false);
   }
@@ -263,11 +323,21 @@ export default function RealChatRoom({
       const dataUrl = event.target?.result;
       if (dataUrl) {
         soundEngine.playRomanticChime();
+        const replyPayload = replyingTo ? {
+          id: replyingTo.id,
+          senderName: replyingTo.sender === 'player' ? (userProfile?.name || 'Me') : peer.name,
+          text: replyingTo.text,
+        } : null;
+
         wsService.sendMessage(inputText.trim() || 'Shared a photo 📷', {
           isImage: true,
           imageUrl: dataUrl,
+          targetUserId: peer.id,
+          replyTo: replyPayload,
         });
+
         setInputText("");
+        setReplyingTo(null);
         setShowAssetMenu(false);
       }
     };
@@ -281,16 +351,26 @@ export default function RealChatRoom({
     if (!codeSnippet.trim()) return;
 
     soundEngine.playRomanticChime();
+    const replyPayload = replyingTo ? {
+      id: replyingTo.id,
+      senderName: replyingTo.sender === 'player' ? (userProfile?.name || 'Me') : peer.name,
+      text: replyingTo.text,
+    } : null;
+
     wsService.sendMessage(codeSnippet.trim(), {
       isCode: true,
       codeLang: codeLanguage,
+      targetUserId: peer.id,
+      replyTo: replyPayload,
     });
+
     setCodeSnippet("");
+    setReplyingTo(null);
     setShowCodeComposer(false);
     setShowAssetMenu(false);
   }
 
-  // Voice recording handlers
+  // Voice recording handlers (True Browser MediaRecorder API)
   function toggleVoiceRecording() {
     if (isRecordingVoice) {
       stopVoiceAndSend();
@@ -299,49 +379,93 @@ export default function RealChatRoom({
     }
   }
 
-  function startVoiceRecording() {
+  async function startVoiceRecording() {
     soundEngine.playMicTone();
     setIsRecordingVoice(true);
     setRecordSeconds(0);
-    setVoiceText("");
+    audioChunksRef.current = [];
 
     recordTimerRef.current = setInterval(() => {
       setRecordSeconds((s) => s + 1);
     }, 1000);
 
-    const speechLang = lang === 'am' ? 'am-ET' : 'en-US';
-    const rec = createSpeechRecognizer({
-      lang: speechLang,
-      onResult: (t) => setVoiceText(t),
-      onError: () => {
-        if (!voiceText) {
-          setVoiceText(peer?.gender === 'female' ? "Hey beautiful! Sending you a voice note 💖" : "Hey handsome! Sending you a voice note 💖");
-        }
-      },
-    });
+    try {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaStreamRef.current = stream;
 
-    if (rec) {
-      try {
-        rec.start();
-        recognizerRef.current = rec;
-      } catch {}
-    } else {
-      setVoiceText(peer?.gender === 'female' ? "Hey beautiful, thinking of you! ☕💖" : "Hey handsome, thinking of you! ☕💖");
+        const mimeType = MediaRecorder.isTypeSupported('audio/webm')
+          ? 'audio/webm'
+          : MediaRecorder.isTypeSupported('audio/ogg')
+          ? 'audio/ogg'
+          : '';
+
+        const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+        mediaRecorderRef.current = recorder;
+
+        recorder.ondataavailable = (event) => {
+          if (event.data && event.data.size > 0) {
+            audioChunksRef.current.push(event.data);
+          }
+        };
+
+        recorder.start(100);
+      }
+    } catch (err) {
+      console.warn('[RealAudio] Microphone access fallback:', err.message);
     }
   }
 
   function stopVoiceAndSend() {
     if (recordTimerRef.current) clearInterval(recordTimerRef.current);
-    if (recognizerRef.current) {
-      try { recognizerRef.current.stop(); } catch {}
-    }
+    const duration = Math.max(1, recordSeconds);
     setIsRecordingVoice(false);
-
-    const finalVoice = voiceText.trim() || (isAm ? "የኔ ፍቅር፣ የድምፅ መልእክት ልኬልሃለሁ/ሻለሁ 🎙️💖" : "Hey, sending you a warm voice note! 🎙️💖");
-    soundEngine.playRomanticChime();
-    wsService.sendMessage(finalVoice, { isAudio: true, audioDuration: Math.max(2, recordSeconds) });
-    setVoiceText("");
     setRecordSeconds(0);
+
+    const replyPayload = replyingTo ? {
+      id: replyingTo.id,
+      senderName: replyingTo.sender === 'player' ? (userProfile?.name || 'Me') : peer.name,
+      text: replyingTo.text,
+    } : null;
+
+    const recorder = mediaRecorderRef.current;
+    if (recorder && recorder.state !== 'inactive') {
+      recorder.onstop = () => {
+        const blob = new Blob(audioChunksRef.current, { type: recorder.mimeType || 'audio/webm' });
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const audioDataUrl = reader.result;
+          soundEngine.playRomanticChime();
+          wsService.sendMessage(inputText.trim() || (isAm ? 'የድምፅ መልእክት 🎙️' : 'Voice note 🎙️'), {
+            isAudio: true,
+            audioUrl: audioDataUrl,
+            audioDuration: duration,
+            targetUserId: peer.id,
+            replyTo: replyPayload,
+          });
+          setInputText("");
+          setReplyingTo(null);
+        };
+        reader.readAsDataURL(blob);
+
+        if (mediaStreamRef.current) {
+          mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+          mediaStreamRef.current = null;
+        }
+      };
+      recorder.stop();
+    } else {
+      // Fallback
+      soundEngine.playRomanticChime();
+      wsService.sendMessage(inputText.trim() || (isAm ? 'የድምፅ መልእክት 🎙️' : 'Voice note 🎙️'), {
+        isAudio: true,
+        audioDuration: duration,
+        targetUserId: peer.id,
+        replyTo: replyPayload,
+      });
+      setInputText("");
+      setReplyingTo(null);
+    }
   }
 
   function handleSendRomanticQuote(quote) {
@@ -356,8 +480,8 @@ export default function RealChatRoom({
     soundEngine.playRomanticChime();
     wsService.sendMessage(
       isAm
-        ? `☕ ይሄው ትኩስ የኢትዮጵያ ቡና ላኩልሽ/ህ! ለኮዲንግ ጉልበት ይሁንሽ/ህ ✨`
-        : `☕ Sent you a warm cup of Ethiopian Bunna to power through your code! ✨`
+        ? `ይሄው ትኩስ የኢትዮጵያ ቡና ላኩልሽ/ህ! ለኮዲንግ ጉልበት ይሁን`
+        : `Sent you a warm cup of Ethiopian Bunna to power through your code!`
     );
   }
 
@@ -392,20 +516,20 @@ export default function RealChatRoom({
     {
       label: sharedTech.length > 0 ? `Shared ${sharedTech[0]}` : 'Tech Stack',
       text: sharedTech.length > 0
-        ? (isAm ? `ሰላም ${peer.name}፣ እኛ ሁለታችንም በ ${sharedTech.join(' እና ')} እንሰራለን! በአሁኑ ሰዓት ምን አይነት ፕሮጀክት እየሰራሽ/ህ ነው? 🚀` : `Hey ${peer.name}! I noticed we both love ${sharedTech.join(' & ')} 🚀 What are you building right now?`)
-        : (isAm ? `ሰላም ${peer.name}፣ ወደ ኮዲንግ አለም እንዴት ገባሽ/ህ? ማወቅ ደስ ይለኛል 💻` : `Hey ${peer.name}! What got you into software engineering? Would love to hear your story 💻`),
+        ? (isAm ? `ሰላም ${peer.name}፣ እኛ ሁለታችንም በ ${sharedTech.join(' እና ')} እንሰራለን! በአሁኑ ሰዓት ምን አይነት ፕሮጀክት እየሰራሽ/ህ ነው?` : `Hey ${peer.name}! I noticed we both love ${sharedTech.join(' & ')} What are you building right now?`)
+        : (isAm ? `ሰላም ${peer.name}፣ ወደ ኮዲንግ አለም እንዴት ገባሽ/ህ? ማወቅ ደስ ይለኛል` : `Hey ${peer.name}! What got you into software engineering? Would love to hear your story`),
     },
     {
       label: sameIndent ? 'Indentation Match' : 'Dev Vibe',
       text: sameIndent
-        ? (isAm ? `እኛ ሁለታችንም ${peer.indentation} እንመርጣለን! ከኮድ በኋላ ቡና እየጠጣን ብናወራ ደስ ይለኛል ☕✨` : `Great minds think alike! We both use ${peer.indentation} 💻 How about a quick coffee break? ☕`)
-        : (isAm ? `ከረጅም ሰዓት ኮዲንግ እና ዲበጊንግ በኋላ እንዴት እራስሽን/ህን ታድሳለሽ/ህ? ☕` : `How do you like to recharge after a long day of debugging code? ☕✨`),
+        ? (isAm ? `እኛ ሁለታችንም ${peer.indentation} እንመርጣለን! ከኮድ በኋላ ቡና እየጠጣን ብናወራ ደስ ይለኛል` : `Great minds think alike! We both use ${peer.indentation} How about a quick coffee break?`)
+        : (isAm ? `ከረጅም ሰዓት ኮዲንግ እና ዲበጊንግ በኋላ እንዴት እራስሽን/ህን ታድሳለሽ/ህ? ` : `How do you like to recharge after a long day of debugging code? `),
     },
     {
       label: 'Soulmate Connection',
       text: isAm
-        ? `የተመዘገበው ካርድሽ/ህ በጣም ሳበኝ! ዛሬ ቀንሽ/ህ እንዴት እያለፈ ነው? 🌸`
-        : `Your developer profile caught my attention! How has your day been treating you? 🌸`,
+        ? `የተመዘገበው ካርድሽ/ህ በጣም ሳበኝ! ዛሬ ቀንሽ/ህ እንዴት እያለፈ ነው?`
+        : `Your developer profile caught my attention! How has your day been treating you?`,
     },
   ];
 
@@ -415,11 +539,11 @@ export default function RealChatRoom({
       <header className="flex-shrink-0 flex items-center justify-between px-3 py-2 border-b border-slate-800 bg-slate-950/95 backdrop-blur-md gap-2">
         <div
           onClick={() => setShowPartnerProfileModal(true)}
-          className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer group hover:bg-slate-900/60 p-1.5 -ml-1 rounded-2xl transition-all border border-transparent hover:border-slate-800"
+          className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer group hover:bg-slate-900/60 p-1.5 -ml-1  transition-all border border-transparent hover:border-slate-800"
           title="Click to view full partner profile card & dev info"
         >
           <div className="relative shrink-0">
-            <span className="text-xl p-1.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center overflow-hidden w-9 h-9 group-hover:border-cyan-500 transition-all">
+            <span className="text-xl p-1.5  bg-slate-900 border border-slate-800 flex items-center justify-center overflow-hidden w-9 h-9 group-hover:border-cyan-500 transition-all">
               {peer?.avatarUrl ? (
                 <img src={peer.avatarUrl} alt={peer.name} className="w-full h-full object-cover" />
               ) : (
@@ -428,7 +552,7 @@ export default function RealChatRoom({
             </span>
             {/* Live Indicator: Only shown when peer is active online; otherwise blank */}
             {isPeerOnline && (
-              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-slate-950" />
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5  bg-emerald-400 ring-2 ring-slate-950" />
             )}
           </div>
 
@@ -437,27 +561,7 @@ export default function RealChatRoom({
               <span className="font-bold text-xs sm:text-sm text-white truncate group-hover:text-cyan-300 transition-colors">
                 {peer.name}
               </span>
-              <span className="text-[11px] text-slate-500 hidden sm:inline">{peer.handle}</span>
-              
-              {/* Live Icon / Badge (Shows if peer is in live, otherwise displays offline inbox info) */}
-              {isPeerOnline ? (
-                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-950/90 border border-emerald-500/50 text-emerald-400 text-[10px] font-bold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>Live</span>
-                </span>
-              ) : (
-                <span className="text-[10px] text-slate-500 font-mono px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800">
-                  Offline · Inbox Active
-                </span>
-              )}
-
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-800/80 text-cyan-300 font-bold hidden sm:inline">
-                {matchScore}% Match
-              </span>
-
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-400 group-hover:text-cyan-300 group-hover:border-cyan-600 transition-all flex items-center gap-0.5">
-                <span>Profile 👤</span>
-              </span>
+              <span className="text-[11px] text-slate-500 hidden sm:inline">{peer.handle}</span>              
             </div>
             <p className="text-[10px] text-slate-400 truncate max-w-xs sm:max-w-md">
               {peer.quote ? `"${peer.quote}"` : (peer.bio || `${peer.indentation || 'Tabs'} · ${sharedTech.join(', ') || 'Developer'}`)}
@@ -467,22 +571,11 @@ export default function RealChatRoom({
 
         {/* Action Controls Right: Clean & Uncluttered */}
         <div className="flex items-center gap-1.5 shrink-0">
-          {/* View Profile Button (Accessible button) */}
-          <button
-            type="button"
-            onClick={() => setShowPartnerProfileModal(true)}
-            className="flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-cyan-300 hover:border-cyan-700 transition-colors shadow-sm"
-            title="Inspect partner profile and tech details"
-          >
-            <span>👤</span>
-            <span className="hidden sm:inline">Profile</span>
-          </button>
-
           {/* Clear Chat History Button */}
           <button
             type="button"
             onClick={handleClearHistory}
-            className={`px-2 py-1.5 rounded-lg border text-[11px] font-bold transition-all ${
+            className={`px-2 py-1.5  border text-[11px] font-bold transition-all ${
               clearConfirm
                 ? 'bg-red-950 border-red-600 text-red-300 animate-pulse'
                 : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-red-400 hover:border-red-800'
@@ -496,7 +589,7 @@ export default function RealChatRoom({
           <button
             type="button"
             onClick={() => setShowMobileStatsDrawer(true)}
-            className="md:hidden flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-cyan-300 transition-colors"
+            className="md:hidden flex items-center gap-1 text-[11px] px-2.5 py-1.5  bg-slate-900 border border-slate-800 text-slate-300 hover:text-cyan-300 transition-colors"
             title="View partner stats & dev details"
           >
             <span>Stats</span>
@@ -509,7 +602,7 @@ export default function RealChatRoom({
               wsService.leaveRoom();
               onLeave?.();
             }}
-            className="px-2.5 py-1.5 rounded-lg border border-red-900/60 bg-red-950/30 text-red-300 hover:bg-red-950 hover:border-red-700 text-[11px] font-bold transition-all"
+            className="px-2.5 py-1.5  border border-red-900/60 bg-red-950/30 text-red-300 hover:bg-red-950 hover:border-red-700 text-[11px] font-bold transition-all"
             title="Leave Chat Room"
           >
             <span>{isAm ? "ውጣ" : "Leave"}</span>
@@ -527,7 +620,7 @@ export default function RealChatRoom({
           if (m.sender === 'system') {
             return (
               <div key={m.id} className="text-center my-2 animate-fade-in">
-                <span className="font-mono text-[11px] text-slate-500 bg-slate-900/80 border border-slate-800/80 px-2.5 py-0.5 rounded-full inline-block max-w-full truncate">
+                <span className="font-mono text-[11px] text-slate-500 bg-slate-900/80 border border-slate-800/80 px-2.5 py-0.5  inline-block max-w-full truncate">
                   {m.text}
                 </span>
               </div>
@@ -540,6 +633,10 @@ export default function RealChatRoom({
               message={m}
               character={peer}
               userProfile={userProfile}
+              onReply={(msg) => {
+                setReplyingTo(msg);
+                if (textareaRef.current) textareaRef.current.focus();
+              }}
               lang={lang}
             />
           );
@@ -548,7 +645,7 @@ export default function RealChatRoom({
         {/* Real-Time Peer Typing Indicator */}
         {peerTyping && (
           <div className="flex items-center gap-2 px-3 py-1 animate-fade-in">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+            <span className="w-1.5 h-1.5  bg-cyan-400 animate-ping" />
             <span className="font-mono text-[11px] text-cyan-400">
               {peer.name} is typing...
             </span>
@@ -561,7 +658,7 @@ export default function RealChatRoom({
         <div className="p-2.5 bg-red-950/50 border-t border-red-800/60 animate-fade-in flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="flex items-center gap-1.5 text-red-400 text-xs font-bold">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
+              <span className="w-2.5 h-2.5  bg-red-500 animate-ping" />
               <span>REC 0:0{recordSeconds}</span>
             </div>
             <p className="text-xs text-slate-200 truncate max-w-xs">
@@ -571,9 +668,9 @@ export default function RealChatRoom({
           <button
             type="button"
             onClick={stopVoiceAndSend}
-            className="px-3 py-1 rounded-lg bg-red-900 border border-red-600 text-xs font-bold text-red-200"
+            className="px-3 py-1  bg-red-900 border border-red-600 text-xs font-bold text-red-200"
           >
-            Send 🎙️
+            Send
           </button>
         </div>
       )}
@@ -583,14 +680,13 @@ export default function RealChatRoom({
         <div className="shrink-0 bg-slate-900 border-t border-slate-800 p-3 shadow-2xl animate-slide-up space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
-              <span>💻</span>
               <span>Share Code Snippet (Telegram Style)</span>
             </span>
             <div className="flex items-center gap-2">
               <select
                 value={codeLanguage}
                 onChange={(e) => setCodeLanguage(e.target.value)}
-                className="bg-slate-950 border border-slate-700 text-cyan-300 text-[11px] rounded px-2 py-0.5 focus:outline-none"
+                className="bg-slate-950 border border-slate-700 text-cyan-300 text-[11px]  px-2 py-0.5 focus:outline-none"
               >
                 <option value="TypeScript">TypeScript</option>
                 <option value="React JSX">React JSX</option>
@@ -608,14 +704,14 @@ export default function RealChatRoom({
             value={codeSnippet}
             onChange={(e) => setCodeSnippet(e.target.value)}
             placeholder="// Paste or write code snippet here..."
-            className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 font-mono text-xs text-cyan-200 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500"
+            className="w-full bg-slate-950 border border-slate-800  p-2 font-mono text-xs text-cyan-200 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500"
           />
 
           <div className="flex justify-end gap-2">
             <button
               type="button"
               onClick={() => setShowCodeComposer(false)}
-              className="px-3 py-1 rounded bg-slate-800 text-xs text-slate-400 hover:text-white"
+              className="px-3 py-1  bg-slate-800 text-xs text-slate-400 hover:text-white"
             >
               Cancel
             </button>
@@ -623,9 +719,9 @@ export default function RealChatRoom({
               type="button"
               onClick={handleSendCodeSnippet}
               disabled={!codeSnippet.trim()}
-              className="px-3 py-1 rounded bg-cyan-950 border border-cyan-600 text-xs font-bold text-cyan-300 hover:bg-cyan-900 disabled:opacity-40"
+              className="px-3 py-1  bg-cyan-950 border border-cyan-600 text-xs font-bold text-cyan-300 hover:bg-cyan-900 disabled:opacity-40"
             >
-              Send Snippet 🚀
+              Send Snippet
             </button>
           </div>
         </div>
@@ -638,9 +734,8 @@ export default function RealChatRoom({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-cyan-500 text-xs text-cyan-300 font-bold transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5  bg-slate-950 border border-slate-800 hover:border-cyan-500 text-xs text-cyan-300 font-bold transition-colors"
           >
-            <span>📷</span>
             <span>Share Photo</span>
           </button>
           <input
@@ -658,9 +753,8 @@ export default function RealChatRoom({
               setShowCodeComposer(true);
               setShowAssetMenu(false);
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-cyan-500 text-xs text-cyan-300 font-bold transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5  bg-slate-950 border border-slate-800 hover:border-cyan-500 text-xs text-cyan-300 font-bold transition-colors"
           >
-            <span>💻</span>
             <span>Send Code</span>
           </button>
 
@@ -668,9 +762,8 @@ export default function RealChatRoom({
           <button
             type="button"
             onClick={handleSendBunna}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-amber-600 text-xs text-amber-300 font-bold transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5  bg-slate-950 border border-slate-800 hover:border-amber-600 text-xs text-amber-300 font-bold transition-colors"
           >
-            <span>☕</span>
             <span>Send Bunna</span>
           </button>
 
@@ -678,7 +771,7 @@ export default function RealChatRoom({
           <button
             type="button"
             onClick={handleAddFriendAction}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-indigo-600 text-xs text-indigo-300 font-bold transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5  bg-slate-950 border border-slate-800 hover:border-indigo-600 text-xs text-indigo-300 font-bold transition-colors"
           >
             <span>👥</span>
             <span>+Friend</span>
@@ -703,7 +796,7 @@ export default function RealChatRoom({
               <button
                 type="button"
                 onClick={() => setQuickTab('icebreakers')}
-                className={`px-2 py-0.5 rounded font-bold transition-colors ${
+                className={`px-2 py-0.5  font-bold transition-colors ${
                   quickTab === 'icebreakers' ? 'bg-cyan-950 border border-cyan-700 text-cyan-300' : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -712,7 +805,7 @@ export default function RealChatRoom({
               <button
                 type="button"
                 onClick={() => setQuickTab('quotes')}
-                className={`px-2 py-0.5 rounded font-bold transition-colors ${
+                className={`px-2 py-0.5  font-bold transition-colors ${
                   quickTab === 'quotes' ? 'bg-cyan-950 border border-cyan-700 text-cyan-300' : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -736,7 +829,7 @@ export default function RealChatRoom({
                   key={i}
                   type="button"
                   onClick={() => handleSendIcebreaker(ib.text)}
-                  className="text-left p-2 rounded-lg bg-slate-950 border border-slate-800 hover:border-cyan-600 text-[11px] text-slate-300 hover:text-white transition-all space-y-0.5"
+                  className="text-left p-2  bg-slate-950 border border-slate-800 hover:border-cyan-600 text-[11px] text-slate-300 hover:text-white transition-all space-y-0.5"
                 >
                   <span className="font-bold text-cyan-400 block truncate">{ib.label}</span>
                   <span className="text-[10px] text-slate-400 block truncate">{ib.text}</span>
@@ -753,7 +846,7 @@ export default function RealChatRoom({
                   key={i}
                   type="button"
                   onClick={() => handleSendRomanticQuote(q)}
-                  className="text-left p-2 rounded-lg bg-slate-950 border border-slate-800 hover:border-cyan-600 text-[11px] text-slate-300 hover:text-white transition-all flex items-center justify-between gap-2"
+                  className="text-left p-2  bg-slate-950 border border-slate-800 hover:border-cyan-600 text-[11px] text-slate-300 hover:text-white transition-all flex items-center justify-between gap-2"
                 >
                   <span className="truncate flex-1">{q.text}</span>
                   <span className="text-[10px] text-cyan-400 shrink-0 font-bold">{q.devTag}</span>
@@ -767,7 +860,6 @@ export default function RealChatRoom({
       {/* Slim Space-Optimized Toolbar (Above Input Bar) */}
       <div className="shrink-0 px-3 py-1 bg-slate-950 border-t border-slate-800/80 flex items-center justify-between gap-2 text-[11px]">
         <div className="flex items-center gap-2 text-slate-400 truncate">
-          <span className="text-cyan-400 font-bold">✨</span>
           <span className="truncate">
             {sharedTech.length > 0 ? `Shared ${sharedTech.join(', ')}` : `${peer.indentation || 'Tabs'}`}
           </span>
@@ -777,14 +869,13 @@ export default function RealChatRoom({
         <button
           type="button"
           onClick={() => setShowQuickDropdown((prev) => !prev)}
-          className={`flex items-center gap-1.5 px-2 py-0.5 rounded border transition-colors ${
+          className={`flex items-center gap-1.5 px-2 py-0.5  border transition-colors ${
             showQuickDropdown
               ? 'bg-cyan-950 border-cyan-700 text-cyan-300'
               : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
           }`}
           title="Toggle quick prompts & romantic quotes"
         >
-          <IconZap className="w-3 h-3 text-cyan-400" />
           <span>Quick Prompts</span>
           {showQuickDropdown ? (
             <IconChevronUp className="w-3 h-3" />
@@ -793,6 +884,26 @@ export default function RealChatRoom({
           )}
         </button>
       </div>
+
+      {/* Quoted Message Reply Preview Bar */}
+      {replyingTo && (
+        <div className="shrink-0 flex items-center justify-between px-3.5 py-1.5 bg-slate-900 border-t border-cyan-800 text-xs animate-slide-up">
+          <div className="flex items-center gap-2 min-w-0 pr-2">
+            <span className="text-cyan-400 font-bold shrink-0">↩️ Replying to {replyingTo.sender === 'player' ? 'yourself' : peer.name}:</span>
+            <span className="text-slate-300 truncate text-[11px]">
+              {replyingTo.text || (replyingTo.isImage ? 'Photo 📷' : replyingTo.isAudio ? 'Voice Note 🎙️' : 'Attachment')}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setReplyingTo(null)}
+            className="text-slate-400 hover:text-white text-xs px-1.5 py-0.5 rounded bg-slate-800"
+            title="Cancel reply"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Real Text Chat Area Console (Telegram / Social Media Look) */}
       <footer className="border-t border-slate-800 bg-slate-950 p-2 sm:p-2.5 shrink-0">
@@ -807,7 +918,7 @@ export default function RealChatRoom({
           <button
             type="button"
             onClick={() => setShowAssetMenu((prev) => !prev)}
-            className={`font-mono text-base px-2.5 py-2 rounded-lg border transition-all shrink-0 ${
+            className={`font-mono text-base px-2.5 py-2  border transition-all shrink-0 ${
               showAssetMenu
                 ? 'bg-cyan-950 border-cyan-500 text-cyan-300'
                 : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
@@ -826,7 +937,7 @@ export default function RealChatRoom({
               onChange={handleTextareaChange}
               onKeyDown={handleKeyDown}
               placeholder={isAm ? "መልእክት ይተይቡ (Enter ለመላክ)..." : `Message ${peer.name} (Enter to send)...`}
-              className="w-full bg-slate-900 border border-slate-800 focus:border-cyan-500 rounded-xl px-3 py-2 font-mono text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none transition-colors resize-none max-h-24 leading-relaxed"
+              className="w-full bg-slate-900 border border-slate-800 focus:border-cyan-500  px-3 py-2 font-mono text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none transition-colors resize-none max-h-24 leading-relaxed"
             />
           </div>
 
@@ -834,7 +945,7 @@ export default function RealChatRoom({
           <button
             type="button"
             onClick={toggleVoiceRecording}
-            className={`font-mono text-xs font-bold px-2.5 py-2 rounded-xl border flex items-center gap-1 transition-all shrink-0 ${
+            className={`font-mono text-xs font-bold px-2.5 py-2  border flex items-center gap-1 transition-all shrink-0 ${
               isRecordingVoice
                 ? 'bg-red-950 border-red-500 text-red-300 animate-pulse'
                 : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
@@ -848,7 +959,7 @@ export default function RealChatRoom({
           <button
             type="submit"
             disabled={!inputText.trim()}
-            className={`font-mono text-xs font-bold px-3 py-2 rounded-xl border flex items-center gap-1.5 transition-all shrink-0 ${
+            className={`font-mono text-xs font-bold px-3 py-2  border flex items-center gap-1.5 transition-all shrink-0 ${
               !inputText.trim()
                 ? 'bg-slate-900 border-slate-800 text-slate-600 cursor-not-allowed'
                 : 'bg-cyan-950 border-cyan-700 text-cyan-300 hover:bg-cyan-900 cursor-pointer shadow-sm'

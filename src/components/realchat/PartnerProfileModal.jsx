@@ -201,14 +201,14 @@ export default function PartnerProfileModal({
             <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
               <span className="text-[10px] text-slate-400 block mb-1">Work Rhythm</span>
               <span className="font-bold text-slate-200">
-                Night Owl Builder 🦉
+                Night Owl Builder
               </span>
             </div>
 
             <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
               <span className="text-[10px] text-slate-400 block mb-1">Soulmate Goal</span>
               <span className="font-bold text-fuchsia-300 truncate block">
-                Pair Programming 💖
+                Pair Programming
               </span>
             </div>
           </div>
@@ -228,7 +228,6 @@ export default function PartnerProfileModal({
               className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-amber-950/70 border border-amber-600/70 hover:bg-amber-900 text-amber-200 text-xs font-bold transition-all shadow"
               title="Send hot Ethiopian Bunna"
             >
-              <span>☕</span>
               <span className="truncate">{isAm ? 'ቡና ላክ' : 'Send Bunna'}</span>
             </button>
 
