@@ -151,7 +151,7 @@ export default function RealChatLobby({
     allKnownUsersMap.set(u.id, {
       ...existing,
       ...u,
-      isLiveNow: Boolean(u.isLiveSocket || u.status === 'online'),
+      isLiveNow: Boolean(u.isLiveSocket),
     });
   }
 
