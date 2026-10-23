@@ -63,14 +63,28 @@ export function loadLanguage() {
 export function loadUserProfile() {
   try {
     const raw = localStorage.getItem(PROFILE_STORAGE);
-    return raw ? { ...DEFAULT_USER_PROFILE, ...JSON.parse(raw) } : DEFAULT_USER_PROFILE;
+    if (!raw || raw === 'null' || raw === 'undefined') return null;
+    const parsed = JSON.parse(raw);
+    return parsed && parsed.isRegistered ? parsed : null;
   } catch {
-    return DEFAULT_USER_PROFILE;
+    return null;
   }
 }
 
 export function saveUserProfile(profile) {
-  try { localStorage.setItem(PROFILE_STORAGE, JSON.stringify(profile)); } catch { /* */ }
+  try {
+    if (!profile) {
+      localStorage.removeItem(PROFILE_STORAGE);
+    } else {
+      localStorage.setItem(PROFILE_STORAGE, JSON.stringify(profile));
+    }
+  } catch { /* fail silently */ }
+}
+
+export function clearUserProfile() {
+  try {
+    localStorage.removeItem(PROFILE_STORAGE);
+  } catch { /* fail silently */ }
 }
 
 export function loadAudioSettings() {
