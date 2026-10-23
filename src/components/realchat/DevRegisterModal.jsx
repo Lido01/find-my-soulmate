@@ -24,13 +24,14 @@ export default function DevRegisterModal({
   onSaveProfile,
   onStartChatNow,
   defaultTarget = null,
+  initialAuthMode = 'register',
   lang = 'en',
 }) {
   const isAm = lang === 'am';
 
   // If defaultTarget is passed or profile already registered, jump to step 2; else step 1
   const [step, setStep] = useState(() => (currentProfile?.isRegistered || defaultTarget ? 2 : 1));
-  const [authMode, setAuthMode] = useState('register'); // 'register' | 'login'
+  const [authMode, setAuthMode] = useState(initialAuthMode); // 'register' | 'login'
   const [inputLoveCode, setInputLoveCode] = useState('');
   const [copiedCode, setCopiedCode] = useState(false);
   const [loveCode] = useState(() => currentProfile?.loveCode || `LOVE-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`);
@@ -177,8 +178,8 @@ export default function DevRegisterModal({
     };
 
     // Save to backend database & WebSocket
-    await wsService.registerInBackend(profileData);
-    onSaveProfile?.(profileData);
+    const savedBackendUser = await wsService.registerInBackend(profileData);
+    onSaveProfile?.(savedBackendUser || profileData);
 
     soundEngine.playGiftFanfare();
     setSuccessMsg(
