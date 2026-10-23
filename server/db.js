@@ -35,7 +35,8 @@ const INITIAL_USERS = [
     emoji: '👩‍💻',
     likes: 14,
     friends: ['user_yonas'],
-    status: 'online',
+    status: 'offline',
+    loveCode: 'LOVE-MERO-9021',
     currentStatus: 'Refactoring auth components with Tailwind... need more bunna ☕',
     registeredAt: new Date(Date.now() - 86400000 * 3).toISOString(),
     isRegistered: true,
@@ -54,7 +55,8 @@ const INITIAL_USERS = [
     emoji: '👩‍💻',
     likes: 21,
     friends: [],
-    status: 'online',
+    status: 'offline',
+    loveCode: 'LOVE-HANN-4432',
     currentStatus: 'Just deployed v1.2 to production without a single error! 🚀',
     registeredAt: new Date(Date.now() - 86400000 * 2).toISOString(),
     isRegistered: true,
@@ -73,7 +75,8 @@ const INITIAL_USERS = [
     emoji: '👩‍💻',
     likes: 38,
     friends: ['user_alex'],
-    status: 'online',
+    status: 'offline',
+    loveCode: 'LOVE-SELA-7719',
     currentStatus: 'Fine-tuning a local LLM while listening to Tilahun Gessesse 🎶',
     registeredAt: new Date(Date.now() - 86400000 * 5).toISOString(),
     isRegistered: true,
@@ -92,7 +95,8 @@ const INITIAL_USERS = [
     emoji: '👨‍💻',
     likes: 27,
     friends: ['user_meron'],
-    status: 'online',
+    status: 'offline',
+    loveCode: 'LOVE-YONA-1823',
     currentStatus: 'Async Rust is pure poetry. Who wants to debate tabs vs spaces? 💻',
     registeredAt: new Date(Date.now() - 86400000 * 4).toISOString(),
     isRegistered: true,
@@ -109,11 +113,12 @@ const INITIAL_USERS = [
     indentation: 'Spaces',
     drink: '🥤 Cold Brew',
     emoji: '👨‍💻',
-    likes: 19,
+    likes: 42,
     friends: ['user_selam'],
-    status: 'online',
-    currentStatus: 'Lubed my mechanical switches today. The typing sounds are divine ⌨️✨',
-    registeredAt: new Date(Date.now() - 86400000 * 1).toISOString(),
+    status: 'offline',
+    loveCode: 'LOVE-ALEX-3392',
+    currentStatus: 'Just built a real-time WebSocket cluster in Go. Anyone want to test? ⚡',
+    registeredAt: new Date(Date.now() - 86400000 * 6).toISOString(),
     isRegistered: true,
   },
   {
@@ -126,13 +131,14 @@ const INITIAL_USERS = [
     techStack: ['Elixir', 'Distributed Systems', 'Tailwind', 'Next.js'],
     bio: 'Aesthetic enthusiast. I believe in romantic code comments and spontaneous coffee dates.',
     indentation: 'Tabs',
-    drink: '☕ Espresso Roast',
+    drink: '☕ Ethiopian Bunna',
     emoji: '👨‍💻',
-    likes: 33,
+    likes: 31,
     friends: [],
-    status: 'online',
-    currentStatus: 'Writing software that scales and looking for someone who stays 💖',
-    registeredAt: new Date(Date.now() - 86400000 * 6).toISOString(),
+    status: 'offline',
+    loveCode: 'LOVE-KENE-6651',
+    currentStatus: 'Designing fault-tolerant systems and looking for genuine chemistry ✨',
+    registeredAt: new Date(Date.now() - 86400000 * 1).toISOString(),
     isRegistered: true,
   },
 ];
@@ -204,7 +210,22 @@ export class Database {
     try {
       this.ensureInitialized();
       const content = fs.readFileSync(USERS_FILE, 'utf-8');
-      return JSON.parse(content) || [];
+      const users = JSON.parse(content) || [];
+      let dirty = false;
+
+      for (const u of users) {
+        if (!u.loveCode || typeof u.loveCode !== 'string' || !u.loveCode.trim()) {
+          u.loveCode = generateLoveCode();
+          dirty = true;
+        }
+      }
+
+      if (dirty) {
+        fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), 'utf-8');
+        console.log(`[DB] 🔑 Assigned missing Love Codes to database users.`);
+      }
+
+      return users;
     } catch (err) {
       console.error('[DB] Error reading users:', err.message);
       return INITIAL_USERS;
@@ -222,7 +243,7 @@ export class Database {
         : `@${(userData.name || 'dev').toLowerCase().replace(/\s+/g, '_')}`;
 
       const existingLoveCode = existingIdx >= 0 ? users[existingIdx].loveCode : null;
-      const loveCode = userData.loveCode || existingLoveCode || generateLoveCode();
+      const loveCode = (userData.loveCode && userData.loveCode.trim()) || existingLoveCode || generateLoveCode();
 
       const updatedUser = {
         id: userData.id || `user_${Date.now()}`,
@@ -241,7 +262,7 @@ export class Database {
         likes: userData.likes || (existingIdx >= 0 ? users[existingIdx].likes : 1),
         friends: userData.friends || (existingIdx >= 0 ? users[existingIdx].friends : []),
         loveCode: loveCode,
-        status: 'online',
+        status: 'offline',
         currentStatus: userData.currentStatus || 'Just registered on DevSoulmate! Say hi',
         registeredAt: existingIdx >= 0 ? users[existingIdx].registeredAt : new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -268,11 +289,34 @@ export class Database {
     return users.find((u) => u.id === id);
   }
 
-  getUserByLoveCode(loveCode) {
-    if (!loveCode) return null;
-    const clean = loveCode.trim().toUpperCase();
+  getUserByLoveCode(searchCode) {
+    if (!searchCode) return null;
+    const raw = String(searchCode).trim();
+    const normalized = raw.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    const cleanWithDashes = raw.toUpperCase();
+    const cleanHandle = raw.startsWith('@') ? raw.toLowerCase() : `@${raw.toLowerCase()}`;
     const users = this.getUsers();
-    return users.find((u) => u.loveCode && u.loveCode.toUpperCase() === clean);
+
+    return users.find((u) => {
+      if (!u) return false;
+      // 1. Direct Love Code match (exact or stripped of dashes/spaces)
+      if (u.loveCode) {
+        const uCode = String(u.loveCode).toUpperCase();
+        const uNorm = uCode.replace(/[^a-zA-Z0-9]/g, '');
+        if (uCode === cleanWithDashes || (normalized.length >= 6 && uNorm === normalized)) {
+          return true;
+        }
+      }
+      // 2. Handle fallback match (@handle or handle)
+      if (u.handle && (u.handle.toLowerCase() === cleanHandle || u.handle.toLowerCase() === `@${raw.toLowerCase()}`)) {
+        return true;
+      }
+      // 3. User ID match
+      if (u.id && u.id.toLowerCase() === raw.toLowerCase()) {
+        return true;
+      }
+      return false;
+    });
   }
 
   // ── Conversation Key Helper ───────────────────────────────────────────────
