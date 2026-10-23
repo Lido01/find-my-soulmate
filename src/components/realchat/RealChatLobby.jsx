@@ -39,6 +39,7 @@ export default function RealChatLobby({
   const [myFriends, setMyFriends] = useState(() => new Set(userProfile?.friends || []));
   const [likedUserIds, setLikedUserIds] = useState(new Set());
   const [wavedUserIds, setWavedUserIds] = useState(new Set());
+  const [requestedUserIds, setRequestedUserIds] = useState(new Set());
   const [communityPosts, setCommunityPosts] = useState([]);
   const [newStatusText, setNewStatusText] = useState('');
   const [socialToast, setSocialToast] = useState(null);
@@ -68,6 +69,18 @@ export default function RealChatLobby({
       wsService.registerProfile({
         ...userProfile,
         lookingFor: searchTarget,
+      });
+    }
+
+    // Fetch initial friend requests status
+    if (userProfile?.id) {
+      wsService.fetchNotifications(userProfile.id).then((notifs) => {
+        if (Array.isArray(notifs)) {
+          const reqs = notifs
+            .filter((n) => n.fromUser?.id === userProfile.id && n.type === 'friend_request' && n.status === 'pending')
+            .map((n) => n.targetUserId);
+          setRequestedUserIds(new Set(reqs));
+        }
       });
     }
 
@@ -243,19 +256,28 @@ export default function RealChatLobby({
   }
 
   function handleToggleFriend(user) {
-    soundEngine.playGiftFanfare();
-    const nextFriends = new Set(myFriends);
-    if (nextFriends.has(user.id)) {
+    if (myFriends.has(user.id)) {
+      soundEngine.playHeartbeat();
+      const nextFriends = new Set(myFriends);
       nextFriends.delete(user.id);
+      setMyFriends(nextFriends);
+      wsService.sendSocialAction('remove_friend', user.id);
       showSocialToast(`Removed ${user.name} from friends`);
-    } else {
-      nextFriends.add(user.id);
-      wsService.sendSocialAction('add_friend', user.id);
-      showSocialToast(
-        isAm ? `👥 ${user.name} አሁን የጓደኞችዎ ዝርዝር ውስጥ ገብቷል!` : `👥 ${user.name} added to friends!`
-      );
+      return;
     }
-    setMyFriends(nextFriends);
+
+    if (requestedUserIds.has(user.id)) {
+      soundEngine.playHeartbeat();
+      showSocialToast(isAm ? 'የጓደኝነት ጥያቄ አስቀድመው ልከዋል!' : `Friend request already pending for ${user.name}!`);
+      return;
+    }
+
+    soundEngine.playGiftFanfare();
+    setRequestedUserIds((prev) => new Set([...prev, user.id]));
+    wsService.sendSocialAction('friend_request', user.id);
+    showSocialToast(
+      isAm ? `👥 ለ ${user.name} የጓደኝነት ጥያቄ ላኩ!` : `👥 Sent a friend request to ${user.name}! Awaiting approval.`
+    );
   }
 
   async function handlePostStatus(e) {
@@ -745,6 +767,7 @@ export default function RealChatLobby({
         onAddFriend={() => inspectPeer && handleToggleFriend(inspectPeer)}
         onLike={() => inspectPeer && handleLike(inspectPeer)}
         isFriend={inspectPeer ? myFriends.has(inspectPeer.id) : false}
+        isRequested={inspectPeer ? requestedUserIds.has(inspectPeer.id) : false}
         isLiked={inspectPeer ? likedUserIds.has(inspectPeer.id) : false}
         lang={lang}
       />
