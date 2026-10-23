@@ -127,7 +127,14 @@ const server = http.createServer(async (req, res) => {
     try {
       const body = await readJsonBody(req);
       const { action, fromUser, targetUserId, metadata } = body;
-      const targetUser = db.interact(action, fromUser, targetUserId);
+      let targetUser = null;
+
+      if (action === 'wave' || action === 'like') {
+        targetUser = db.interact(action, fromUser, targetUserId);
+      } else if (action === 'remove_friend') {
+        targetUser = db.interact('remove_friend', fromUser, targetUserId);
+        broadcastOnlineUsers();
+      }
 
       // Create notification for target user
       if (targetUserId) {
@@ -136,6 +143,12 @@ const server = http.createServer(async (req, res) => {
         if (action === 'wave') notifText = `${fromUser.name} sent you a warm coffee wave ☕`;
         else if (action === 'like') notifText = `${fromUser.name} liked your developer card 💖`;
         else if (action === 'add_friend' || action === 'friend_request') {
+          // Check if already friends
+          const currentFromUser = db.getUserById(fromUser.id);
+          if (currentFromUser?.friends?.includes(targetUserId)) {
+            sendJson(res, 200, { ok: true, status: 'already_friends' });
+            return;
+          }
           notifText = `${fromUser.name} sent you a developer friend request 👥`;
           notifType = 'friend_request';
         }

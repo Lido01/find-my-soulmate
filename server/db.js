@@ -410,7 +410,8 @@ export class Database {
       if (!fs.existsSync(NOTIFICATIONS_FILE)) return [];
       const content = fs.readFileSync(NOTIFICATIONS_FILE, 'utf-8');
       const list = JSON.parse(content) || [];
-      return list.filter((n) => n.targetUserId === userId);
+      // Return notifications where target is userId OR outgoing friend requests sent by this user
+      return list.filter((n) => n.targetUserId === userId || (n.fromUser?.id === userId && n.type === 'friend_request'));
     } catch (err) {
       console.error('[DB] Error reading notifications:', err.message);
       return [];
@@ -422,6 +423,20 @@ export class Database {
       this.ensureInitialized();
       const content = fs.existsSync(NOTIFICATIONS_FILE) ? fs.readFileSync(NOTIFICATIONS_FILE, 'utf-8') : '[]';
       const list = JSON.parse(content) || [];
+
+      // Prevent duplicate pending friend requests
+      if (notif.type === 'friend_request') {
+        const existing = list.find((n) =>
+          n.type === 'friend_request' &&
+          n.fromUser?.id === notif.fromUser?.id &&
+          n.targetUserId === notif.targetUserId &&
+          n.status === 'pending'
+        );
+        if (existing) {
+          return existing;
+        }
+      }
+
       const item = {
         id: notif.id || `notif_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
         type: notif.type || 'info', // 'friend_request' | 'friend_accept' | 'wave' | 'like' | 'chat_message'
@@ -457,7 +472,7 @@ export class Database {
 
       if (action === 'accepted') {
         // Mutual friend addition in users database
-        this.interact('add_friend', { id: targetNotif.fromUser.id }, targetNotif.targetUserId);
+        this.interact('confirm_friend', { id: targetNotif.fromUser.id }, targetNotif.targetUserId);
       }
 
       fs.writeFileSync(NOTIFICATIONS_FILE, JSON.stringify(list, null, 2), 'utf-8');
@@ -498,7 +513,7 @@ export class Database {
 
       if (action === 'like') {
         targetUser.likes = (targetUser.likes || 0) + 1;
-      } else if (action === 'add_friend' || action === 'friend_request') {
+      } else if (action === 'confirm_friend') {
         if (!targetUser.friends) targetUser.friends = [];
         if (!targetUser.friends.includes(fromUser.id)) {
           targetUser.friends.push(fromUser.id);
@@ -511,6 +526,14 @@ export class Database {
           if (!actor.friends.includes(targetUserId)) {
             actor.friends.push(targetUserId);
           }
+        }
+      } else if (action === 'remove_friend') {
+        if (targetUser.friends) {
+          targetUser.friends = targetUser.friends.filter((id) => id !== fromUser.id);
+        }
+        const actor = users.find((u) => u.id === fromUser.id);
+        if (actor && actor.friends) {
+          actor.friends = actor.friends.filter((id) => id !== targetUserId);
         }
       }
 
