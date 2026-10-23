@@ -136,7 +136,7 @@ export default function RealChatRoom({
     }
   }, [peer?.id, messages]);
 
-  // Send seen notification to partner for unread messages
+  // Send seen notification to partner for unread messages when opening chat
   useEffect(() => {
     if (peer?.id && messages.length > 0) {
       const unreadPartnerMsgs = messages
@@ -144,9 +144,12 @@ export default function RealChatRoom({
         .map((m) => m.id);
       if (unreadPartnerMsgs.length > 0) {
         wsService.sendSeen(peer.id, unreadPartnerMsgs);
+        setMessages((prev) =>
+          prev.map((m) => (m.sender === 'partner' && m.status !== 'seen' ? { ...m, status: 'seen' } : m))
+        );
       }
     }
-  }, [peer?.id, messages]);
+  }, [peer?.id, messages.length]);
 
   function handleClearHistory() {
     if (clearConfirm) {

@@ -213,7 +213,24 @@ const server = http.createServer(async (req, res) => {
       sendJson(res, 400, { ok: false, error: 'user1 and user2 required' });
       return;
     }
+    // user1 is opening and reading the conversation with user2
+    const updatedIds = db.markMessagesSeen(user1, user2, user1, []);
     const messages = db.getMessages(user1, user2);
+
+    if (updatedIds && updatedIds.length > 0) {
+      const seenPayload = JSON.stringify({
+        type: 'chat:seen',
+        readerId: user1,
+        peerId: user2,
+        messageIds: updatedIds,
+      });
+      for (const [otherWs, otherUser] of clients) {
+        if (otherUser && otherUser.id === user2 && otherWs.readyState === WebSocket.OPEN) {
+          otherWs.send(seenPayload);
+        }
+      }
+    }
+
     sendJson(res, 200, { ok: true, messages });
     return;
   }
