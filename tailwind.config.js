@@ -7,9 +7,10 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Manrope', 'Segoe UI', 'sans-serif'],
-        mono: ['DM Mono', 'Cascadia Mono', 'Consolas', 'monospace'],
-        heading: ['Manrope', 'Segoe UI', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', 'Manrope', 'Segoe UI', 'sans-serif'],
+        mono: ['"JetBrains Mono"', '"DM Mono"', 'Cascadia Mono', 'Consolas', 'monospace'],
+        heading: ['"Space Grotesk"', '"Plus Jakarta Sans"', 'sans-serif'],
+        brand: ['"Space Grotesk"', 'sans-serif'],
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
