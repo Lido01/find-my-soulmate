@@ -1,4 +1,7 @@
-// Commit: feat(gifts): add GiftModal with category tabs and gift grid
+// ─────────────────────────────────────────────────────────────────────────────
+// GiftModal.jsx — Developer & Romantic Gift Selection Modal
+// Styled in high-tech Red, Black & White developer theme with Space Grotesk / JetBrains Mono
+// ─────────────────────────────────────────────────────────────────────────────
 
 import { useState } from "react";
 import { GIFT_CATEGORIES, RARITY_META } from "../../data/gifts.js";
@@ -12,8 +15,6 @@ export default function GiftModal({ isOpen, onClose, onGift, character, t, lang 
   const categories = GIFT_CATEGORIES ?? [];
   const currentCategory = categories[activeCategory] ?? {};
   const gifts = currentCategory.gifts ?? [];
-  const accentColor = character?.accentColor ?? "#64748b";
-  const borderColor = character?.borderColor ?? accentColor;
 
   function handleGift(gift) {
     onGift?.(gift);
@@ -22,115 +23,106 @@ export default function GiftModal({ isOpen, onClose, onGift, character, t, lang 
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)" }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md animate-fade-in font-mono select-text"
       onClick={(e) => e.target === e.currentTarget && onClose?.()}
     >
-      <div
-        className="relative w-full max-w-2xl bg-slate-900 rounded-2xl border shadow-2xl overflow-hidden"
-        style={{
-          borderColor: borderColor,
-          boxShadow: `0 0 30px ${borderColor}40, 0 0 60px ${borderColor}15`,
-        }}
-      >
+      <div className="relative w-full max-w-2xl bg-black rounded-3xl border border-zinc-800 shadow-2xl shadow-red-950/40 overflow-hidden flex flex-col max-h-[90vh] animate-slide-up">
         {/* Modal header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
-          <div className="flex items-center gap-2">
-            <IconGift className="w-4 h-4 text-amber-400" />
-            <h2 className="font-mono font-bold text-sm text-white">
-              {t?.giftTitle ?? "Choose a Gift"}
-            </h2>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800 bg-zinc-950/90 shrink-0">
+          <div className="flex items-center gap-2.5">
+            <span className="p-1.5 rounded-xl bg-red-950/70 border border-red-600/50 text-red-400">
+              <IconGift className="w-4 h-4" />
+            </span>
+            <div>
+              <h2 className="font-heading font-bold text-sm sm:text-base text-white">
+                {t?.giftTitle ?? "Choose a Developer Gift"}
+              </h2>
+              <p className="text-[10px] text-zinc-500 font-mono">Send assets, tech fuel & tokens of affection</p>
+            </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="text-slate-500 hover:text-slate-200 transition-colors p-1 rounded hover:bg-slate-800"
+            className="text-zinc-400 hover:text-white transition-colors p-1.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-red-600"
           >
             <IconX className="w-4 h-4" />
           </button>
         </div>
 
         {/* Category tabs */}
-        <div className="flex gap-1 px-4 pt-3 overflow-x-auto scrollbar-none">
+        <div className="flex gap-1.5 px-4 pt-3.5 pb-2 overflow-x-auto shrink-0 bg-black border-b border-zinc-900 scrollbar-none">
           {categories.map((cat, i) => (
             <button
               key={i}
+              type="button"
               onClick={() => setActiveCategory(i)}
               className={`
-                shrink-0 font-mono text-xs px-3 py-1.5 rounded-lg border transition-all duration-200
+                shrink-0 font-mono text-xs px-3.5 py-1.5 rounded-xl border transition-all duration-200 font-bold flex items-center gap-1.5
                 ${activeCategory === i
-                  ? "text-white border-opacity-80"
-                  : "text-slate-500 border-slate-800 hover:text-slate-300 hover:border-slate-600 bg-slate-900"
+                  ? "bg-red-600 text-white border-red-500 shadow-[0_0_12px_rgba(239,68,68,0.4)]"
+                  : "bg-zinc-950 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700"
                 }
               `}
-              style={
-                activeCategory === i
-                  ? { borderColor: cat.color ?? accentColor, background: `${cat.color ?? accentColor}20`, color: cat.color ?? "white" }
-                  : {}
-              }
             >
-              {cat.icon && <span className="mr-1">{cat.icon}</span>}
-              {cat.label?.[lang] ?? cat.label?.en ?? cat.name ?? `Cat ${i + 1}`}
+              {cat.icon && <span>{cat.icon}</span>}
+              <span>{cat.label?.[lang] ?? cat.label?.en ?? cat.name ?? `Cat ${i + 1}`}</span>
             </button>
           ))}
         </div>
 
         {/* Gift grid */}
-        <div className="p-4 grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto"
-          style={{ scrollbarWidth: "thin", scrollbarColor: "#1e293b transparent" }}>
+        <div
+          className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 overflow-y-auto flex-1 bg-black"
+          style={{ scrollbarWidth: "thin", scrollbarColor: "#27272a transparent" }}
+        >
           {gifts.map((gift, i) => {
-            const rarity = RARITY_META?.[gift.rarity] ?? { label: gift.rarity ?? "common", color: "#64748b" };
             const giftName = gift.name?.[lang] ?? gift.name?.en ?? gift.name ?? "Gift";
             const giftDesc = gift.description?.[lang] ?? gift.description?.en ?? gift.description ?? "";
 
             return (
               <button
                 key={gift.id ?? i}
+                type="button"
                 onClick={() => handleGift(gift)}
-                className="group relative flex flex-col gap-2 bg-slate-800/60 hover:bg-slate-800 border border-slate-700 hover:border-slate-500 rounded-xl p-3 text-left transition-all duration-200 hover:scale-[1.02]"
+                className="group relative flex flex-col justify-between gap-2.5 bg-zinc-950 hover:bg-zinc-900/90 border border-zinc-800 hover:border-red-600 rounded-2xl p-3.5 text-left transition-all duration-200 hover:scale-[1.02] shadow-lg shadow-black"
               >
-                {/* Icon + name */}
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">{gift.icon ?? "🎁"}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-mono text-xs font-bold text-white truncate">{giftName}</p>
-                    {/* Rarity badge */}
-                    <span
-                      className="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider"
-                      style={{
-                        background: `${rarity.color}20`,
-                        color: rarity.color,
-                        border: `1px solid ${rarity.color}50`,
-                      }}
-                    >
-                      {rarity.label}
+                <div>
+                  {/* Icon + name */}
+                  <div className="flex items-center gap-2.5 mb-2">
+                    <span className="text-3xl p-1.5 rounded-xl bg-black border border-zinc-800 group-hover:border-red-600/70 transition-colors shrink-0">
+                      {gift.icon ?? "🎁"}
                     </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-mono text-xs font-bold text-white truncate group-hover:text-red-400 transition-colors">
+                        {giftName}
+                      </p>
+                      {/* Rarity badge */}
+                      <span className="inline-block mt-0.5 font-mono text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider bg-zinc-900 text-red-300 border border-red-900/50">
+                        {gift.rarity || 'Common'}
+                      </span>
+                    </div>
                   </div>
+
+                  {/* Description */}
+                  {giftDesc && (
+                    <p className="font-mono text-[10px] text-zinc-400 leading-relaxed line-clamp-2">
+                      {giftDesc}
+                    </p>
+                  )}
                 </div>
 
-                {/* Description */}
-                {giftDesc && (
-                  <p className="font-mono text-[10px] text-slate-400 leading-relaxed line-clamp-2">{giftDesc}</p>
-                )}
-
                 {/* Relationship boost */}
-                {gift.relationshipBoost && (
-                  <div className="flex items-center gap-1">
-                    <IconStar className="w-3 h-3 text-fuchsia-400" />
-                    <span className="font-mono text-[10px] text-fuchsia-300">+{gift.relationshipBoost}</span>
-                  </div>
-                )}
-
-                {/* Hover: send button overlay */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-xl bg-black/40">
-                  <span
-                    className="font-mono text-xs font-bold px-3 py-1.5 rounded-lg border"
-                    style={{
-                      color: currentCategory.color ?? accentColor,
-                      borderColor: currentCategory.color ?? accentColor,
-                      background: `${currentCategory.color ?? accentColor}25`,
-                    }}
-                  >
-                    Send 🎁
+                <div className="flex items-center justify-between pt-2 border-t border-zinc-900 text-[10px]">
+                  {gift.relationshipBoost ? (
+                    <div className="flex items-center gap-1 text-red-400 font-bold">
+                      <IconStar className="w-3 h-3 text-red-500" />
+                      <span>+{gift.relationshipBoost} Bond</span>
+                    </div>
+                  ) : (
+                    <span className="text-zinc-600 font-mono">Dev Token</span>
+                  )}
+                  <span className="text-zinc-500 group-hover:text-white transition-colors text-[10px] font-bold">
+                    Send →
                   </span>
                 </div>
               </button>

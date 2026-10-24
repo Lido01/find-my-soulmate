@@ -151,8 +151,8 @@
     },
     "text": "Selam sent you a developer friend request 👥",
     "timestamp": "2026-10-24T10:25:23.502Z",
-    "read": false,
-    "status": "pending"
+    "read": true,
+    "status": "declined"
   },
   {
     "id": "notif_1792828091846_daxn",
