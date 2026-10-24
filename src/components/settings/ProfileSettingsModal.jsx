@@ -197,6 +197,33 @@ export default function ProfileSettingsModal({
               // {lang === 'am' ? 'የድምፅ እና የሮማንቲክ ኦዲዮ ቅንብር' : 'Audio & Voice Synthesis'}
             </h3>
 
+            {/* Appearance / Theme Toggle */}
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
+              <div>
+                <p className="font-mono text-xs font-bold text-white flex items-center gap-1.5">
+                  <span>{theme === 'light' ? '☀️' : '🌙'}</span>
+                  <span>{lang === 'am' ? 'የገጽታ ቀለም (Theme)' : 'Theme Appearance'}</span>
+                </p>
+                <p className="font-mono text-[11px] text-zinc-500">
+                  {theme === 'light' ? 'Active: Crisp White Light Mode' : 'Active: Cyber Red & Pitch Black Dark Mode'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  soundEngine.playRomanticChime();
+                  onToggleTheme?.();
+                }}
+                className={`px-3 py-1.5 rounded-xl border font-bold text-xs transition-all flex items-center gap-1.5 ${
+                  theme === 'light'
+                    ? 'bg-red-600 text-white border-red-500 shadow-sm'
+                    : 'bg-zinc-900 border-zinc-700 text-zinc-300 hover:text-white'
+                }`}
+              >
+                <span>{theme === 'light' ? 'Light Mode ☀️' : 'Dark Mode 🌙'}</span>
+              </button>
+            </div>
+
             {/* Voice narration toggle */}
             <div className="flex items-center justify-between p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
               <div>

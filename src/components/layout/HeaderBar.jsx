@@ -179,11 +179,15 @@ export default function HeaderBar({
             soundEngine.playRomanticChime();
             onToggleTheme?.();
           }}
-          className="flex items-center gap-1 font-mono text-[11px] px-2.5 py-1 rounded-xl border border-zinc-800 bg-zinc-950 text-zinc-300 hover:text-white transition-colors shadow-sm"
-          title="Toggle Light / Dark Mode"
+          className={`flex items-center gap-1.5 font-mono text-[11px] px-2.5 py-1 rounded-xl border transition-all shadow-sm ${
+            theme === 'light'
+              ? 'bg-red-50 border-red-300 text-red-600 shadow-sm'
+              : 'bg-zinc-950 border-zinc-800 text-zinc-300 hover:text-white hover:border-red-600'
+          }`}
+          title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
         >
-          {theme === 'light' ? <IconMoon className="w-3.5 h-3.5" /> : <IconSun className="w-3.5 h-3.5" />}
-          <span className="hidden md:inline">{theme === 'light' ? 'Dark' : 'Light'}</span>
+          <span className="text-xs leading-none">{theme === 'light' ? '☀️' : '🌙'}</span>
+          <span className="hidden sm:inline font-bold">{theme === 'light' ? 'Light' : 'Dark'}</span>
         </button>
 
         {/* Mobile Hamburger Menu Button (Visible on screens < md) */}
