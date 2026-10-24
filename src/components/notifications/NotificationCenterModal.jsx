@@ -1,6 +1,6 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// NotificationCenterModal.jsx — Real Social Media Notification Center
-// Handles friend requests (Accept/Decline), Waves, Likes, and Message Alerts
+// NotificationCenterModal.jsx — Developer Social Media Notification Center
+// Red, Black & White developer theme with real friends, followers, likes, & alerts
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState, useEffect } from 'react';
@@ -22,17 +22,16 @@ export default function NotificationCenterModal({
   const isAm = lang === 'am';
 
   const friendCount = userProfile?.friends?.length || 0;
+  const followerCount = Array.isArray(userProfile?.followers) ? userProfile.followers.length : 0;
+  const followingCount = Array.isArray(userProfile?.following) ? userProfile.following.length : 0;
   const likeCount = userProfile?.likes || 1;
 
   // Distinguish incoming notifications vs outgoing pending requests
   const incomingNotifs = notifications.filter((n) => n.targetUserId === userProfile?.id);
-  const outgoingRequests = notifications.filter(
-    (n) => n.fromUser?.id === userProfile?.id && n.type === 'friend_request'
-  );
 
   const filteredNotifs = notifications.filter((n) => {
     if (activeTab === 'requests') return n.type === 'friend_request';
-    if (activeTab === 'social') return n.type === 'wave' || n.type === 'like' || n.type === 'friend_accept';
+    if (activeTab === 'social') return n.type === 'wave' || n.type === 'like' || n.type === 'follow' || n.type === 'friend_accept';
     return true;
   });
 
@@ -87,22 +86,27 @@ export default function NotificationCenterModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 font-mono select-text animate-fade-in"
+      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 font-mono select-text animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg bg-slate-950 border border-slate-800 rounded-3xl shadow-2xl flex flex-col max-h-[88vh] overflow-hidden animate-slide-up"
+        className="w-full max-w-lg bg-black border border-zinc-800 rounded-3xl shadow-2xl shadow-red-950/30 flex flex-col max-h-[88vh] overflow-hidden animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-4 border-b border-slate-800 bg-slate-900/80 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2">
-            <span className="text-lg">🔔</span>
-            <h3 className="font-bold text-white text-sm sm:text-base">
-              {isAm ? "ማሳወቂያዎች" : "Notifications"}
-            </h3>
+        <div className="p-4 border-b border-zinc-800 bg-zinc-950/90 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2.5">
+            <span className="p-1.5 rounded-xl bg-red-950/60 border border-red-600/50 text-red-400 text-sm">
+              🔔
+            </span>
+            <div>
+              <h3 className="font-bold text-white text-sm sm:text-base font-heading">
+                {isAm ? "ማሳወቂያዎች" : "Notifications"}
+              </h3>
+              <p className="text-[10px] text-zinc-500 font-mono">DevSoulmate Event Bus</p>
+            </div>
             {unreadCount > 0 && (
-              <span className="px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-black animate-pulse">
+              <span className="ml-1 px-2 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-black animate-pulse">
                 {unreadCount} new
               </span>
             )}
@@ -113,7 +117,7 @@ export default function NotificationCenterModal({
               <button
                 type="button"
                 onClick={handleMarkAllRead}
-                className="text-[11px] text-cyan-400 hover:text-cyan-300 font-bold hover:underline"
+                className="text-[11px] text-red-400 hover:text-red-300 font-bold hover:underline"
               >
                 {isAm ? "ሁሉንም አንብብ" : "Mark all read"}
               </button>
@@ -121,7 +125,7 @@ export default function NotificationCenterModal({
             <button
               type="button"
               onClick={onClose}
-              className="p-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white text-xs"
+              className="p-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white text-xs transition-colors"
             >
               ✕
             </button>
@@ -129,35 +133,41 @@ export default function NotificationCenterModal({
         </div>
 
         {/* Stats Strip */}
-        <div className="p-3 bg-slate-900/40 border-b border-slate-800 flex items-center justify-around text-xs shrink-0">
+        <div className="p-3 bg-zinc-950/70 border-b border-zinc-800 flex items-center justify-around text-xs shrink-0">
           <div className="flex items-center gap-1.5">
-            <span className="text-cyan-400">👥</span>
+            <span className="text-zinc-400">👥</span>
             <span className="font-bold text-white">{friendCount}</span>
-            <span className="text-slate-500 text-[11px]">{isAm ? "ጓደኞች" : "Friends"}</span>
+            <span className="text-zinc-500 text-[11px]">{isAm ? "ጓደኞች" : "Friends"}</span>
           </div>
-          <div className="w-px h-4 bg-slate-800" />
+          <div className="w-px h-4 bg-zinc-800" />
           <div className="flex items-center gap-1.5">
-            <span className="text-rose-400">💖</span>
+            <span className="text-red-400">🌟</span>
+            <span className="font-bold text-white">{followerCount}</span>
+            <span className="text-zinc-500 text-[11px]">Followers</span>
+          </div>
+          <div className="w-px h-4 bg-zinc-800" />
+          <div className="flex items-center gap-1.5">
+            <span className="text-zinc-400">✓</span>
+            <span className="font-bold text-white">{followingCount}</span>
+            <span className="text-zinc-500 text-[11px]">Following</span>
+          </div>
+          <div className="w-px h-4 bg-zinc-800" />
+          <div className="flex items-center gap-1.5">
+            <span className="text-red-500">❤️</span>
             <span className="font-bold text-white">{likeCount}</span>
-            <span className="text-slate-500 text-[11px]">{isAm ? "ተወዳጅነት" : "Likes"}</span>
-          </div>
-          <div className="w-px h-4 bg-slate-800" />
-          <div className="flex items-center gap-1.5">
-            <span className="text-amber-400">☕</span>
-            <span className="font-bold text-white">Active</span>
-            <span className="text-slate-500 text-[11px]">Dev Vibe</span>
+            <span className="text-zinc-500 text-[11px]">{isAm ? "ተወዳጅነት" : "Likes"}</span>
           </div>
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex items-center gap-1 p-2 bg-slate-950 border-b border-slate-800 text-xs shrink-0">
+        <div className="flex items-center gap-1 p-2 bg-black border-b border-zinc-800 text-xs shrink-0">
           <button
             type="button"
             onClick={() => setActiveTab('all')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition-colors ${
+            className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
               activeTab === 'all'
-                ? 'bg-slate-900 border border-slate-700 text-cyan-300'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-red-600 text-white shadow-sm'
+                : 'text-zinc-400 hover:text-white bg-zinc-900/50'
             }`}
           >
             {isAm ? "ሁሉም" : "All"} ({notifications.length})
@@ -165,10 +175,10 @@ export default function NotificationCenterModal({
           <button
             type="button"
             onClick={() => setActiveTab('requests')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition-colors ${
+            className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
               activeTab === 'requests'
-                ? 'bg-slate-900 border border-slate-700 text-cyan-300'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-red-600 text-white shadow-sm'
+                : 'text-zinc-400 hover:text-white bg-zinc-900/50'
             }`}
           >
             {isAm ? "የጓደኝነት ጥያቄዎች" : "Requests"}
@@ -176,10 +186,10 @@ export default function NotificationCenterModal({
           <button
             type="button"
             onClick={() => setActiveTab('social')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition-colors ${
+            className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
               activeTab === 'social'
-                ? 'bg-slate-900 border border-slate-700 text-cyan-300'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-red-600 text-white shadow-sm'
+                : 'text-zinc-400 hover:text-white bg-zinc-900/50'
             }`}
           >
             {isAm ? "ግንኙነቶች" : "Social Vibes"}
@@ -192,11 +202,11 @@ export default function NotificationCenterModal({
           style={{ scrollbarWidth: 'thin' }}
         >
           {filteredNotifs.length === 0 ? (
-            <div className="py-12 text-center text-slate-500 space-y-2">
+            <div className="py-12 text-center text-zinc-500 space-y-2">
               <span className="text-3xl block">📭</span>
-              <p className="text-xs">{isAm ? "ምንም አዲስ ማሳወቂያ የለም" : "No notifications right now."}</p>
-              <p className="text-[10px] text-slate-600">
-                {isAm ? "ገንቢዎችን ያግኙ እና ጓደኝነት ይጀምሩ!" : "Interact with developers in Registered Peers to receive updates!"}
+              <p className="text-xs text-zinc-300 font-bold">{isAm ? "ምንም አዲስ ማሳወቂያ የለም" : "No notifications right now."}</p>
+              <p className="text-[10px] text-zinc-500">
+                {isAm ? "ገንቢዎችን ያግኙ እና ጓደኝነት ይጀምሩ!" : "Connect with developers in Registered Peers to receive updates!"}
               </p>
             </div>
           ) : (
@@ -210,12 +220,12 @@ export default function NotificationCenterModal({
                   key={notif.id}
                   className={`p-3 rounded-2xl border transition-all text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
                     notif.read
-                      ? 'bg-slate-900/50 border-slate-800/80'
-                      : 'bg-slate-900 border-cyan-800/80 shadow-md'
+                      ? 'bg-zinc-950/80 border-zinc-800'
+                      : 'bg-zinc-900/90 border-red-900/70 shadow-md'
                   }`}
                 >
                   <div className="flex items-start gap-2.5 min-w-0 flex-1">
-                    <div className="w-10 h-10 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center overflow-hidden shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-black border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
                       {notif.fromUser?.avatarUrl ? (
                         <img
                           src={notif.fromUser.avatarUrl}
@@ -230,10 +240,10 @@ export default function NotificationCenterModal({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span className="font-bold text-white truncate">{notif.fromUser?.name || 'Developer'}</span>
-                        <span className="text-[10px] text-slate-500">{notif.fromUser?.handle}</span>
+                        <span className="text-[10px] text-red-400">{notif.fromUser?.handle}</span>
                       </div>
-                      <p className="text-[11px] text-slate-300 mt-0.5">{notif.text}</p>
-                      <span className="text-[9px] text-slate-500 block mt-1">
+                      <p className="text-[11px] text-zinc-300 mt-0.5">{notif.text}</p>
+                      <span className="text-[9px] text-zinc-500 block mt-1">
                         {new Date(notif.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
@@ -243,11 +253,11 @@ export default function NotificationCenterModal({
                   {isReq && (
                     <div className="flex items-center gap-1.5 self-end sm:self-center shrink-0">
                       {isAccepted ? (
-                        <span className="px-2.5 py-1 rounded-lg bg-emerald-950/80 border border-emerald-600 text-emerald-300 text-[10px] font-bold">
+                        <span className="px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-700 text-white text-[10px] font-bold">
                           ✓ {isAm ? "ጓደኛ ሆነዋል" : "Friends"}
                         </span>
                       ) : isDeclined ? (
-                        <span className="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-500 text-[10px]">
+                        <span className="px-2.5 py-1 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-500 text-[10px]">
                           Declined
                         </span>
                       ) : (
@@ -255,14 +265,14 @@ export default function NotificationCenterModal({
                           <button
                             type="button"
                             onClick={() => handleAcceptFriend(notif)}
-                            className="px-3 py-1.5 rounded-xl bg-emerald-950 hover:bg-emerald-900 border border-emerald-600 text-emerald-200 font-bold text-xs transition-all shadow"
+                            className="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition-all shadow"
                           >
                             {isAm ? "ተቀበል ✓" : "Accept"}
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDeclineFriend(notif)}
-                            className="px-2.5 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-900 border border-slate-800 text-slate-400 hover:text-white text-xs transition-all"
+                            className="px-2.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white text-xs transition-all"
                           >
                             ✕
                           </button>
@@ -279,7 +289,7 @@ export default function NotificationCenterModal({
                         onClose();
                         onOpenChatWithPeer?.(notif.fromUser);
                       }}
-                      className="px-3 py-1.5 rounded-xl bg-cyan-950 hover:bg-cyan-900 border border-cyan-700 text-cyan-200 font-bold text-[11px] transition-all shrink-0 self-end sm:self-center"
+                      className="px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-red-600/70 text-red-300 font-bold text-[11px] transition-all shrink-0 self-end sm:self-center"
                     >
                       {isAm ? "አውራ 💬" : "Chat 💬"}
                     </button>
