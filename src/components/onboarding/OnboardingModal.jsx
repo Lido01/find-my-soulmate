@@ -1,9 +1,10 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // OnboardingModal.jsx — "Tell Me About Yourself" & Partner Preference Setup
+// High-tech Red, Black & White developer theme with Space Grotesk / JetBrains Mono
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState } from 'react';
-import { IconX, IconCheck, IconHeart, IconCode } from '../ui/Icons.jsx';
+import { IconX, IconHeart } from '../ui/Icons.jsx';
 import { soundEngine } from '../../utils/audio.js';
 
 const EMOJI_OPTIONS = ['🧑‍💻', '👩‍💻', '👨‍💻', '🤖', '🧙‍♂️', '🦊', '☕', '⚡', '🥷', '🦀', '💻', '✨'];
@@ -60,46 +61,46 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md animate-fade-in font-mono select-text"
       onClick={(e) => e.target === e.currentTarget && onClose?.()}
     >
-      <div className="relative w-full max-w-lg bg-slate-900 border border-slate-700  shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="relative w-full max-w-lg bg-black border border-zinc-800 rounded-3xl shadow-2xl shadow-red-950/40 overflow-hidden flex flex-col max-h-[90vh] animate-slide-up">
         {/* Top glow border */}
-        <div className="h-1.5 w-full bg-gradient-to-r from-emerald-500 via-fuchsia-500 to-cyan-500" />
+        <div className="h-1.5 w-full bg-gradient-to-r from-red-700 via-red-500 to-white" />
 
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div>
-              <h2 className="font-mono text-base font-bold text-white">
-                {lang === 'am' ? 'ስለ እራስዎ ይንገሩን' : 'Tell Me About Yourself'}
-              </h2>
-              <p className="font-mono text-[11px] text-slate-500">
-                {lang === 'am' ? 'የነፍስ ጓደኛዎን ለማግኘት ፕሮፋይል ያዘጋጁ' : 'Customize your developer dating profile'}
-              </p>
-            </div>
+        <div className="px-6 py-4 border-b border-zinc-800 bg-zinc-950/90 flex items-center justify-between shrink-0">
+          <div>
+            <h2 className="font-heading text-base font-bold text-white">
+              {lang === 'am' ? 'ስለ እራስዎ ይንገሩን' : 'Tell Me About Yourself'}
+            </h2>
+            <p className="font-mono text-[11px] text-zinc-500">
+              {lang === 'am' ? 'የነፍስ ጓደኛዎን ለማግኘት ፕሮፋይል ያዘጋጁ' : 'Customize your developer dating profile'}
+            </p>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="text-slate-500 hover:text-white p-1  hover:bg-slate-800 transition-colors"
+            className="text-zinc-400 hover:text-white p-1.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-red-600 transition-colors"
           >
             <IconX className="w-5 h-5" />
           </button>
         </div>
 
         {/* Step Indicator */}
-        <div className="flex items-center justify-center gap-3 py-3 bg-slate-950/50 border-b border-slate-800/80 px-6">
+        <div className="flex items-center justify-center gap-2 py-3 bg-zinc-950/70 border-b border-zinc-800/80 px-6 shrink-0">
           {[1, 2, 3].map((s) => (
             <button
               key={s}
+              type="button"
               onClick={() => {
                 soundEngine.playHeartbeat();
                 setStep(s);
               }}
-              className={`flex items-center gap-1.5 px-3 py-1  font-mono text-xs font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-mono text-xs font-bold transition-all ${
                 step === s
-                  ? 'bg-fuchsia-950 border border-fuchsia-600 text-fuchsia-300 shadow-md shadow-fuchsia-900/30'
-                  : 'text-slate-500 hover:text-slate-300'
+                  ? 'bg-red-600 text-white border border-red-500 shadow-[0_0_12px_rgba(239,68,68,0.4)]'
+                  : 'bg-zinc-950 text-zinc-500 border border-zinc-800 hover:text-white'
               }`}
             >
               <span>{s === 1 ? '1. Preference' : s === 2 ? '2. Identity' : '3. Dev Vibe'}</span>
@@ -108,12 +109,12 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
         </div>
 
         {/* Body content */}
-        <div className="p-6 overflow-y-auto space-y-5 flex-1" style={{ scrollbarWidth: 'thin' }}>
+        <div className="p-6 overflow-y-auto space-y-5 flex-1 bg-black" style={{ scrollbarWidth: 'thin', scrollbarColor: '#27272a transparent' }}>
           {/* STEP 1: Preference */}
           {step === 1 && (
             <div className="space-y-4 animate-slide-up">
               <div>
-                <label className="font-mono text-xs font-bold text-slate-300 block mb-2">
+                <label className="font-mono text-xs font-bold text-zinc-300 block mb-2">
                   {lang === 'am' ? 'ማንን ማግኘት ይፈልጋሉ?' : 'Who are you looking to find?'}
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -129,21 +130,21 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
                         soundEngine.playHeartbeat();
                         setProfile((p) => ({ ...p, lookingFor: opt.id }));
                       }}
-                      className={`p-3.5  border text-left font-mono transition-all duration-200 ${
+                      className={`p-3.5 rounded-2xl border text-left font-mono transition-all duration-200 ${
                         profile.lookingFor === opt.id
-                          ? 'border-fuchsia-500 bg-fuchsia-950/40 text-white shadow-lg shadow-fuchsia-950/50'
-                          : 'border-slate-800 bg-slate-950/60 text-slate-400 hover:border-slate-600'
+                          ? 'border-red-500 bg-red-950/60 text-white shadow-lg shadow-red-950/50'
+                          : 'border-zinc-800 bg-zinc-950 text-zinc-400 hover:border-zinc-700'
                       }`}
                     >
-                      <p className="text-sm font-bold">{opt.label}</p>
-                      <p className="text-[11px] text-slate-500 mt-1">{opt.desc}</p>
+                      <p className="text-sm font-bold text-white">{opt.label}</p>
+                      <p className="text-[11px] text-zinc-400 mt-1">{opt.desc}</p>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className="font-mono text-xs font-bold text-slate-300 block mb-2">
+                <label className="font-mono text-xs font-bold text-zinc-300 block mb-2">
                   {lang === 'am' ? 'የግንኙነት ግብ' : 'Your Relationship Goal'}
                 </label>
                 <div className="space-y-2">
@@ -152,10 +153,10 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
                       key={goal}
                       type="button"
                       onClick={() => setProfile((p) => ({ ...p, goal }))}
-                      className={`w-full p-2.5  border text-left font-mono text-xs transition-all ${
+                      className={`w-full p-3 rounded-xl border text-left font-mono text-xs transition-all ${
                         profile.goal === goal
-                          ? 'border-emerald-500 bg-emerald-950/40 text-emerald-300'
-                          : 'border-slate-800 bg-slate-950 text-slate-400 hover:border-slate-700'
+                          ? 'border-red-500 bg-red-950/50 text-white font-bold'
+                          : 'border-zinc-800 bg-zinc-950 text-zinc-400 hover:border-zinc-700'
                       }`}
                     >
                       {goal}
@@ -170,11 +171,11 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
           {step === 2 && (
             <div className="space-y-4 animate-slide-up">
               <div>
-                <label className="font-mono text-xs font-bold text-slate-300 block mb-2">
+                <label className="font-mono text-xs font-bold text-zinc-300 block mb-2">
                   {lang === 'am' ? 'የእርስዎ ስም / Handle' : 'Your Name / Dev Handle'}
                 </label>
                 <div className="flex items-center gap-3">
-                  <div className="text-3xl p-2.5  bg-slate-950 border border-slate-700 flex items-center justify-center shrink-0">
+                  <div className="text-3xl p-2 rounded-2xl bg-zinc-950 border border-zinc-800 flex items-center justify-center shrink-0">
                     {profile.emoji}
                   </div>
                   <input
@@ -182,13 +183,13 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
                     value={profile.name}
                     onChange={(e) => setProfile((p) => ({ ...p, name: e.target.value }))}
                     placeholder="Enter your name or dev handle..."
-                    className="flex-1 bg-slate-950 border border-slate-700  px-3.5 py-2.5 font-mono text-sm text-white focus:border-emerald-500 focus:outline-none"
+                    className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2.5 font-mono text-sm text-white focus:border-red-500 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="font-mono text-xs font-bold text-slate-300 block mb-2">
+                <label className="font-mono text-xs font-bold text-zinc-300 block mb-2">
                   {lang === 'am' ? 'የእርስዎን Avatar Emoji ይምረጡ' : 'Choose Your Avatar Emoji'}
                 </label>
                 <div className="grid grid-cols-6 gap-2">
@@ -200,10 +201,10 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
                         soundEngine.playMessageBeep();
                         setProfile((p) => ({ ...p, emoji: em }));
                       }}
-                      className={`p-2.5 text-2xl  border text-center transition-all ${
+                      className={`p-2.5 text-2xl rounded-xl border text-center transition-all ${
                         profile.emoji === em
-                          ? 'border-fuchsia-500 bg-fuchsia-950/60 scale-110 shadow-md shadow-fuchsia-900/40'
-                          : 'border-slate-800 bg-slate-950/80 hover:border-slate-600'
+                          ? 'border-red-500 bg-red-950/60 scale-110 shadow-md shadow-red-950/50'
+                          : 'border-zinc-800 bg-zinc-950 hover:border-zinc-700'
                       }`}
                     >
                       {em}
@@ -213,16 +214,16 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
               </div>
 
               <div>
-                <label className="font-mono text-xs font-bold text-slate-300 block mb-2">
+                <label className="font-mono text-xs font-bold text-zinc-300 block mb-2">
                   {lang === 'am' ? 'የእርስዎ Dev Archetype' : 'Your Developer Archetype'}
                 </label>
                 <select
                   value={profile.archetype}
                   onChange={(e) => setProfile((p) => ({ ...p, archetype: e.target.value }))}
-                  className="w-full bg-slate-950 border border-slate-700  px-3.5 py-2.5 font-mono text-xs text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2.5 font-mono text-xs text-white focus:outline-none focus:border-red-500"
                 >
                   {ARCHETYPES.map((arch) => (
-                    <option key={arch} value={arch}>
+                    <option key={arch} value={arch} className="bg-black text-white">
                       {arch}
                     </option>
                   ))}
@@ -235,7 +236,7 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
           {step === 3 && (
             <div className="space-y-4 animate-slide-up">
               <div>
-                <label className="font-mono text-xs font-bold text-slate-300 block mb-2">
+                <label className="font-mono text-xs font-bold text-zinc-300 block mb-2">
                   {lang === 'am' ? 'የሚወዱት የቴክኖሎጂ ስብስብ' : 'Favorite Tech Stack'}
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -244,10 +245,10 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
                       key={stack}
                       type="button"
                       onClick={() => setProfile((p) => ({ ...p, favoriteStack: stack }))}
-                      className={`p-2.5  border text-left font-mono text-xs transition-all ${
+                      className={`p-3 rounded-xl border text-left font-mono text-xs transition-all ${
                         profile.favoriteStack === stack
-                          ? 'border-cyan-500 bg-cyan-950/50 text-cyan-300 font-bold'
-                          : 'border-slate-800 bg-slate-950 text-slate-400 hover:border-slate-700'
+                          ? 'border-red-500 bg-red-950/60 text-white font-bold'
+                          : 'border-zinc-800 bg-zinc-950 text-zinc-400 hover:border-zinc-700'
                       }`}
                     >
                       {stack}
@@ -257,7 +258,7 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
               </div>
 
               <div>
-                <label className="font-mono text-xs font-bold text-slate-300 block mb-2">
+                <label className="font-mono text-xs font-bold text-zinc-300 block mb-2">
                   {lang === 'am' ? 'አጭር የፍቅር / የኮዲንግ ማስታወሻ' : 'Short Bio / Dating Note'}
                 </label>
                 <textarea
@@ -265,7 +266,7 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
                   onChange={(e) => setProfile((p) => ({ ...p, bio: e.target.value }))}
                   rows={3}
                   placeholder="Searching for someone whose code compiles as cleanly as our chemistry..."
-                  className="w-full bg-slate-950 border border-slate-700  p-3 font-mono text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 font-mono text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-500"
                 />
               </div>
             </div>
@@ -273,12 +274,12 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
         </div>
 
         {/* Footer controls */}
-        <div className="p-4 bg-slate-950 border-t border-slate-800 flex items-center justify-between">
+        <div className="p-4 bg-zinc-950/90 border-t border-zinc-800 flex items-center justify-between shrink-0">
           {step > 1 ? (
             <button
               type="button"
               onClick={() => setStep((s) => s - 1)}
-              className="font-mono text-xs text-slate-400 hover:text-white px-3 py-2  border border-slate-800 hover:bg-slate-900"
+              className="font-mono text-xs text-zinc-400 hover:text-white px-3.5 py-2 rounded-xl border border-zinc-800 hover:bg-zinc-900 transition-colors"
             >
               ← Back
             </button>
@@ -293,7 +294,7 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
                 soundEngine.playHeartbeat();
                 setStep((s) => s + 1);
               }}
-              className="font-mono text-xs font-bold px-5 py-2.5  bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-950/40"
+              className="font-mono text-xs font-bold px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-950/40 transition-all"
             >
               Next Step →
             </button>
@@ -301,7 +302,7 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
             <button
               type="button"
               onClick={handleSave}
-              className="font-mono text-xs font-bold px-6 py-2.5  bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-500 hover:to-pink-500 text-white shadow-lg shadow-fuchsia-950/50 flex items-center gap-2"
+              className="font-mono text-xs font-bold px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-950/50 flex items-center gap-2 transition-all"
             >
               <IconHeart className="w-4 h-4" />
               <span>{lang === 'am' ? 'አስቀምጥና ጀምር 🚀' : 'Save & Find Soulmate 🚀'}</span>

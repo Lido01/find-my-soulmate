@@ -8,10 +8,10 @@
     --brand-surface: #09090b;
     --brand-surface-raised: #121214;
     --brand-line: #27272a;
-    --brand-signal: #ef4444;
-    --brand-signal-strong: #dc2626;
-    --brand-text: #ffffff;
-    --brand-muted: #a1a1aa;
+    --brand-signal: #ff5b5b;
+    --brand-signal-strong: #e52e3f;
+    --brand-text: #fff7f5;
+    --brand-muted: #b8a9aa;
   }
   *, *::before, *::after { box-sizing: border-box; }
   html, body, #root { height: 100%; margin: 0; padding: 0; overflow: hidden; }
@@ -21,7 +21,7 @@
       radial-gradient(circle at 85% 15%, rgba(185, 28, 28, 0.06), transparent 32rem),
       #000000;
     color: #f4f4f5;
-    font-family: 'Space Grotesk', 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'Manrope', 'Segoe UI', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -29,7 +29,7 @@
   button { cursor: pointer; }
   ::selection { color: #ffffff; background: #dc2626; }
   /* Amharic font fallback */
-  [lang="am"], .am-text { font-family: 'Noto Sans Ethiopic', 'Space Grotesk', sans-serif; }
+  [lang="am"], .am-text { font-family: 'Noto Sans Ethiopic', 'Manrope', sans-serif; }
 }
 
 @layer components {
@@ -96,35 +96,102 @@
   /* Shared product surface: a calm, technical workspace instead of flat terminal chrome. */
   .app-shell {
     background:
-      linear-gradient(rgba(91, 132, 173, 0.045) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(91, 132, 173, 0.045) 1px, transparent 1px),
-      radial-gradient(circle at 50% -20%, rgba(14, 116, 144, 0.16), transparent 36rem),
+      linear-gradient(rgba(255, 91, 91, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 91, 91, 0.035) 1px, transparent 1px),
+      radial-gradient(circle at 50% -20%, rgba(229, 46, 63, 0.16), transparent 36rem),
       var(--brand-ink);
     background-size: 32px 32px, 32px 32px, auto;
   }
-  .app-shell .bg-slate-950 { background-color: rgba(7, 20, 29, 0.92); }
-  .app-shell .bg-slate-900 { background-color: rgba(12, 32, 40, 0.94); }
-  .app-shell .border-slate-800 { border-color: rgba(36, 81, 90, 0.7); }
-  .app-shell .border-slate-700 { border-color: rgba(63, 125, 130, 0.65); }
-  .app-shell .text-cyan-300, .app-shell .text-cyan-400 { color: var(--brand-signal); }
-  .app-shell .border-cyan-500, .app-shell .border-cyan-600, .app-shell .border-cyan-700 { border-color: var(--brand-signal-strong); }
-  .app-shell .bg-cyan-950, .app-shell .bg-cyan-950\/60, .app-shell .bg-cyan-950\/90 { background-color: rgba(18, 74, 73, .72); }
-  .app-shell .text-fuchsia-300, .app-shell .text-fuchsia-400 { color: #9cefe0; }
-  .app-shell header { box-shadow: 0 1px 0 rgba(80, 170, 203, 0.12), 0 12px 28px rgba(0, 0, 0, 0.18); }
+  /* Brand surface mapping: all existing screens resolve to the same visual system. */
+  .app-shell .bg-slate-950,
+  .app-shell .bg-slate-950\/95,
+  .app-shell .bg-slate-950\/90,
+  .app-shell .bg-slate-950\/85,
+  .app-shell .bg-slate-950\/80,
+  .app-shell .bg-slate-950\/60 { background-color: rgba(0, 0, 0, .9); }
+  .app-shell .bg-slate-900,
+  .app-shell .bg-slate-900\/95,
+  .app-shell .bg-slate-900\/90,
+  .app-shell .bg-slate-900\/80,
+  .app-shell .bg-slate-900\/60 { background-color: rgba(16, 12, 13, .96); }
+  .app-shell .bg-slate-800,
+  .app-shell .bg-slate-800\/90,
+  .app-shell .bg-slate-800\/80 { background-color: #201719; }
+  .app-shell .border-slate-800,
+  .app-shell .border-slate-800\/80,
+  .app-shell .border-slate-800\/60 { border-color: rgba(105, 53, 57, .58); }
+  .app-shell .border-slate-700,
+  .app-shell .border-slate-700\/80 { border-color: rgba(166, 82, 88, .62); }
+  .app-shell .text-white { color: var(--brand-text); }
+  .app-shell .text-slate-200,
+  .app-shell .text-slate-300 { color: #f4e9e8; }
+  .app-shell .text-slate-400 { color: #c6b8b8; }
+  .app-shell .text-slate-500,
+  .app-shell .text-slate-600 { color: #8f7e80; }
+  .app-shell .text-cyan-200,
+  .app-shell .text-cyan-300,
+  .app-shell .text-cyan-400,
+  .app-shell .text-cyan-500,
+  .app-shell .text-emerald-200,
+  .app-shell .text-emerald-300,
+  .app-shell .text-emerald-400,
+  .app-shell .text-emerald-500,
+  .app-shell .text-fuchsia-200,
+  .app-shell .text-fuchsia-300,
+  .app-shell .text-fuchsia-400,
+  .app-shell .text-indigo-300,
+  .app-shell .text-indigo-400 { color: var(--brand-signal); }
+  .app-shell .text-amber-200,
+  .app-shell .text-amber-300,
+  .app-shell .text-amber-400 { color: #ffe5dc; }
+  .app-shell .border-cyan-500,
+  .app-shell .border-cyan-600,
+  .app-shell .border-cyan-700,
+  .app-shell .border-emerald-500,
+  .app-shell .border-emerald-600,
+  .app-shell .border-emerald-700,
+  .app-shell .border-fuchsia-500,
+  .app-shell .border-fuchsia-600,
+  .app-shell .border-fuchsia-700,
+  .app-shell .border-indigo-500,
+  .app-shell .border-indigo-600 { border-color: var(--brand-signal-strong); }
+  .app-shell .bg-cyan-950,
+  .app-shell .bg-cyan-950\/60,
+  .app-shell .bg-cyan-950\/80,
+  .app-shell .bg-cyan-950\/90,
+  .app-shell .bg-emerald-950,
+  .app-shell .bg-emerald-950\/60,
+  .app-shell .bg-emerald-950\/80,
+  .app-shell .bg-emerald-950\/90,
+  .app-shell .bg-fuchsia-950,
+  .app-shell .bg-fuchsia-950\/60,
+  .app-shell .bg-fuchsia-950\/80,
+  .app-shell .bg-fuchsia-950\/90,
+  .app-shell .bg-indigo-950,
+  .app-shell .bg-indigo-950\/60,
+  .app-shell .bg-indigo-950\/80 { background-color: rgba(92, 19, 25, .58); }
+  .app-shell .bg-amber-950,
+  .app-shell .bg-amber-950\/30,
+  .app-shell .bg-amber-950\/40,
+  .app-shell .bg-amber-950\/50,
+  .app-shell .bg-amber-950\/60,
+  .app-shell .bg-amber-950\/70 { background-color: rgba(68, 31, 26, .65); }
+  .app-shell .placeholder\:text-slate-600::placeholder { color: #8f7e80; }
+  .app-shell header { box-shadow: 0 1px 0 rgba(229, 46, 63, .22), 0 12px 28px rgba(0, 0, 0, .35); }
   .app-shell button { transition: border-color .2s ease, background-color .2s ease, color .2s ease, transform .2s ease; }
   .app-shell button:active { transform: translateY(1px); }
   .app-shell input:focus, .app-shell textarea:focus, .app-shell select:focus {
-    outline: 2px solid rgba(34, 211, 238, 0.28);
+    outline: 2px solid rgba(255, 91, 91, 0.38);
     outline-offset: 1px;
   }
   .surface-card {
-    background: linear-gradient(145deg, rgba(17, 47, 56, .96), rgba(8, 27, 35, .98));
-    border: 1px solid rgba(98, 230, 197, .25);
+    background: linear-gradient(145deg, rgba(30, 18, 20, .96), rgba(8, 5, 6, .98));
+    border: 1px solid rgba(255, 91, 91, .25);
     box-shadow: 0 14px 38px rgba(0, 0, 0, .22);
   }
   .eyebrow {
-    color: #7dd3fc;
-    font: 700 10px/1.2 'JetBrains Mono', monospace;
+    color: #ff9b9b;
+    font: 700 10px/1.2 'DM Mono', monospace;
     letter-spacing: .16em;
     text-transform: uppercase;
   }
@@ -132,6 +199,10 @@
     .app-shell { background-size: 24px 24px, 24px 24px, auto; }
     .app-shell .hide-mobile { display: none; }
   }
+
+  .app-shell .font-sans,
+  .app-shell { font-family: 'Manrope', 'Segoe UI', sans-serif; }
+  .app-shell .font-mono { font-family: 'DM Mono', 'Cascadia Mono', monospace; }
 
 /* Custom animations beyond Tailwind */
 @keyframes slideUp {
