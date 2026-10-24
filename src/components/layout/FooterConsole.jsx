@@ -4,7 +4,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { MOOD_META } from "../../data/characters.js";
-import { IconGift, IconTerminal, IconSend } from "../ui/Icons.jsx";
+import { IconGift, IconTerminal, IconSend, IconHeart } from "../ui/Icons.jsx";
 import { soundEngine, isSpeechRecognitionSupported, createSpeechRecognizer } from "../../utils/audio.js";
 
 const QUICK_VOICE_NOTES = {
@@ -211,7 +211,7 @@ export default function FooterConsole({
             className="flex items-center gap-1 px-2.5 py-0.5 rounded-full font-mono text-[11px] font-bold border border-slate-700 bg-slate-900 text-slate-300 hover:text-cyan-300 hover:border-cyan-600 transition-all"
             title="Send romantic voice audio clips"
           >
-            <span>🎙️</span>
+            {/* <span>🎙️</span> */}
             <span className="hidden sm:inline">{isAm ? "የድምፅ ቅንጥብ" : "Voice Note"}</span>
           </button>
 
@@ -229,7 +229,7 @@ export default function FooterConsole({
             }`}
             title="Open Developer Love Indicators & Romantic Emojis"
           >
-            <span>💖</span>
+            <IconHeart className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Love Hub</span>
           </button>
 
@@ -257,7 +257,7 @@ export default function FooterConsole({
         <div className="p-3 bg-slate-900/95 border-b border-slate-800 animate-slide-up space-y-2">
           <div className="flex items-center justify-between">
             <span className="font-mono text-xs font-bold text-cyan-300 flex items-center gap-1.5">
-              <span>🎙️</span>
+              <span className="text-cyan-300">REC</span>
               <span>{isAm ? "ፈጣን የድምፅ መልእክት ምረጥ" : "Select a Romantic Voice Note to Send"}</span>
             </span>
             <button
@@ -277,7 +277,7 @@ export default function FooterConsole({
               >
                 <span className="truncate pr-2">"{phrase}"</span>
                 <span className="text-cyan-400 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                  🎙️ Send
+                  Send
                 </span>
               </button>
             ))}
@@ -322,7 +322,7 @@ export default function FooterConsole({
               onClick={stopRecordingAndSend}
               className="px-3 py-1 rounded-lg border border-red-600 bg-red-950 text-red-200 hover:bg-red-900 text-xs font-mono font-bold flex items-center gap-1 shadow-md shadow-red-950/50"
             >
-              <span>🎙️</span>
+              <span className="text-red-300">REC</span>
               <span>Send Voice</span>
             </button>
           </div>
