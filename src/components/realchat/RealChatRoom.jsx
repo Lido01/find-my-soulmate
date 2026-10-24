@@ -52,6 +52,7 @@ export default function RealChatRoom({
   const [showPartnerProfileModal, setShowPartnerProfileModal] = useState(false);
   const [clearConfirm, setClearConfirm] = useState(false);
   const [isFriend, setIsFriend] = useState(() => (userProfile?.friends || []).includes(peer?.id));
+  const [isFollowing, setIsFollowing] = useState(() => (userProfile?.following || []).includes(peer?.id));
   const [isLiked, setIsLiked] = useState(false);
   const [replyingTo, setReplyingTo] = useState(null);
 
@@ -250,27 +251,11 @@ export default function RealChatRoom({
       setPeerTyping(Boolean(data.isTyping));
     });
 
-    // 5. When peer leaves or disconnects: PRESERVE full chat history
-    const unbindLeave = wsService.on('room:peer_left', () => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `sys_left_${Date.now()}`,
-          sender: 'system',
-          text: isAm
-            ? `👋 @${peer.handle} ውይይቱን ለቋል/ከመስመር ወጥቷል። የውይይት ታሪክዎ እንደተጠበቀ ይቆያል!`
-            : `👋 ${peer.name} has left the session. Your chat history is preserved!`,
-          timestamp: new Date().toISOString(),
-        },
-      ]);
-    });
-
     return () => {
       unbindMsg();
       unbindSeen();
       unbindHistory();
       unbindTyping();
-      unbindLeave();
     };
   }, [peer, userProfile, isAm, isPeerOnline]);
 
@@ -512,11 +497,6 @@ export default function RealChatRoom({
     setShowAssetMenu(false);
     soundEngine.playGiftFanfare();
     wsService.sendSocialAction('add_friend', peer.id);
-    wsService.sendMessage(
-      isAm
-        ? `👥 በገንቢ ጓደኝነት ዝርዝሬ ውስጥ አካትቼሻለሁ/ሃለሁ! ጓደኛሞች ሆነናል 💖`
-        : `👥 I added you to my developer friends list! Let's stay connected and build together 💖`
-    );
   }
 
   function handleSendIcebreaker(text) {
@@ -556,16 +536,16 @@ export default function RealChatRoom({
   ];
 
   return (
-    <div className="flex-1 flex flex-col h-full min-h-0 bg-slate-950 font-mono overflow-hidden select-text">
+    <div className="flex-1 flex flex-col h-full min-h-0 bg-black font-mono overflow-hidden select-text">
       {/* Clean, Space-Efficient Room Header */}
-      <header className="flex-shrink-0 flex items-center justify-between px-3 py-2 border-b border-slate-800 bg-slate-950/95 backdrop-blur-md gap-2">
+      <header className="flex-shrink-0 flex items-center justify-between px-3 py-2 border-b border-zinc-800 bg-black/95 backdrop-blur-md gap-2">
         <div
           onClick={() => setShowPartnerProfileModal(true)}
-          className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer group hover:bg-slate-900/60 p-1.5 -ml-1  transition-all border border-transparent hover:border-slate-800"
+          className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer group hover:bg-zinc-900/60 p-1.5 -ml-1 rounded-xl transition-all border border-transparent hover:border-zinc-800"
           title="Click to view full partner profile card & dev info"
         >
           <div className="relative shrink-0">
-            <span className="text-xl p-1.5  bg-slate-900 border border-slate-800 flex items-center justify-center overflow-hidden w-9 h-9 group-hover:border-cyan-500 transition-all">
+            <span className="text-xl p-1.5 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden w-9 h-9 group-hover:border-red-600 transition-all">
               {peer?.avatarUrl ? (
                 <img src={peer.avatarUrl} alt={peer.name} className="w-full h-full object-cover" />
               ) : (
@@ -574,18 +554,18 @@ export default function RealChatRoom({
             </span>
             {/* Live Indicator: Only shown when peer is active online; otherwise blank */}
             {isPeerOnline && (
-              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5  bg-emerald-400 ring-2 ring-slate-950" />
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-black animate-pulse" />
             )}
           </div>
 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-              <span className="font-bold text-xs sm:text-sm text-white truncate group-hover:text-cyan-300 transition-colors">
+              <span className="font-bold text-xs sm:text-sm text-white truncate group-hover:text-red-400 transition-colors">
                 {peer.name}
               </span>
-              <span className="text-[11px] text-slate-500 hidden sm:inline">{peer.handle}</span>              
+              <span className="text-[11px] text-red-400 font-bold hidden sm:inline">{peer.handle}</span>              
             </div>
-            <p className="text-[10px] text-slate-400 truncate max-w-xs sm:max-w-md">
+            <p className="text-[10px] text-zinc-400 truncate max-w-xs sm:max-w-md">
               {peer.quote ? `"${peer.quote}"` : (peer.bio || `${peer.indentation || 'Tabs'} · ${sharedTech.join(', ') || 'Developer'}`)}
             </p>
           </div>
@@ -597,10 +577,10 @@ export default function RealChatRoom({
           <button
             type="button"
             onClick={handleClearHistory}
-            className={`px-2 py-1.5  border text-[11px] font-bold transition-all ${
+            className={`px-2 py-1.5 rounded-xl border text-[11px] font-bold transition-all ${
               clearConfirm
-                ? 'bg-red-950 border-red-600 text-red-300 animate-pulse'
-                : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-red-400 hover:border-red-800'
+                ? 'bg-red-950 border-red-600 text-white animate-pulse'
+                : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-red-400 hover:border-red-800'
             }`}
             title="Clear saved chat history with this partner"
           >
@@ -611,7 +591,7 @@ export default function RealChatRoom({
           <button
             type="button"
             onClick={() => setShowMobileStatsDrawer(true)}
-            className="md:hidden flex items-center gap-1 text-[11px] px-2.5 py-1.5  bg-slate-900 border border-slate-800 text-slate-300 hover:text-cyan-300 transition-colors"
+            className="md:hidden flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white transition-colors"
             title="View partner stats & dev details"
           >
             <span>Stats</span>
@@ -624,7 +604,7 @@ export default function RealChatRoom({
               wsService.leaveRoom();
               onLeave?.();
             }}
-            className="px-2.5 py-1.5  border border-red-900/60 bg-red-950/30 text-red-300 hover:bg-red-950 hover:border-red-700 text-[11px] font-bold transition-all"
+            className="px-2.5 py-1.5 rounded-xl border border-red-900/60 bg-red-950/40 text-red-300 hover:bg-red-950 hover:border-red-600 text-[11px] font-bold transition-all"
             title="Leave Chat Room"
           >
             <span>{isAm ? "ውጣ" : "Leave"}</span>
@@ -635,14 +615,14 @@ export default function RealChatRoom({
       {/* Primary Chat Messages Feed: Full Vertical Height */}
       <div
         ref={feedRef}
-        className="flex-1 h-full min-h-0 overflow-y-auto p-3 sm:p-4 space-y-2.5"
+        className="flex-1 h-full min-h-0 overflow-y-auto p-3 sm:p-4 space-y-2.5 bg-black"
         style={{ scrollbarWidth: 'thin' }}
       >
         {messages.map((m) => {
           if (m.sender === 'system') {
             return (
               <div key={m.id} className="text-center my-2 animate-fade-in">
-                <span className="font-mono text-[11px] text-slate-500 bg-slate-900/80 border border-slate-800/80 px-2.5 py-0.5  inline-block max-w-full truncate">
+                <span className="font-mono text-[11px] text-zinc-500 bg-zinc-950 border border-zinc-800 px-2.5 py-0.5 rounded-full inline-block max-w-full truncate">
                   {m.text}
                 </span>
               </div>
@@ -667,8 +647,8 @@ export default function RealChatRoom({
         {/* Real-Time Peer Typing Indicator */}
         {peerTyping && (
           <div className="flex items-center gap-2 px-3 py-1 animate-fade-in">
-            <span className="w-1.5 h-1.5  bg-cyan-400 animate-ping" />
-            <span className="font-mono text-[11px] text-cyan-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+            <span className="font-mono text-[11px] text-red-400 font-bold">
               {peer.name} is typing...
             </span>
           </div>
@@ -677,7 +657,7 @@ export default function RealChatRoom({
 
       {/* Voice Recording Active Bar */}
       {isRecordingVoice && (
-        <div className="p-2.5 bg-red-950/70 border-t border-red-800/80 animate-fade-in flex items-center justify-between shrink-0 font-mono">
+        <div className="p-2.5 bg-red-950/80 border-t border-red-800/80 animate-fade-in flex items-center justify-between shrink-0 font-mono">
           <div className="flex items-center gap-2.5">
             <div className="flex items-center gap-1.5 text-red-400 text-xs font-bold">
               <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
@@ -685,7 +665,7 @@ export default function RealChatRoom({
                 REC {Math.floor(recordSeconds / 60)}:{String(recordSeconds % 60).padStart(2, '0')}
               </span>
             </div>
-            <p className="text-xs text-slate-200 truncate max-w-[180px] sm:max-w-xs">
+            <p className="text-xs text-white truncate max-w-[180px] sm:max-w-xs">
               {mediaRecorderRef.current ? (isAm ? "እየቀረጽኩ ነው... 🎙️" : "Recording voice... 🎙️") : (isAm ? "የድምጽ መልእክት 🎙️" : "Voice message 🎙️")}
             </p>
           </div>
@@ -693,14 +673,14 @@ export default function RealChatRoom({
             <button
               type="button"
               onClick={cancelVoiceRecording}
-              className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs font-bold text-slate-300 hover:text-white transition-colors"
+              className="px-2.5 py-1 rounded-xl bg-zinc-900 border border-zinc-700 text-xs font-bold text-zinc-300 hover:text-white transition-colors"
             >
               ✕ {isAm ? 'ሰርዝ' : 'Cancel'}
             </button>
             <button
               type="button"
               onClick={stopVoiceAndSend}
-              className="px-3 py-1 rounded-lg bg-red-800 hover:bg-red-700 border border-red-500 text-xs font-bold text-white shadow-sm transition-colors"
+              className="px-3 py-1 rounded-xl bg-red-600 hover:bg-red-700 border border-red-500 text-xs font-bold text-white shadow-sm transition-colors"
             >
               ✓ {isAm ? 'ላክ' : 'Send'}
             </button>
@@ -710,16 +690,16 @@ export default function RealChatRoom({
 
       {/* Code Snippet Composer Modal / Drawer */}
       {showCodeComposer && (
-        <div className="shrink-0 bg-slate-900 border-t border-slate-800 p-3 shadow-2xl animate-slide-up space-y-2">
+        <div className="shrink-0 bg-zinc-950 border-t border-zinc-800 p-3 shadow-2xl animate-slide-up space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
+            <span className="text-xs font-bold text-red-400 flex items-center gap-1.5">
               <span>Share Code Snippet (Telegram Style)</span>
             </span>
             <div className="flex items-center gap-2">
               <select
                 value={codeLanguage}
                 onChange={(e) => setCodeLanguage(e.target.value)}
-                className="bg-slate-950 border border-slate-700 text-cyan-300 text-[11px]  px-2 py-0.5 focus:outline-none"
+                className="bg-black border border-zinc-700 text-white text-[11px] rounded-lg px-2 py-0.5 focus:outline-none"
               >
                 <option value="TypeScript">TypeScript</option>
                 <option value="React JSX">React JSX</option>
@@ -728,7 +708,7 @@ export default function RealChatRoom({
                 <option value="Go">Go</option>
                 <option value="CSS / Tailwind">CSS</option>
               </select>
-              <button onClick={() => setShowCodeComposer(false)} className="text-slate-500 hover:text-white text-xs">✕</button>
+              <button onClick={() => setShowCodeComposer(false)} className="text-zinc-500 hover:text-white text-xs">✕</button>
             </div>
           </div>
 
@@ -737,14 +717,14 @@ export default function RealChatRoom({
             value={codeSnippet}
             onChange={(e) => setCodeSnippet(e.target.value)}
             placeholder="// Paste or write code snippet here..."
-            className="w-full bg-slate-950 border border-slate-800  p-2 font-mono text-xs text-cyan-200 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500"
+            className="w-full bg-black border border-zinc-800 rounded-xl p-2 font-mono text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-600"
           />
 
           <div className="flex justify-end gap-2">
             <button
               type="button"
               onClick={() => setShowCodeComposer(false)}
-              className="px-3 py-1  bg-slate-800 text-xs text-slate-400 hover:text-white"
+              className="px-3 py-1 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-400 hover:text-white"
             >
               Cancel
             </button>
@@ -752,7 +732,7 @@ export default function RealChatRoom({
               type="button"
               onClick={handleSendCodeSnippet}
               disabled={!codeSnippet.trim()}
-              className="px-3 py-1  bg-cyan-950 border border-cyan-600 text-xs font-bold text-cyan-300 hover:bg-cyan-900 disabled:opacity-40"
+              className="px-3 py-1 rounded-xl bg-red-600 border border-red-500 text-xs font-bold text-white hover:bg-red-700 disabled:opacity-40"
             >
               Send Snippet
             </button>
@@ -762,12 +742,12 @@ export default function RealChatRoom({
 
       {/* Telegram-style Asset Share Menu (Photos, Code, Bunna) */}
       {showAssetMenu && (
-        <div className="shrink-0 bg-slate-900 border-t border-slate-800 p-2.5 shadow-2xl animate-slide-up flex flex-wrap items-center gap-2">
+        <div className="shrink-0 bg-zinc-950 border-t border-zinc-800 p-2.5 shadow-2xl animate-slide-up flex flex-wrap items-center gap-2">
           {/* 1. Share Photo */}
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-1.5 px-3 py-1.5  bg-slate-950 border border-slate-800 hover:border-cyan-500 text-xs text-cyan-300 font-bold transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black border border-zinc-800 hover:border-red-600 text-xs text-white font-bold transition-colors"
           >
             <span>Share Photo</span>
           </button>
@@ -786,7 +766,7 @@ export default function RealChatRoom({
               setShowCodeComposer(true);
               setShowAssetMenu(false);
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5  bg-slate-950 border border-slate-800 hover:border-cyan-500 text-xs text-cyan-300 font-bold transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black border border-zinc-800 hover:border-red-600 text-xs text-white font-bold transition-colors"
           >
             <span>Send Code</span>
           </button>
@@ -795,25 +775,25 @@ export default function RealChatRoom({
           <button
             type="button"
             onClick={handleSendBunna}
-            className="flex items-center gap-1.5 px-3 py-1.5  bg-slate-950 border border-slate-800 hover:border-amber-600 text-xs text-amber-300 font-bold transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black border border-zinc-800 hover:border-amber-600 text-xs text-amber-300 font-bold transition-colors"
           >
             <span>Send Bunna</span>
           </button>
 
-          {/* 4. Add Friend */}
+          {/* 4. Send friend request */}
           <button
             type="button"
             onClick={handleAddFriendAction}
-            className="flex items-center gap-1.5 px-3 py-1.5  bg-slate-950 border border-slate-800 hover:border-indigo-600 text-xs text-indigo-300 font-bold transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black border border-zinc-800 hover:border-red-600 text-xs text-white font-bold transition-colors"
           >
             <span>👥</span>
-            <span>+Friend</span>
+            <span>Request</span>
           </button>
 
           <button
             type="button"
             onClick={() => setShowAssetMenu(false)}
-            className="ml-auto text-slate-500 hover:text-white text-xs px-2"
+            className="ml-auto text-zinc-500 hover:text-white text-xs px-2"
           >
             ✕
           </button>
@@ -822,15 +802,15 @@ export default function RealChatRoom({
 
       {/* Space-Saving Quick Prompts Popover (Chevron Collapsible) */}
       {showQuickDropdown && (
-        <div className="shrink-0 bg-slate-900 border-t border-slate-800 p-2.5 shadow-2xl animate-slide-up space-y-2">
+        <div className="shrink-0 bg-zinc-950 border-t border-zinc-800 p-2.5 shadow-2xl animate-slide-up space-y-2">
           {/* Tabs: Icebreakers / Quotes / Actions */}
-          <div className="flex items-center justify-between gap-1 pb-1 border-b border-slate-800 text-[11px]">
+          <div className="flex items-center justify-between gap-1 pb-1 border-b border-zinc-800 text-[11px]">
             <div className="flex items-center gap-1">
               <button
                 type="button"
                 onClick={() => setQuickTab('icebreakers')}
-                className={`px-2 py-0.5  font-bold transition-colors ${
-                  quickTab === 'icebreakers' ? 'bg-cyan-950 border border-cyan-700 text-cyan-300' : 'text-slate-400 hover:text-white'
+                className={`px-2 py-0.5 rounded-lg font-bold transition-colors ${
+                  quickTab === 'icebreakers' ? 'bg-red-600 text-white' : 'text-zinc-400 hover:text-white'
                 }`}
               >
                 Icebreakers
@@ -838,8 +818,8 @@ export default function RealChatRoom({
               <button
                 type="button"
                 onClick={() => setQuickTab('quotes')}
-                className={`px-2 py-0.5  font-bold transition-colors ${
-                  quickTab === 'quotes' ? 'bg-cyan-950 border border-cyan-700 text-cyan-300' : 'text-slate-400 hover:text-white'
+                className={`px-2 py-0.5 rounded-lg font-bold transition-colors ${
+                  quickTab === 'quotes' ? 'bg-red-600 text-white' : 'text-zinc-400 hover:text-white'
                 }`}
               >
                 Quotes
@@ -848,7 +828,7 @@ export default function RealChatRoom({
             <button
               type="button"
               onClick={() => setShowQuickDropdown(false)}
-              className="text-slate-500 hover:text-white px-1 text-xs"
+              className="text-zinc-500 hover:text-white px-1 text-xs"
             >
               ✕
             </button>
@@ -862,10 +842,10 @@ export default function RealChatRoom({
                   key={i}
                   type="button"
                   onClick={() => handleSendIcebreaker(ib.text)}
-                  className="text-left p-2  bg-slate-950 border border-slate-800 hover:border-cyan-600 text-[11px] text-slate-300 hover:text-white transition-all space-y-0.5"
+                  className="text-left p-2 rounded-xl bg-black border border-zinc-800 hover:border-red-600 text-[11px] text-zinc-300 hover:text-white transition-all space-y-0.5"
                 >
-                  <span className="font-bold text-cyan-400 block truncate">{ib.label}</span>
-                  <span className="text-[10px] text-slate-400 block truncate">{ib.text}</span>
+                  <span className="font-bold text-red-400 block truncate">{ib.label}</span>
+                  <span className="text-[10px] text-zinc-400 block truncate">{ib.text}</span>
                 </button>
               ))}
             </div>
@@ -879,10 +859,10 @@ export default function RealChatRoom({
                   key={i}
                   type="button"
                   onClick={() => handleSendRomanticQuote(q)}
-                  className="text-left p-2  bg-slate-950 border border-slate-800 hover:border-cyan-600 text-[11px] text-slate-300 hover:text-white transition-all flex items-center justify-between gap-2"
+                  className="text-left p-2 rounded-xl bg-black border border-zinc-800 hover:border-red-600 text-[11px] text-zinc-300 hover:text-white transition-all flex items-center justify-between gap-2"
                 >
                   <span className="truncate flex-1">{q.text}</span>
-                  <span className="text-[10px] text-cyan-400 shrink-0 font-bold">{q.devTag}</span>
+                  <span className="text-[10px] text-red-400 shrink-0 font-bold">{q.devTag}</span>
                 </button>
               ))}
             </div>
@@ -891,8 +871,8 @@ export default function RealChatRoom({
       )}
 
       {/* Slim Space-Optimized Toolbar (Above Input Bar) */}
-      <div className="shrink-0 px-3 py-1 bg-slate-950 border-t border-slate-800/80 flex items-center justify-between gap-2 text-[11px]">
-        <div className="flex items-center gap-2 text-slate-400 truncate">
+      <div className="shrink-0 px-3 py-1 bg-black border-t border-zinc-800/80 flex items-center justify-between gap-2 text-[11px]">
+        <div className="flex items-center gap-2 text-zinc-400 truncate">
           <span className="truncate">
             {sharedTech.length > 0 ? `Shared ${sharedTech.join(', ')}` : `${peer.indentation || 'Tabs'}`}
           </span>
@@ -902,10 +882,10 @@ export default function RealChatRoom({
         <button
           type="button"
           onClick={() => setShowQuickDropdown((prev) => !prev)}
-          className={`flex items-center gap-1.5 px-2 py-0.5  border transition-colors ${
+          className={`flex items-center gap-1.5 px-2 py-0.5 rounded-lg border transition-colors ${
             showQuickDropdown
-              ? 'bg-cyan-950 border-cyan-700 text-cyan-300'
-              : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+              ? 'bg-red-950/70 border-red-600 text-white'
+              : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700'
           }`}
           title="Toggle quick prompts & romantic quotes"
         >
@@ -920,17 +900,17 @@ export default function RealChatRoom({
 
       {/* Quoted Message Reply Preview Bar */}
       {replyingTo && (
-        <div className="shrink-0 flex items-center justify-between px-3.5 py-1.5 bg-slate-900 border-t border-cyan-800 text-xs animate-slide-up">
+        <div className="shrink-0 flex items-center justify-between px-3.5 py-1.5 bg-zinc-950 border-t border-red-600 text-xs animate-slide-up">
           <div className="flex items-center gap-2 min-w-0 pr-2">
-            <span className="text-cyan-400 font-bold shrink-0">↩️ Replying to {replyingTo.sender === 'player' ? 'yourself' : peer.name}:</span>
-            <span className="text-slate-300 truncate text-[11px]">
+            <span className="text-red-400 font-bold shrink-0">↩️ Replying to {replyingTo.sender === 'player' ? 'yourself' : peer.name}:</span>
+            <span className="text-zinc-300 truncate text-[11px]">
               {replyingTo.text || (replyingTo.isImage ? 'Photo 📷' : replyingTo.isAudio ? 'Voice Note 🎙️' : 'Attachment')}
             </span>
           </div>
           <button
             type="button"
             onClick={() => setReplyingTo(null)}
-            className="text-slate-400 hover:text-white text-xs px-1.5 py-0.5 rounded bg-slate-800"
+            className="text-zinc-400 hover:text-white text-xs px-1.5 py-0.5 rounded bg-zinc-800"
             title="Cancel reply"
           >
             ✕
@@ -939,7 +919,7 @@ export default function RealChatRoom({
       )}
 
       {/* Real Text Chat Area Console (Telegram / Social Media Look) */}
-      <footer className="border-t border-slate-800 bg-slate-950 p-2 sm:p-2.5 shrink-0">
+      <footer className="border-t border-zinc-800 bg-black p-2 sm:p-2.5 shrink-0">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -951,10 +931,10 @@ export default function RealChatRoom({
           <button
             type="button"
             onClick={() => setShowAssetMenu((prev) => !prev)}
-            className={`font-mono text-base px-2.5 py-2  border transition-all shrink-0 ${
+            className={`font-mono text-base px-2.5 py-2 rounded-xl border transition-all shrink-0 ${
               showAssetMenu
-                ? 'bg-cyan-950 border-cyan-500 text-cyan-300'
-                : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
+                ? 'bg-red-950 border-red-600 text-white'
+                : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white hover:border-red-600'
             }`}
             title="Attach photo, code snippet, or gift"
           >
@@ -970,7 +950,7 @@ export default function RealChatRoom({
               onChange={handleTextareaChange}
               onKeyDown={handleKeyDown}
               placeholder={isAm ? "መልእክት ይተይቡ (Enter ለመላክ)..." : `Message ${peer.name} (Enter to send)...`}
-              className="w-full bg-slate-900 border border-slate-800 focus:border-cyan-500  px-3 py-2 font-mono text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none transition-colors resize-none max-h-24 leading-relaxed"
+              className="w-full bg-zinc-950 border border-zinc-800 focus:border-red-600 rounded-xl px-3 py-2 font-mono text-xs text-white placeholder:text-zinc-600 focus:outline-none transition-colors resize-none max-h-24 leading-relaxed"
             />
           </div>
 
@@ -978,10 +958,10 @@ export default function RealChatRoom({
           <button
             type="button"
             onClick={toggleVoiceRecording}
-            className={`font-mono text-xs font-bold px-2.5 py-2  border flex items-center gap-1 transition-all shrink-0 ${
+            className={`font-mono text-xs font-bold px-2.5 py-2 rounded-xl border flex items-center gap-1 transition-all shrink-0 ${
               isRecordingVoice
-                ? 'bg-red-950 border-red-500 text-red-300 animate-pulse'
-                : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                ? 'bg-red-600 border-red-500 text-white animate-pulse'
+                : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white hover:border-red-600'
             }`}
             title="Send audio voice note"
           >
@@ -992,10 +972,10 @@ export default function RealChatRoom({
           <button
             type="submit"
             disabled={!inputText.trim()}
-            className={`font-mono text-xs font-bold px-3 py-2  border flex items-center gap-1.5 transition-all shrink-0 ${
+            className={`font-mono text-xs font-bold px-3 py-2 rounded-xl border flex items-center gap-1.5 transition-all shrink-0 ${
               !inputText.trim()
-                ? 'bg-slate-900 border-slate-800 text-slate-600 cursor-not-allowed'
-                : 'bg-cyan-950 border-cyan-700 text-cyan-300 hover:bg-cyan-900 cursor-pointer shadow-sm'
+                ? 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'
+                : 'bg-red-600 border-red-500 text-white hover:bg-red-700 cursor-pointer shadow-sm'
             }`}
           >
             <IconSend className="w-3.5 h-3.5" />
@@ -1007,11 +987,11 @@ export default function RealChatRoom({
       {/* Mobile Peer Stats Drawer Overlay */}
       {showMobileStatsDrawer && (
         <div
-          className="fixed inset-0 z-50 md:hidden bg-slate-950/80 backdrop-blur-sm flex justify-start animate-fade-in"
+          className="fixed inset-0 z-50 md:hidden bg-black/85 backdrop-blur-sm flex justify-start animate-fade-in"
           onClick={() => setShowMobileStatsDrawer(false)}
         >
           <div
-            className="w-72 sm:w-80 h-full bg-slate-950 shadow-2xl flex flex-col animate-slide-right border-r border-slate-800"
+            className="w-72 sm:w-80 h-full bg-black shadow-2xl flex flex-col animate-slide-right border-r border-zinc-800"
             onClick={(e) => e.stopPropagation()}
           >
             <RealPeerSidebar
@@ -1043,6 +1023,12 @@ export default function RealChatRoom({
           setIsFriend((prev) => !prev);
           handleAddFriendAction();
         }}
+        onFollow={async () => {
+          setIsFollowing((prev) => !prev);
+          soundEngine.playRomanticChime();
+          const action = isFollowing ? 'unfollow' : 'follow';
+          await wsService.sendSocialAction(action, peer.id);
+        }}
         onLike={() => {
           setIsLiked(true);
           soundEngine.playHeartbeat();
@@ -1050,6 +1036,7 @@ export default function RealChatRoom({
         }}
         onOpenGiftModal={onOpenGiftModal}
         isFriend={isFriend}
+        isFollowing={isFollowing}
         isLiked={isLiked}
         lang={lang}
       />
