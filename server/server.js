@@ -122,17 +122,17 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // ── REST: Social Actions (Wave, Like, Friend) ─────────────────────────────
+  // ── REST: Social Actions (Wave, Like, Follow, Friend) ─────────────────────
   if (req.method === 'POST' && url.pathname === '/api/social/action') {
     try {
       const body = await readJsonBody(req);
       const { action, fromUser, targetUserId, metadata } = body;
-      let targetUser = null;
+      let interactResult = null;
 
-      if (action === 'wave' || action === 'like') {
-        targetUser = db.interact(action, fromUser, targetUserId);
+      if (action === 'wave' || action === 'like' || action === 'follow' || action === 'toggle_follow') {
+        interactResult = db.interact(action, fromUser, targetUserId);
       } else if (action === 'remove_friend') {
-        targetUser = db.interact('remove_friend', fromUser, targetUserId);
+        interactResult = db.interact('remove_friend', fromUser, targetUserId);
         broadcastOnlineUsers();
       }
 
@@ -142,6 +142,7 @@ const server = http.createServer(async (req, res) => {
         let notifType = action;
         if (action === 'wave') notifText = `${fromUser.name} sent you a warm coffee wave ☕`;
         else if (action === 'like') notifText = `${fromUser.name} liked your developer card 💖`;
+        else if (action === 'follow' || action === 'toggle_follow') notifText = `${fromUser.name} started following your developer journey 🌟`;
         else if (action === 'add_friend' || action === 'friend_request') {
           // Check if already friends
           const currentFromUser = db.getUserById(fromUser.id);
@@ -173,19 +174,42 @@ const server = http.createServer(async (req, res) => {
         }
       }
 
-      // Real-time broadcast of wave or like
+      // Real-time broadcast of social action
       broadcastToAll({
         type: 'social:action',
         action,
         fromUser,
         targetUserId,
+        targetUser: interactResult?.targetUser,
+        actor: interactResult?.actor,
         metadata,
       });
 
-      sendJson(res, 200, { ok: true, action, targetUser });
+      sendJson(res, 200, {
+        ok: true,
+        action,
+        targetUser: interactResult?.targetUser,
+        actor: interactResult?.actor,
+      });
     } catch (err) {
       sendJson(res, 400, { ok: false, error: err.message });
     }
+    return;
+  }
+
+  // ── REST: Sync User Profile ───────────────────────────────────────────────
+  if (req.method === 'GET' && url.pathname === '/api/users/profile') {
+    const userId = url.searchParams.get('userId');
+    if (!userId) {
+      sendJson(res, 400, { ok: false, error: 'userId required' });
+      return;
+    }
+    const user = db.getUserById(userId);
+    if (!user) {
+      sendJson(res, 404, { ok: false, error: 'User not found' });
+      return;
+    }
+    sendJson(res, 200, { ok: true, user });
     return;
   }
 
@@ -253,7 +277,7 @@ const server = http.createServer(async (req, res) => {
       const { notificationId, action, userId } = body; // action: 'accepted' | 'declined'
       const updatedNotif = db.respondToFriendRequest(notificationId, action, userId);
 
-      if (action === 'accepted' && updatedNotif) {
+      if ((action === 'accepted' || action === 'declined') && updatedNotif) {
         // Broadcast presence update with updated friends lists
         broadcastOnlineUsers();
 
@@ -264,10 +288,12 @@ const server = http.createServer(async (req, res) => {
               type: 'notification:new',
               notification: {
                 id: `notif_${Date.now()}`,
-                type: 'friend_accept',
+                type: action === 'accepted' ? 'friend_accept' : 'friend_decline',
                 fromUser: { id: userId, name: 'Developer friend' },
                 targetUserId: otherUser.id,
-                text: `🎉 Your developer friend request was accepted!`,
+                text: action === 'accepted'
+                  ? 'Your developer friend request was accepted.'
+                  : 'Your developer friend request was declined. You can send a new request later.',
                 timestamp: new Date().toISOString(),
               },
             }));
@@ -709,15 +735,16 @@ function handleClientMessage(ws, msg) {
       break;
     }
 
-    // ── 6. Social Action (Wave, Like, Coffee, Friend Request) ──────────────────
+    // ── 6. Social Action (Wave, Like, Follow, Coffee, Friend Request) ─────────
     case 'social:interact': {
       const { action, targetUserId } = msg;
-      const targetUser = db.interact(action, user, targetUserId);
+      const interactResult = db.interact(action, user, targetUserId);
 
       // Create notification
       let notifText = '';
       if (action === 'wave') notifText = `${user.name} sent you a warm coffee wave ☕`;
       else if (action === 'like') notifText = `${user.name} liked your developer card 💖`;
+      else if (action === 'follow' || action === 'toggle_follow') notifText = `${user.name} started following your developer journey 🌟`;
       else if (action === 'add_friend' || action === 'friend_request') {
         notifText = `${user.name} sent you a developer friend request 👥`;
       }
@@ -757,6 +784,8 @@ function handleClientMessage(ws, msg) {
           emoji: user.emoji,
         },
         targetUserId,
+        targetUser: interactResult?.targetUser,
+        actor: interactResult?.actor,
       });
       break;
     }
