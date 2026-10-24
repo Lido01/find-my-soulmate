@@ -27,7 +27,7 @@ export default function CharacterCard({ character, charState, onSelect, t, lang 
   return (
     <div
       onClick={() => onSelect?.(character.id)}
-      className="group relative w-full text-left   border-2 border-zinc-800 hover:border-red-600 bg-zinc-950 p-5 overflow-hidden transition-all duration-300 hover:scale-[1.02] cursor-pointer shadow-2xl flex flex-col justify-between font-mono select-text"
+      className="group relative w-full text-left rounded-3xl border-2 border-zinc-800 hover:border-red-600 bg-zinc-950 p-5 overflow-hidden transition-all duration-300 hover:scale-[1.02] cursor-pointer shadow-2xl flex flex-col justify-between font-mono select-text"
     >
       {/* Red ambient highlight */}
       <div className="absolute -top-12 -right-12 w-32 h-32 bg-red-600/10 blur-2xl group-hover:bg-red-600/25 transition-all" />
@@ -36,7 +36,7 @@ export default function CharacterCard({ character, charState, onSelect, t, lang 
         {/* Header row */}
         <div className="flex items-start gap-3.5">
           {/* Avatar */}
-          <div className="w-14 h-14   bg-black flex items-center justify-center shrink-0 text-xl font-mono font-black text-white border-2 border-red-600 shadow-lg shadow-red-950/40">
+          <div className="w-14 h-14 rounded-2xl bg-black flex items-center justify-center shrink-0 text-xl font-mono font-black text-white border-2 border-red-600 shadow-lg shadow-red-950/40">
             {initials}
           </div>
 
@@ -47,7 +47,7 @@ export default function CharacterCard({ character, charState, onSelect, t, lang 
                 {character.name}
               </h3>
               {character.nationality && <span className="text-sm">{character.nationality}</span>}
-              <span className="font-mono text-[10px] text-red-400 border border-red-900/60 bg-black   px-2 py-0.5 font-bold">
+              <span className="font-mono text-[10px] text-red-400 border border-red-900/60 bg-black rounded-lg px-2 py-0.5 font-bold">
                 {character.gender === 'female' ? 'Girlfriend' : 'Boyfriend'}
               </span>
             </div>
@@ -56,13 +56,13 @@ export default function CharacterCard({ character, charState, onSelect, t, lang 
           </div>
 
           {/* Mood indicator */}
-          <span className="text-xl shrink-0 p-1 bg-black   border border-zinc-800">{moodMeta.emoji}</span>
+          <span className="text-xl shrink-0 p-1 bg-black rounded-xl border border-zinc-800">{moodMeta.emoji || "🤔"}</span>
         </div>
 
         {/* Mood description pill */}
-        <div className="flex items-center justify-between   px-3 py-1.5 border border-zinc-800 bg-black">
+        <div className="flex items-center justify-between rounded-xl px-3 py-1.5 border border-zinc-800 bg-black">
           <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2   bg-red-500" />
+            <span className="w-2 h-2 rounded-full bg-red-500" />
             <span className="font-mono text-xs font-bold text-red-400">
               {t?.moods?.[mood] ?? mood}
             </span>
@@ -85,7 +85,7 @@ export default function CharacterCard({ character, charState, onSelect, t, lang 
             {personalities.map((tag, i) => (
               <span
                 key={i}
-                className="font-mono text-[10px] bg-black border border-zinc-800 text-zinc-300   px-2 py-0.5 font-bold"
+                className="font-mono text-[10px] bg-black border border-zinc-800 text-zinc-300 rounded-lg px-2 py-0.5 font-bold"
               >
                 {tag}
               </span>
@@ -95,14 +95,14 @@ export default function CharacterCard({ character, charState, onSelect, t, lang 
 
         {/* Fun fact preview */}
         {randomFact && (
-          <p className="font-mono text-[11px] text-zinc-400 italic bg-black/60 border border-zinc-800   p-2.5 leading-relaxed">
+          <p className="font-mono text-[11px] text-zinc-400 italic bg-black/60 border border-zinc-800 rounded-xl p-2.5 leading-relaxed">
             // {randomFact}
           </p>
         )}
       </div>
 
       {/* Action button */}
-      <div className="relative z-10 w-full text-center py-2.5   font-mono text-xs font-bold transition-all duration-200 border border-zinc-700 bg-black text-white group-hover:bg-red-600 group-hover:border-red-500 mt-4 flex items-center justify-center gap-2 shadow-sm">
+      <div className="relative z-10 w-full text-center py-2.5 rounded-xl font-mono text-xs font-bold transition-all duration-200 border border-zinc-700 bg-black text-white group-hover:bg-red-600 group-hover:border-red-500 mt-4 flex items-center justify-center gap-2 shadow-sm">
         <span>{t?.openChannel ?? "OPEN CHANNEL"}</span>
         <span>→</span>
       </div>

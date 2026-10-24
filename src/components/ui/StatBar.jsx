@@ -48,7 +48,7 @@ export default function StatBar({ label, value, color = "red" }) {
   return (
     <div className="flex items-center gap-2 w-full font-mono">
       <span className="text-[11px] text-zinc-400 w-24 shrink-0 truncate">{label}</span>
-      <div className="flex-1 bg-zinc-900 border border-zinc-800   h-1.5 overflow-hidden">
+      <div className="flex-1 bg-zinc-900 border border-zinc-800 rounded-full h-1.5 overflow-hidden">
         <div
           className={`h-full   transition-all duration-500 ${colors.bar}`}
           style={{ width: `${pct}%` }}

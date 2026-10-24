@@ -64,7 +64,7 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md animate-fade-in font-mono select-text"
       onClick={(e) => e.target === e.currentTarget && onClose?.()}
     >
-      <div className="relative w-full max-w-lg bg-black border border-zinc-800   shadow-2xl shadow-red-950/40 overflow-hidden flex flex-col max-h-[90vh] animate-slide-up">
+      <div className="relative w-full max-w-lg bg-black border border-zinc-800 rounded-3xl shadow-2xl shadow-red-950/40 overflow-hidden flex flex-col max-h-[90vh] animate-slide-up">
         {/* Top glow border */}
         <div className="h-1.5 w-full bg-gradient-to-r from-red-700 via-red-500 to-white" />
 
@@ -81,7 +81,7 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
           <button
             type="button"
             onClick={onClose}
-            className="text-zinc-400 hover:text-white p-1.5   bg-zinc-900 border border-zinc-800 hover:border-red-600 transition-colors"
+            className="text-zinc-400 hover:text-white p-1.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-red-600 transition-colors"
           >
             <IconX className="w-5 h-5" />
           </button>
@@ -97,7 +97,7 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
                 soundEngine.playHeartbeat();
                 setStep(s);
               }}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5   font-mono text-xs font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-mono text-xs font-bold transition-all ${
                 step === s
                   ? 'bg-red-600 text-white border border-red-500 shadow-[0_0_12px_rgba(239,68,68,0.4)]'
                   : 'bg-zinc-950 text-zinc-500 border border-zinc-800 hover:text-white'
@@ -130,7 +130,7 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
                         soundEngine.playHeartbeat();
                         setProfile((p) => ({ ...p, lookingFor: opt.id }));
                       }}
-                      className={`p-3.5   border text-left font-mono transition-all duration-200 ${
+                      className={`p-3.5 rounded-2xl border text-left font-mono transition-all duration-200 ${
                         profile.lookingFor === opt.id
                           ? 'border-red-500 bg-red-950/60 text-white shadow-lg shadow-red-950/50'
                           : 'border-zinc-800 bg-zinc-950 text-zinc-400 hover:border-zinc-700'
@@ -153,7 +153,7 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
                       key={goal}
                       type="button"
                       onClick={() => setProfile((p) => ({ ...p, goal }))}
-                      className={`w-full p-3   border text-left font-mono text-xs transition-all ${
+                      className={`w-full p-3 rounded-xl border text-left font-mono text-xs transition-all ${
                         profile.goal === goal
                           ? 'border-red-500 bg-red-950/50 text-white font-bold'
                           : 'border-zinc-800 bg-zinc-950 text-zinc-400 hover:border-zinc-700'
@@ -175,7 +175,7 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
                   {lang === 'am' ? 'የእርስዎ ስም / Handle' : 'Your Name / Dev Handle'}
                 </label>
                 <div className="flex items-center gap-3">
-                  <div className="text-3xl p-2   bg-zinc-950 border border-zinc-800 flex items-center justify-center shrink-0">
+                  <div className="text-3xl p-2 rounded-2xl bg-zinc-950 border border-zinc-800 flex items-center justify-center shrink-0">
                     {profile.emoji}
                   </div>
                   <input
@@ -183,7 +183,7 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
                     value={profile.name}
                     onChange={(e) => setProfile((p) => ({ ...p, name: e.target.value }))}
                     placeholder="Enter your name or dev handle..."
-                    className="flex-1 bg-zinc-950 border border-zinc-800   px-3.5 py-2.5 font-mono text-sm text-white focus:border-red-500 focus:outline-none"
+                    className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2.5 font-mono text-sm text-white focus:border-red-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -201,7 +201,7 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
                         soundEngine.playMessageBeep();
                         setProfile((p) => ({ ...p, emoji: em }));
                       }}
-                      className={`p-2.5 text-2xl   border text-center transition-all ${
+                      className={`p-2.5 text-2xl rounded-xl border text-center transition-all ${
                         profile.emoji === em
                           ? 'border-red-500 bg-red-950/60 scale-110 shadow-md shadow-red-950/50'
                           : 'border-zinc-800 bg-zinc-950 hover:border-zinc-700'
@@ -220,7 +220,7 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
                 <select
                   value={profile.archetype}
                   onChange={(e) => setProfile((p) => ({ ...p, archetype: e.target.value }))}
-                  className="w-full bg-zinc-950 border border-zinc-800   px-3.5 py-2.5 font-mono text-xs text-white focus:outline-none focus:border-red-500"
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2.5 font-mono text-xs text-white focus:outline-none focus:border-red-500"
                 >
                   {ARCHETYPES.map((arch) => (
                     <option key={arch} value={arch} className="bg-black text-white">
@@ -245,7 +245,7 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
                       key={stack}
                       type="button"
                       onClick={() => setProfile((p) => ({ ...p, favoriteStack: stack }))}
-                      className={`p-3   border text-left font-mono text-xs transition-all ${
+                      className={`p-3 rounded-xl border text-left font-mono text-xs transition-all ${
                         profile.favoriteStack === stack
                           ? 'border-red-500 bg-red-950/60 text-white font-bold'
                           : 'border-zinc-800 bg-zinc-950 text-zinc-400 hover:border-zinc-700'
@@ -266,7 +266,7 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
                   onChange={(e) => setProfile((p) => ({ ...p, bio: e.target.value }))}
                   rows={3}
                   placeholder="Searching for someone whose code compiles as cleanly as our chemistry..."
-                  className="w-full bg-zinc-950 border border-zinc-800   p-3 font-mono text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-500"
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 font-mono text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-red-500"
                 />
               </div>
             </div>
@@ -279,7 +279,7 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
             <button
               type="button"
               onClick={() => setStep((s) => s - 1)}
-              className="font-mono text-xs text-zinc-400 hover:text-white px-3.5 py-2   border border-zinc-800 hover:bg-zinc-900 transition-colors"
+              className="font-mono text-xs text-zinc-400 hover:text-white px-3.5 py-2 rounded-xl border border-zinc-800 hover:bg-zinc-900 transition-colors"
             >
               ← Back
             </button>
@@ -294,7 +294,7 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
                 soundEngine.playHeartbeat();
                 setStep((s) => s + 1);
               }}
-              className="font-mono text-xs font-bold px-5 py-2.5   bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-950/40 transition-all"
+              className="font-mono text-xs font-bold px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-950/40 transition-all"
             >
               Next Step →
             </button>
@@ -302,7 +302,7 @@ export default function OnboardingModal({ isOpen, onClose, userProfile, onSavePr
             <button
               type="button"
               onClick={handleSave}
-              className="font-mono text-xs font-bold px-6 py-2.5   bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-950/50 flex items-center gap-2 transition-all"
+              className="font-mono text-xs font-bold px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-950/50 flex items-center gap-2 transition-all"
             >
               <IconHeart className="w-4 h-4" />
               <span>{lang === 'am' ? 'አስቀምጥና ጀምር' : 'Save & Find Soulmate'}</span>

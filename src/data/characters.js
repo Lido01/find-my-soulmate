@@ -12,7 +12,7 @@ export const MOODS = {
 
 export const MOOD_META = {
   [MOODS.SMITTEN]: {
-    emoji: '❤️',
+    emoji: '💖',
     color: 'red',
     borderColor: '#ef4444',
     textClass: 'text-red-400',

@@ -13,7 +13,7 @@ function EmptyState({ character, lang }) {
 
   return (
     <div className="flex flex-col items-center justify-center flex-1 gap-4 py-16 select-none font-mono">
-      <div className="w-16 h-16   bg-black border-2 border-red-600 flex items-center justify-center text-2xl font-mono font-black text-white shadow-xl shadow-red-950/40">
+      <div className="w-16 h-16 rounded-2xl bg-black border-2 border-red-600 flex items-center justify-center text-2xl font-mono font-black text-white shadow-xl shadow-red-950/40">
         {initials}
       </div>
       <div className="text-center space-y-1">

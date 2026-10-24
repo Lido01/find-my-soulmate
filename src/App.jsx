@@ -401,7 +401,7 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setMobileSidebarOpen(false)}
-                  className="px-2 py-1   text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 text-xs font-mono"
+                  className="px-2 py-1 rounded-lg text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 text-xs font-mono"
                 >
                   ✕
                 </button>
@@ -667,7 +667,7 @@ function ChatHeader({ character, charState, userProfile, onOpenLoveHub, onToggle
   return (
     <div className="flex-shrink-0 flex items-center gap-3 px-3 sm:px-5 py-2.5 border-b border-zinc-800 bg-black/95 backdrop-blur-sm font-mono select-text">
       {/* Avatar */}
-      <div className="w-9 h-9   bg-black flex items-center justify-center text-sm font-black text-white border-2 border-red-600 flex-shrink-0 shadow-md shadow-red-950/40">
+      <div className="w-9 h-9 rounded-xl bg-black flex items-center justify-center text-sm font-black text-white border-2 border-red-600 flex-shrink-0 shadow-md shadow-red-950/40">
         {character.avatarInitials}
       </div>
 
@@ -677,17 +677,17 @@ function ChatHeader({ character, charState, userProfile, onOpenLoveHub, onToggle
           <span className="text-sm font-heading font-black truncate text-white">{character.name}</span>
           <span className="text-xs text-red-400 font-bold hidden sm:inline">{character.handle}</span>
           <span>{mood?.emoji}</span>
-          <span className="text-[10px] text-white border border-zinc-800 bg-zinc-950   px-2 py-0.5 font-bold">
+          <span className="text-[10px] text-white border border-zinc-800 bg-zinc-950 rounded-lg px-2 py-0.5 font-bold">
             {character.gender === 'female' ? 'Girlfriend 👩‍💻' : 'Boyfriend 👨‍💻'}
           </span>
           {aiModeActive && (
-            <span className="text-[10px] px-2 py-0.5   bg-red-600 text-white font-bold">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-600 text-white font-bold">
               🤖 AI
             </span>
           )}
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-1.5 h-1.5   bg-red-500 animate-pulse" />
+          <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
           <span className="text-xs text-zinc-400 truncate">
             {t?.online ?? "online"} · {typeof character.title === 'object' ? character.title[lang] || character.title.en : character.title}
           </span>
@@ -698,12 +698,12 @@ function ChatHeader({ character, charState, userProfile, onOpenLoveHub, onToggle
       <button
         type="button"
         onClick={onToggleMobileSidebar}
-        className={`md:hidden flex items-center gap-1.5 font-mono text-xs px-2.5 py-1.5   bg-zinc-900 border border-zinc-800 text-white hover:border-red-600 shrink-0 shadow-sm ${
+        className={`md:hidden flex items-center gap-1.5 font-mono text-xs px-2.5 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white hover:border-red-600 shrink-0 shadow-sm ${
           mobileSidebarOpen ? 'ring-1 ring-red-500/50' : ''
         }`}
         title="View partner stats & switcher"
       >
-        <span className="h-1.5 w-1.5   bg-red-500" />
+        <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
         <span>Partner</span>
         {mobileSidebarOpen ? <IconChevronUp className="w-3.5 h-3.5" /> : <IconChevronDown className="w-3.5 h-3.5" />}
       </button>
@@ -713,15 +713,15 @@ function ChatHeader({ character, charState, userProfile, onOpenLoveHub, onToggle
         {/* Quick Love Hub Pill Button */}
         <button
           onClick={onOpenLoveHub}
-          className="flex items-center gap-1.5 px-3 py-1.5   bg-zinc-950 border border-zinc-800 hover:border-red-600 transition-all text-xs font-mono shadow-sm"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-red-600 transition-all text-xs font-mono shadow-sm"
           title="Open Love Metrics & Reactions"
         >
-          <span>❤️</span>
+          <span>💖</span>
           <span className="text-white font-bold">{charState.relationship}%</span>
           <span className="text-zinc-500 text-[10px]">Bond</span>
         </button>
 
-        <div className="px-3 py-1.5   text-xs font-bold border border-zinc-800 bg-zinc-950 text-red-400">
+        <div className="px-3 py-1.5 rounded-xl text-xs font-bold border border-zinc-800 bg-zinc-950 text-red-400">
           {t?.moods?.[charState.mood] || charState.mood}
         </div>
       </div>

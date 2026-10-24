@@ -56,7 +56,7 @@ export default function LoveWordBubble({ lang = "en" }) {
         fading ? "opacity-0 translate-y-2" : "opacity-100 translate-y-0"
       }`}
     >
-      <div className="bg-black/95 backdrop-blur border border-red-600/70   px-4 py-2 shadow-xl shadow-red-950/50">
+      <div className="bg-black/95 backdrop-blur border border-red-600/70 rounded-2xl px-4 py-2 shadow-xl shadow-red-950/50">
         <p className="text-red-400 text-sm font-bold tracking-wide">{word}</p>
       </div>
     </div>

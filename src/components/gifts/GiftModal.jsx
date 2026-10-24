@@ -26,11 +26,11 @@ export default function GiftModal({ isOpen, onClose, onGift, character, t, lang 
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md animate-fade-in font-mono select-text"
       onClick={(e) => e.target === e.currentTarget && onClose?.()}
     >
-      <div className="relative w-full max-w-2xl bg-black   border border-zinc-800 shadow-2xl shadow-red-950/40 overflow-hidden flex flex-col max-h-[90vh] animate-slide-up">
+      <div className="relative w-full max-w-2xl bg-black rounded-3xl border border-zinc-800 shadow-2xl shadow-red-950/40 overflow-hidden flex flex-col max-h-[90vh] animate-slide-up">
         {/* Modal header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800 bg-zinc-950/90 shrink-0">
           <div className="flex items-center gap-2.5">
-            <span className="p-1.5   bg-red-950/70 border border-red-600/50 text-red-400">
+            <span className="p-1.5 rounded-xl bg-red-950/70 border border-red-600/50 text-red-400">
               <IconGift className="w-4 h-4" />
             </span>
             <div>
@@ -43,7 +43,7 @@ export default function GiftModal({ isOpen, onClose, onGift, character, t, lang 
           <button
             type="button"
             onClick={onClose}
-            className="text-zinc-400 hover:text-white transition-colors p-1.5   bg-zinc-900 border border-zinc-800 hover:border-red-600"
+            className="text-zinc-400 hover:text-white transition-colors p-1.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-red-600"
           >
             <IconX className="w-4 h-4" />
           </button>
@@ -57,7 +57,7 @@ export default function GiftModal({ isOpen, onClose, onGift, character, t, lang 
               type="button"
               onClick={() => setActiveCategory(i)}
               className={`
-                shrink-0 font-mono text-xs px-3.5 py-1.5   border transition-all duration-200 font-bold flex items-center gap-1.5
+                shrink-0 font-mono text-xs px-3.5 py-1.5 rounded-xl border transition-all duration-200 font-bold flex items-center gap-1.5
                 ${activeCategory === i
                   ? "bg-red-600 text-white border-red-500 shadow-[0_0_12px_rgba(239,68,68,0.4)]"
                   : "bg-zinc-950 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700"
@@ -84,12 +84,12 @@ export default function GiftModal({ isOpen, onClose, onGift, character, t, lang 
                 key={gift.id ?? i}
                 type="button"
                 onClick={() => handleGift(gift)}
-                className="group relative flex flex-col justify-between gap-2.5 bg-zinc-950 hover:bg-zinc-900/90 border border-zinc-800 hover:border-red-600   p-3.5 text-left transition-all duration-200 hover:scale-[1.02] shadow-lg shadow-black"
+                className="group relative flex flex-col justify-between gap-2.5 bg-zinc-950 hover:bg-zinc-900/90 border border-zinc-800 hover:border-red-600 rounded-2xl p-3.5 text-left transition-all duration-200 hover:scale-[1.02] shadow-lg shadow-black"
               >
                 <div>
                   {/* Icon + name */}
                   <div className="flex items-center gap-2.5 mb-2">
-                    <span className="text-3xl p-1.5   bg-black border border-zinc-800 group-hover:border-red-600/70 transition-colors shrink-0">
+                    <span className="text-3xl p-1.5 rounded-xl bg-black border border-zinc-800 group-hover:border-red-600/70 transition-colors shrink-0">
                       {gift.icon ?? "🎁"}
                     </span>
                     <div className="flex-1 min-w-0">
@@ -97,7 +97,7 @@ export default function GiftModal({ isOpen, onClose, onGift, character, t, lang 
                         {giftName}
                       </p>
                       {/* Rarity badge */}
-                      <span className="inline-block mt-0.5 font-mono text-[9px] font-bold px-1.5 py-0.5   uppercase tracking-wider bg-zinc-900 text-red-300 border border-red-900/50">
+                      <span className="inline-block mt-0.5 font-mono text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider bg-zinc-900 text-red-300 border border-red-900/50">
                         {gift.rarity || 'Common'}
                       </span>
                     </div>

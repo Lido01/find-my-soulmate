@@ -50,7 +50,7 @@ export default function RelationshipMeter({ value = 0, accentColor = "red", t = 
         <span className="font-mono text-xs text-zinc-400">{t.relationship ?? "relationship"}</span>
         <span className={`font-mono text-xs font-bold ${colors.text}`}>{pct}%</span>
       </div>
-      <div className="w-full bg-black border border-zinc-800   h-2 overflow-hidden">
+      <div className="w-full bg-black border border-zinc-800 rounded-full h-2 overflow-hidden">
         <div
           className={`h-full   transition-all duration-700 ease-out ${colors.bar} shadow-sm ${colors.glow}`}
           style={{ width: `${pct}%` }}

@@ -19,7 +19,7 @@ export default function MoodToast({ mood, visible }) {
           : "opacity-0 -translate-y-4 pointer-events-none"
       }`}
     >
-      <div className="bg-black/95 backdrop-blur border border-red-600/80   px-4 py-3 max-w-xs shadow-2xl shadow-red-950/50">
+      <div className="bg-black/95 backdrop-blur border border-red-600/80 rounded-2xl px-4 py-3 max-w-xs shadow-2xl shadow-red-950/50">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xl">{meta.emoji}</span>
           <span className="text-sm font-bold text-red-400">

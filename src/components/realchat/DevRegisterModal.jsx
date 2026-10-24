@@ -212,7 +212,7 @@ export default function DevRegisterModal({
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md animate-fade-in font-mono select-text"
       onClick={(e) => e.target === e.currentTarget && onClose?.()}
     >
-      <div className="w-full max-w-lg max-h-[92vh] bg-black border border-zinc-800   shadow-2xl shadow-red-950/40 flex flex-col overflow-hidden animate-slide-up">
+      <div className="w-full max-w-lg max-h-[92vh] bg-black border border-zinc-800 rounded-3xl shadow-2xl shadow-red-950/40 flex flex-col overflow-hidden animate-slide-up">
         {/* Header Bar */}
         <div className="p-4 sm:p-5 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/90 shrink-0">
           <div>
@@ -236,7 +236,7 @@ export default function DevRegisterModal({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5   bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-red-600 transition-colors"
+              className="p-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-red-600 transition-colors"
             >
               <IconX className="w-5 h-5" />
             </button>
@@ -252,7 +252,7 @@ export default function DevRegisterModal({
               setAuthMode('register');
               setErrorMsg('');
             }}
-            className={`py-2 text-center font-bold   transition-all ${
+            className={`py-2 text-center font-bold rounded-xl transition-all ${
               authMode === 'register'
                 ? 'bg-red-600 text-white shadow-sm'
                 : 'bg-zinc-950 text-zinc-400 border border-zinc-800 hover:text-white'
@@ -267,7 +267,7 @@ export default function DevRegisterModal({
               setAuthMode('login');
               setErrorMsg('');
             }}
-            className={`py-2 text-center font-bold   transition-all ${
+            className={`py-2 text-center font-bold rounded-xl transition-all ${
               authMode === 'login'
                 ? 'bg-red-600 text-white shadow-sm'
                 : 'bg-zinc-950 text-zinc-400 border border-zinc-800 hover:text-white'
@@ -281,7 +281,7 @@ export default function DevRegisterModal({
         {authMode === 'login' && (
           <form onSubmit={handleLoginWithLoveCode} className="p-5 sm:p-6 space-y-4 overflow-y-auto bg-black">
             <div className="text-center space-y-2">
-              <div className="w-14 h-14   bg-zinc-950 border border-red-600 mx-auto flex items-center justify-center text-3xl shadow">
+              <div className="w-14 h-14 rounded-2xl bg-zinc-950 border border-red-600 mx-auto flex items-center justify-center text-3xl shadow">
                 🔑
               </div>
               <p className="text-xs text-zinc-400 max-w-sm mx-auto leading-relaxed font-sans">
@@ -301,18 +301,18 @@ export default function DevRegisterModal({
                 value={inputLoveCode}
                 onChange={(e) => setInputLoveCode(e.target.value.toUpperCase())}
                 placeholder="e.g. LOVE-8FA2-K9Q1"
-                className="w-full bg-zinc-950 border border-zinc-800 focus:border-red-600   px-3.5 py-2.5 text-center text-sm font-bold tracking-wider text-red-400 placeholder:text-zinc-600 focus:outline-none"
+                className="w-full bg-zinc-950 border border-zinc-800 focus:border-red-600 rounded-xl px-3.5 py-2.5 text-center text-sm font-bold tracking-wider text-red-400 placeholder:text-zinc-600 focus:outline-none"
               />
             </div>
 
             {errorMsg && (
-              <div className="p-3   bg-red-950/80 border border-red-700 text-red-300 text-xs font-bold animate-shake">
+              <div className="p-3 rounded-xl bg-red-950/80 border border-red-700 text-red-300 text-xs font-bold animate-shake">
                 ⚠ {errorMsg}
               </div>
             )}
 
             {successMsg && (
-              <div className="p-3   bg-red-950 border border-red-600 text-white font-bold text-xs animate-bounce-in flex items-center justify-center gap-2">
+              <div className="p-3 rounded-xl bg-red-950 border border-red-600 text-white font-bold text-xs animate-bounce-in flex items-center justify-center gap-2">
                 <span>✓</span>
                 <span>{successMsg}</span>
               </div>
@@ -321,7 +321,7 @@ export default function DevRegisterModal({
             <button
               type="submit"
               disabled={isSaving || !inputLoveCode.trim()}
-              className={`w-full py-3   font-bold transition-all shadow-md flex items-center justify-center gap-2 text-xs ${
+              className={`w-full py-3 rounded-xl font-bold transition-all shadow-md flex items-center justify-center gap-2 text-xs ${
                 isSaving
                   ? 'bg-zinc-900 border border-zinc-800 text-zinc-500 cursor-wait'
                   : 'bg-red-600 hover:bg-red-700 text-white cursor-pointer shadow-red-950/40'
@@ -344,10 +344,10 @@ export default function DevRegisterModal({
               <button
                 type="button"
                 onClick={() => handleSelectTarget('female')}
-                className="p-5   bg-zinc-950 border border-zinc-800 hover:border-red-600 hover:bg-zinc-900 text-left transition-all group flex flex-col justify-between space-y-3 shadow-md"
+                className="p-5 rounded-3xl bg-zinc-950 border border-zinc-800 hover:border-red-600 hover:bg-zinc-900 text-left transition-all group flex flex-col justify-between space-y-3 shadow-md"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-3xl p-2   bg-black border border-zinc-800 group-hover:border-red-600 transition-colors">👩‍💻</span>
+                  <span className="text-3xl p-2 rounded-2xl bg-black border border-zinc-800 group-hover:border-red-600 transition-colors">👩‍💻</span>
                   <span className="text-xs font-bold text-red-400 group-hover:translate-x-1 transition-transform">→</span>
                 </div>
                 <div>
@@ -364,10 +364,10 @@ export default function DevRegisterModal({
               <button
                 type="button"
                 onClick={() => handleSelectTarget('male')}
-                className="p-5   bg-zinc-950 border border-zinc-800 hover:border-red-600 hover:bg-zinc-900 text-left transition-all group flex flex-col justify-between space-y-3 shadow-md"
+                className="p-5 rounded-3xl bg-zinc-950 border border-zinc-800 hover:border-red-600 hover:bg-zinc-900 text-left transition-all group flex flex-col justify-between space-y-3 shadow-md"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-3xl p-2   bg-black border border-zinc-800 group-hover:border-red-600 transition-colors">👨‍💻</span>
+                  <span className="text-3xl p-2 rounded-2xl bg-black border border-zinc-800 group-hover:border-red-600 transition-colors">👨‍💻</span>
                   <span className="text-xs font-bold text-red-400 group-hover:translate-x-1 transition-transform">→</span>
                 </div>
                 <div>
@@ -387,7 +387,7 @@ export default function DevRegisterModal({
         {authMode === 'register' && step === 2 && (
           <form onSubmit={handleFormSubmit} className="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs bg-black" style={{ scrollbarWidth: 'thin', scrollbarColor: '#27272a transparent' }}>
             {/* Preference Badge / Change Button */}
-            <div className="p-2.5   bg-zinc-950 border border-zinc-800 flex items-center justify-between">
+            <div className="p-2.5 rounded-2xl bg-zinc-950 border border-zinc-800 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="text-zinc-400 text-[11px]">
                   {isAm ? "የተመረጠ:" : "Looking for:"}
@@ -406,7 +406,7 @@ export default function DevRegisterModal({
             </div>
 
             {/* Unique Love Code Card for Cross-Device Login */}
-            <div className="p-3.5   bg-zinc-950 border border-red-900/50 flex items-center justify-between gap-3 shadow-inner">
+            <div className="p-3.5 rounded-2xl bg-zinc-950 border border-red-900/50 flex items-center justify-between gap-3 shadow-inner">
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 text-red-400 text-[11px] font-bold">
                   <span>🔑</span>
@@ -423,7 +423,7 @@ export default function DevRegisterModal({
               <button
                 type="button"
                 onClick={handleCopyLoveCode}
-                className="px-3.5 py-1.5   bg-red-600 hover:bg-red-700 text-white text-xs font-bold shrink-0 transition-colors flex items-center gap-1.5 shadow"
+                className="px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shrink-0 transition-colors flex items-center gap-1.5 shadow"
               >
                 <span>{copiedCode ? '✓' : '📋'}</span>
                 <span>{copiedCode ? (isAm ? 'ተቀድቷል!' : 'Copied!') : (isAm ? 'ቅዳ' : 'Copy')}</span>
@@ -431,14 +431,14 @@ export default function DevRegisterModal({
             </div>
 
             {/* Profile Photo / Avatar Picker */}
-            <div className="space-y-2 p-3.5   bg-zinc-950 border border-zinc-800">
+            <div className="space-y-2 p-3.5 rounded-2xl bg-zinc-950 border border-zinc-800">
               <label className="text-zinc-300 font-bold block">
                 {isAm ? "የመገለጫ ፎቶ ወይም ኢሞጂ ይምረጡ" : "Profile Photo or Emoji Avatar"} *
               </label>
 
               <div className="flex items-center gap-3">
                 {/* Current Avatar Preview */}
-                <div className="relative w-14 h-14   bg-black border-2 border-red-600 overflow-hidden shrink-0 flex items-center justify-center shadow-md">
+                <div className="relative w-14 h-14 rounded-2xl bg-black border-2 border-red-600 overflow-hidden shrink-0 flex items-center justify-center shadow-md">
                   {avatarUrl ? (
                     <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
@@ -451,7 +451,7 @@ export default function DevRegisterModal({
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="px-3 py-1.5   bg-zinc-900 hover:bg-zinc-800 text-white border border-zinc-700 font-bold text-xs transition-colors"
+                      className="px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white border border-zinc-700 font-bold text-xs transition-colors"
                     >
                       📷 {avatarUrl ? (isAm ? "ፎቶ ቀይር" : "Change Photo") : (isAm ? "ፎቶ ስቀል" : "Upload Photo")}
                     </button>
@@ -459,7 +459,7 @@ export default function DevRegisterModal({
                       <button
                         type="button"
                         onClick={() => setAvatarUrl(null)}
-                        className="px-2 py-1.5   bg-zinc-900 text-zinc-400 hover:text-red-400 text-[11px]"
+                        className="px-2 py-1.5 rounded-xl bg-zinc-900 text-zinc-400 hover:text-red-400 text-[11px]"
                       >
                         {isAm ? "አስወግድ" : "Remove"}
                       </button>
@@ -486,7 +486,7 @@ export default function DevRegisterModal({
                       key={em}
                       type="button"
                       onClick={() => setEmoji(em)}
-                      className={`w-8 h-8   border text-lg flex items-center justify-center transition-all ${
+                      className={`w-8 h-8 rounded-xl border text-lg flex items-center justify-center transition-all ${
                         emoji === em
                           ? 'bg-red-950 border-red-600 scale-110 shadow-sm'
                           : 'bg-black border-zinc-800 hover:bg-zinc-900'
@@ -511,7 +511,7 @@ export default function DevRegisterModal({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Dawit, Meron, Alex"
-                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-red-600   px-3 py-2 text-white placeholder:text-zinc-600 focus:outline-none"
+                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-red-600 rounded-xl px-3 py-2 text-white placeholder:text-zinc-600 focus:outline-none"
                 />
               </div>
 
@@ -525,7 +525,7 @@ export default function DevRegisterModal({
                   value={handle}
                   onChange={(e) => setHandle(e.target.value)}
                   placeholder="@your_handle"
-                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-red-600   px-3 py-2 text-white placeholder:text-zinc-600 focus:outline-none"
+                  className="w-full bg-zinc-950 border border-zinc-800 focus:border-red-600 rounded-xl px-3 py-2 text-white placeholder:text-zinc-600 focus:outline-none"
                 />
               </div>
             </div>
@@ -545,7 +545,7 @@ export default function DevRegisterModal({
                     ? "ለምሳሌ: ማታ ማታ React እና Python ላይ መስራት ደስ ይለኛል፣ ቡና አፍቃሪ ነኝ..."
                     : "e.g. Late night frontend builder, coffee enthusiast, looking for deep conversations and clean code..."
                 }
-                className="w-full bg-zinc-950 border border-zinc-800 focus:border-red-600   p-2.5 text-white placeholder:text-zinc-600 focus:outline-none resize-none leading-relaxed font-sans"
+                className="w-full bg-zinc-950 border border-zinc-800 focus:border-red-600 rounded-xl p-2.5 text-white placeholder:text-zinc-600 focus:outline-none resize-none leading-relaxed font-sans"
               />
             </div>
 
@@ -559,7 +559,7 @@ export default function DevRegisterModal({
                 value={quote}
                 onChange={(e) => setQuote(e.target.value)}
                 placeholder='e.g. "Tabs over spaces, but you over everything."'
-                className="w-full bg-zinc-950 border border-zinc-800 focus:border-red-600   px-3 py-2 text-white placeholder:text-zinc-600 focus:outline-none"
+                className="w-full bg-zinc-950 border border-zinc-800 focus:border-red-600 rounded-xl px-3 py-2 text-white placeholder:text-zinc-600 focus:outline-none"
               />
             </div>
 
@@ -577,7 +577,7 @@ export default function DevRegisterModal({
                       key={tech}
                       type="button"
                       onClick={() => toggleTech(tech)}
-                      className={`px-3 py-1   border font-bold transition-all text-[11px] ${
+                      className={`px-3 py-1 rounded-xl border font-bold transition-all text-[11px] ${
                         selected
                           ? 'bg-red-600 border-red-500 text-white shadow-sm'
                           : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white'
@@ -600,7 +600,7 @@ export default function DevRegisterModal({
                       key={opt}
                       type="button"
                       onClick={() => setIndentation(opt)}
-                      className={`py-1.5   border text-center font-bold ${
+                      className={`py-1.5 rounded-xl border text-center font-bold ${
                         indentation === opt
                           ? 'bg-red-950/70 border-red-600 text-white'
                           : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white'
@@ -617,7 +617,7 @@ export default function DevRegisterModal({
                 <select
                   value={drink}
                   onChange={(e) => setDrink(e.target.value)}
-                  className="w-full bg-zinc-950 border border-zinc-800   px-2.5 py-1.5 text-white focus:outline-none"
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-2.5 py-1.5 text-white focus:outline-none"
                 >
                   <option value="☕ Ethiopian Bunna">☕ Ethiopian Bunna</option>
                   <option value="☕ Espresso">☕ Espresso</option>
@@ -630,14 +630,14 @@ export default function DevRegisterModal({
 
             {/* Error Banner */}
             {errorMsg && (
-              <div className="p-3   bg-red-950/80 border border-red-700 text-red-300 text-xs font-bold animate-shake">
+              <div className="p-3 rounded-xl bg-red-950/80 border border-red-700 text-red-300 text-xs font-bold animate-shake">
                 ⚠ {errorMsg}
               </div>
             )}
 
             {/* Success Banner */}
             {successMsg && (
-              <div className="p-3   bg-red-950 border border-red-600 text-white font-bold text-xs animate-bounce-in flex items-center gap-2">
+              <div className="p-3 rounded-xl bg-red-950 border border-red-600 text-white font-bold text-xs animate-bounce-in flex items-center gap-2">
                 <span>✓</span>
                 <span>{successMsg}</span>
               </div>
@@ -648,7 +648,7 @@ export default function DevRegisterModal({
               <button
                 type="submit"
                 disabled={!name.trim() || !bio.trim() || isSaving}
-                className={`w-full py-3.5   font-bold transition-all shadow-md flex items-center justify-center gap-2 text-xs ${
+                className={`w-full py-3.5 rounded-xl font-bold transition-all shadow-md flex items-center justify-center gap-2 text-xs ${
                   isSaving
                     ? 'bg-zinc-900 border border-zinc-800 text-zinc-500 cursor-wait'
                     : 'bg-red-600 hover:bg-red-700 text-white cursor-pointer shadow-red-950/40'

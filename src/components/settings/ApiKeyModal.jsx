@@ -112,11 +112,11 @@ export default function ApiKeyModal({ isOpen, onClose, onSave, currentKey = "", 
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md animate-fade-in font-mono select-text"
       onClick={(e) => e.target === e.currentTarget && onClose?.()}
     >
-      <div className="w-full max-w-md bg-black border border-zinc-800   shadow-2xl shadow-red-950/40 overflow-hidden flex flex-col animate-slide-up">
+      <div className="w-full max-w-md bg-black border border-zinc-800 rounded-3xl shadow-2xl shadow-red-950/40 overflow-hidden flex flex-col animate-slide-up">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-zinc-950/90 shrink-0">
           <div className="flex items-center gap-2.5">
-            <span className="p-1.5   bg-red-950/70 border border-red-600/50 text-red-400">
+            <span className="p-1.5 rounded-xl bg-red-950/70 border border-red-600/50 text-red-400">
               <IconKey className="w-4 h-4" />
             </span>
             <div>
@@ -129,7 +129,7 @@ export default function ApiKeyModal({ isOpen, onClose, onSave, currentKey = "", 
           <button
             type="button"
             onClick={onClose}
-            className="text-zinc-400 hover:text-white p-1.5   bg-zinc-900 border border-zinc-800 hover:border-red-600 transition-colors"
+            className="text-zinc-400 hover:text-white p-1.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-red-600 transition-colors"
           >
             <IconX className="w-4 h-4" />
           </button>
@@ -143,9 +143,9 @@ export default function ApiKeyModal({ isOpen, onClose, onSave, currentKey = "", 
 
           {/* Current key indicator */}
           {hasKey && (
-            <div className="flex items-center justify-between p-3   bg-zinc-950 border border-zinc-800">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2   bg-red-500 animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                 <span className="font-mono text-xs text-white font-bold">Active Key:</span>
                 <span className="font-mono text-xs text-zinc-400">{maskKey(currentKey)}</span>
               </div>
@@ -174,7 +174,7 @@ export default function ApiKeyModal({ isOpen, onClose, onSave, currentKey = "", 
                   setFeedback("");
                 }}
                 placeholder="Paste API key (starts with AIzaSy...)"
-                className="w-full bg-zinc-950 border border-zinc-800 focus:border-red-600   px-3.5 py-2.5 pr-10 font-mono text-xs text-white placeholder:text-zinc-600 focus:outline-none transition-colors"
+                className="w-full bg-zinc-950 border border-zinc-800 focus:border-red-600 rounded-xl px-3.5 py-2.5 pr-10 font-mono text-xs text-white placeholder:text-zinc-600 focus:outline-none transition-colors"
               />
               <button
                 type="button"
@@ -200,7 +200,7 @@ export default function ApiKeyModal({ isOpen, onClose, onSave, currentKey = "", 
           {/* Status feedback block */}
           {feedback && (
             <div
-              className={`p-3   font-mono text-xs leading-relaxed border ${
+              className={`p-3 rounded-2xl font-mono text-xs leading-relaxed border ${
                 status === "success"
                   ? "bg-red-950/80 border-red-600 text-white"
                   : "bg-zinc-950 border-red-900/60 text-red-300"
@@ -213,7 +213,7 @@ export default function ApiKeyModal({ isOpen, onClose, onSave, currentKey = "", 
                   <button
                     type="button"
                     onClick={handleForceSave}
-                    className="px-2.5 py-1   bg-red-600 hover:bg-red-700 text-white font-bold text-[10px]"
+                    className="px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-[10px]"
                   >
                     Save Key Anyway →
                   </button>
@@ -228,7 +228,7 @@ export default function ApiKeyModal({ isOpen, onClose, onSave, currentKey = "", 
               type="button"
               disabled={loading || !inputKey.trim()}
               onClick={handleTestAndSave}
-              className={`flex-1 py-3   font-mono text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+              className={`flex-1 py-3 rounded-xl font-mono text-xs font-bold transition-all flex items-center justify-center gap-2 ${
                 loading || !inputKey.trim()
                   ? "bg-zinc-900 border border-zinc-800 text-zinc-600 cursor-not-allowed"
                   : "bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-950/50 cursor-pointer"

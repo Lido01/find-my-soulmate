@@ -82,14 +82,18 @@ export default function CharacterSelectScreen({
       <div className="relative z-20 flex flex-col flex-1 items-center px-4 pt-8 pb-12 max-w-5xl mx-auto w-full">
         {/* App title */}
         <div className="text-center mb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-950 border border-zinc-800 text-[11px] font-mono text-zinc-400 mb-3">
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+            <span>Developer Dating Platform & Virtual Terminal</span>
+          </div>
           <h1 className="font-heading text-4xl md:text-5xl font-black tracking-tight text-white">
-            Find<span className="text-red-500">MySoulmate</span>.io
+            Dev<span className="text-red-500">Soulmate</span>.io
           </h1>
         </div>
 
         {/* Tagline */}
-        <p className="font-mono text-zinc-400 text-xs sm:text-sm mb-2 text-center">
-          // Stop debugging alone. Choose your mate instead of hitting a keyboard.
+        <p className="font-mono text-zinc-400 text-xs sm:text-sm mb-4 text-center max-w-md">
+          // Stop debugging alone. Connect with your verified developer soulmate.
         </p>
 
         {/* ═══════════════════════════════════════════════════════════════════
@@ -98,7 +102,7 @@ export default function CharacterSelectScreen({
         {activeTarget === null ? (
           <div className="w-full max-w-3xl mt-4 animate-fade-in space-y-6">
             {!userProfile?.isRegistered && (
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4  border border-zinc-800 bg-zinc-950/90 shadow-xl">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-3xl border border-zinc-800 bg-zinc-950/90 shadow-xl">
                 <div>
                   <p className="font-mono text-[11px] text-red-400 font-bold uppercase tracking-wider">Session Ready</p>
                   <p className="text-sm text-zinc-200 mt-0.5 font-sans">Log in with your Love Code, or register a new developer card.</p>
@@ -107,7 +111,7 @@ export default function CharacterSelectScreen({
                   <button
                     type="button"
                     onClick={onOpenLogin}
-                    className="shrink-0 inline-flex items-center justify-center gap-2   border border-red-600 bg-red-950/60 px-3.5 py-2 text-xs font-bold text-white hover:bg-red-900 transition-all shadow-sm"
+                    className="shrink-0 inline-flex items-center justify-center gap-2 rounded-xl border border-red-600 bg-red-950/60 px-3.5 py-2 text-xs font-bold text-white hover:bg-red-900 transition-all shadow-sm"
                   >
                     <IconLogIn className="w-4 h-4" />
                     Log in with Love Code
@@ -115,7 +119,7 @@ export default function CharacterSelectScreen({
                   <button
                     type="button"
                     onClick={() => onOpenRegister?.()}
-                    className="shrink-0 inline-flex items-center justify-center gap-1   border border-zinc-700 bg-zinc-900 px-3.5 py-2 text-xs font-bold text-zinc-200 hover:text-white hover:border-red-500 transition-all"
+                    className="shrink-0 inline-flex items-center justify-center gap-1 rounded-xl border border-zinc-700 bg-zinc-900 px-3.5 py-2 text-xs font-bold text-zinc-200 hover:text-white hover:border-red-500 transition-all"
                   >
                     Register new profile
                     <IconChevronRight className="w-3.5 h-3.5" />
@@ -129,16 +133,16 @@ export default function CharacterSelectScreen({
               {/* Option A: Girlfriend */}
               <div
                 onClick={() => handleSelectCategory('female')}
-                className="group relative border-2 border-zinc-800 hover:border-red-600 bg-zinc-950 p-6  cursor-pointer transition-all duration-300 hover:scale-[1.02] shadow-2xl overflow-hidden flex flex-col justify-between"
+                className="group relative border-2 border-zinc-800 hover:border-red-600 bg-zinc-950 p-6 rounded-3xl cursor-pointer transition-all duration-300 hover:scale-[1.02] shadow-2xl overflow-hidden flex flex-col justify-between"
               >
                 <div className="absolute -top-12 -right-12 w-40 h-40 bg-red-600/15 blur-2xl group-hover:bg-red-600/30 transition-all" />
 
                 <div className="relative z-10 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-4xl p-3 bg-black border border-zinc-800   inline-block group-hover:border-red-600 transition-colors">
+                    <span className="text-4xl p-3 bg-black border border-zinc-800 rounded-2xl inline-block group-hover:border-red-600 transition-colors">
                       👩‍💻
                     </span>
-                    <span className="font-mono text-xs font-bold px-2.5 py-1   bg-black border border-zinc-800 text-red-400">
+                    <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-xl bg-black border border-zinc-800 text-red-400">
                       {girlfriends.length} {isAm ? 'ጓደኞች' : 'Profiles'}
                     </span>
                   </div>
@@ -158,7 +162,7 @@ export default function CharacterSelectScreen({
                     {girlfriends.map((g) => (
                       <div
                         key={g.id}
-                        className="flex items-center gap-1.5 px-2.5 py-1   bg-black border border-zinc-800 text-xs text-zinc-300"
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black border border-zinc-800 text-xs text-zinc-300"
                       >
                         <span>{g.nationality}</span>
                         <span className="font-bold">{g.name}</span>
@@ -176,16 +180,16 @@ export default function CharacterSelectScreen({
               {/* Option B: Boyfriend */}
               <div
                 onClick={() => handleSelectCategory('male')}
-                className="group relative border-2 border-zinc-800 hover:border-red-600 bg-zinc-950 p-6  cursor-pointer transition-all duration-300 hover:scale-[1.02] shadow-2xl overflow-hidden flex flex-col justify-between"
+                className="group relative border-2 border-zinc-800 hover:border-red-600 bg-zinc-950 p-6 rounded-3xl cursor-pointer transition-all duration-300 hover:scale-[1.02] shadow-2xl overflow-hidden flex flex-col justify-between"
               >
                 <div className="absolute -top-12 -right-12 w-40 h-40 bg-zinc-800/30 blur-2xl group-hover:bg-red-600/20 transition-all" />
 
                 <div className="relative z-10 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-4xl p-3 bg-black border border-zinc-800   inline-block group-hover:border-red-600 transition-colors">
+                    <span className="text-4xl p-3 bg-black border border-zinc-800 rounded-2xl inline-block group-hover:border-red-600 transition-colors">
                       👨‍💻
                     </span>
-                    <span className="font-mono text-xs font-bold px-2.5 py-1   bg-black border border-zinc-800 text-white">
+                    <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-xl bg-black border border-zinc-800 text-white">
                       {boyfriends.length} {isAm ? 'ጓደኞች' : 'Profiles'}
                     </span>
                   </div>
@@ -205,7 +209,7 @@ export default function CharacterSelectScreen({
                     {boyfriends.map((b) => (
                       <div
                         key={b.id}
-                        className="flex items-center gap-1.5 px-2.5 py-1   bg-black border border-zinc-800 text-xs text-zinc-300"
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black border border-zinc-800 text-xs text-zinc-300"
                       >
                         <span>{b.nationality}</span>
                         <span className="font-bold">{b.name}</span>
@@ -227,10 +231,11 @@ export default function CharacterSelectScreen({
              ═══════════════════════════════════════════════════════════════════ */
           <div className="w-full mt-4 animate-fade-in space-y-5">
             {/* Target Status Banner */}
-            <div className="w-full flex items-center justify-between p-3   bg-zinc-950 border border-zinc-800 shadow-md flex-wrap gap-2">
+            <div className="w-full flex items-center justify-between p-3 rounded-2xl bg-zinc-950 border border-zinc-800 shadow-md flex-wrap gap-2">
               <div className="flex items-center gap-2 font-mono text-xs">
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                 <span className="text-zinc-400">{isAm ? "የተመረጠ:" : "Active Preference:"}</span>
-                <span className="font-bold text-white px-2.5 py-0.5   bg-black border border-zinc-800">
+                <span className="font-bold text-white px-2.5 py-0.5 rounded-lg bg-black border border-zinc-800">
                   {activeTarget === 'female'
                     ? (isAm ? 'የሴት ጓደኞች' : 'Girlfriends')
                     : (isAm ? 'የወንድ ጓደኞች ' : 'Boyfriends')}
@@ -241,7 +246,7 @@ export default function CharacterSelectScreen({
               </div>
 
               <span className="text-[11px] text-zinc-500 font-mono">
-                {isAm ? "ምርጫን ለመቀየር በ Settings ውስጥ ይቀይሩ" : "To change preference, edit in Settings"}
+                {isAm ? "ምርጫን ለመቀየር በ Settings ⚙️ ውስጥ ይቀይሩ" : "To change preference, edit in Settings ⚙️"}
               </span>
             </div>
 

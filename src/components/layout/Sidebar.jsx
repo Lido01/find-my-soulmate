@@ -69,11 +69,11 @@ export default function Sidebar({
       {/* Header */}
       <div className="p-3 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/90">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2   bg-red-500 animate-pulse" />
+          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
           <span className="font-mono text-xs text-white font-bold tracking-widest">DEV.CONNECTIONS</span>
         </div>
         {aiModeActive && (
-          <span className="font-mono text-[10px] px-2 py-0.5   bg-red-600 text-white font-bold">
+          <span className="font-mono text-[10px] px-2 py-0.5 rounded-full bg-red-600 text-white font-bold">
             🤖 AI
           </span>
         )}
@@ -81,9 +81,9 @@ export default function Sidebar({
 
       <div className="flex flex-col gap-3 p-3 flex-1 bg-black">
         {/* Active partner card */}
-        <div className="bg-zinc-950 border border-red-900/60   p-3.5 space-y-3 shadow-lg shadow-red-950/20">
+        <div className="bg-zinc-950 border border-red-900/60 rounded-2xl p-3.5 space-y-3 shadow-lg shadow-red-950/20">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10   bg-black border-2 border-red-600 flex items-center justify-center text-sm font-mono font-bold text-white shrink-0 shadow-md">
+            <div className="w-10 h-10 rounded-xl bg-black border-2 border-red-600 flex items-center justify-center text-sm font-mono font-bold text-white shrink-0 shadow-md">
               {initials}
             </div>
             <div className="flex-1 min-w-0">
@@ -96,7 +96,7 @@ export default function Sidebar({
           </div>
 
           {/* Mood status pill */}
-          <div className="flex items-center gap-1.5   px-2.5 py-1.5 border border-zinc-800 bg-black">
+          <div className="flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 border border-zinc-800 bg-black">
             <span className="text-xs">{moodMeta.emoji || "🤔"}</span>
             <span className="font-mono text-[10px] font-bold text-red-400">
               {t?.moods?.[mood] ?? mood}
@@ -113,7 +113,7 @@ export default function Sidebar({
 
         {/* Stats */}
         {Object.keys(stats).length > 0 && (
-          <div className="bg-zinc-950 border border-zinc-800   p-3 space-y-2">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-3 space-y-2">
             <p className="font-mono text-[10px] text-zinc-400 uppercase tracking-widest mb-1 font-bold">
               {t?.partnerStats ?? "// partner.stats"}
             </p>
@@ -132,7 +132,7 @@ export default function Sidebar({
 
         {/* Bio terminal */}
         {bio && (
-          <div className="bg-zinc-950 border border-zinc-800   p-3">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-3">
             <p className="font-mono text-[10px] text-zinc-400 mb-1 uppercase tracking-widest font-bold">
               {t?.partnerBio ?? "// partner.bio"}
             </p>
@@ -144,7 +144,7 @@ export default function Sidebar({
 
         {/* Rotating Fun fact */}
         {currentFact && (
-          <div className="bg-zinc-950 border border-zinc-800   p-3">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-3">
             <p className="font-mono text-[10px] text-red-400 mb-1 uppercase tracking-widest font-bold">// fun fact</p>
             <p className="font-mono text-[10px] text-zinc-400 italic leading-relaxed">
               {typeof currentFact === "object" ? currentFact[lang] ?? currentFact.en : currentFact}
@@ -168,9 +168,9 @@ export default function Sidebar({
                   key={c.id}
                   type="button"
                   onClick={() => onSwitchCharacter?.(c.id)}
-                  className="w-full flex items-center gap-2 bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 hover:border-red-600   px-2.5 py-2 transition-all duration-200 text-left group shadow-sm"
+                  className="w-full flex items-center gap-2 bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 hover:border-red-600 rounded-xl px-2.5 py-2 transition-all duration-200 text-left group shadow-sm"
                 >
-                  <div className="w-7 h-7   bg-black border border-zinc-800 group-hover:border-red-600 flex items-center justify-center text-[10px] font-mono font-bold text-white shrink-0">
+                  <div className="w-7 h-7 rounded-lg bg-black border border-zinc-800 group-hover:border-red-600 flex items-center justify-center text-[10px] font-mono font-bold text-white shrink-0">
                     {cInitials}
                   </div>
                   <div className="flex-1 min-w-0">

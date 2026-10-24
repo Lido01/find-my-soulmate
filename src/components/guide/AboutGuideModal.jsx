@@ -32,14 +32,17 @@ export default function AboutGuideModal({
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md animate-fade-in font-mono select-text"
       onClick={(e) => e.target === e.currentTarget && onClose?.()}
     >
-      <div className="w-full max-w-3xl max-h-[90vh] bg-black border border-zinc-800   shadow-2xl shadow-red-950/40 flex flex-col overflow-hidden animate-slide-up">
+      <div className="w-full max-w-3xl max-h-[90vh] bg-black border border-zinc-800 rounded-3xl shadow-2xl shadow-red-950/40 flex flex-col overflow-hidden animate-slide-up">
         {/* Header Bar */}
         <div className="p-4 sm:p-5 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/90 shrink-0">
           <div className="flex items-center gap-3">
+            <span className="p-2 rounded-xl bg-red-950/70 border border-red-600/50 text-xl">
+              💌
+            </span>
             <div>
               <h2 className="font-heading text-base sm:text-lg font-black text-white flex items-center gap-2">
                 <span>{isAm ? "ስለ DevSoulmate እና መመሪያ" : "About & Developer Guide"}</span>
-                <span className="font-mono text-[10px] px-2 py-0.5   bg-red-600 text-white font-bold">
+                <span className="font-mono text-[10px] px-2 py-0.5 rounded-full bg-red-600 text-white font-bold">
                   v2.0
                 </span>
               </h2>
@@ -54,7 +57,7 @@ export default function AboutGuideModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5   text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 hover:border-red-600 transition-colors"
+            className="p-1.5 rounded-xl text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 hover:border-red-600 transition-colors"
           >
             <IconX className="w-5 h-5" />
           </button>
@@ -70,7 +73,7 @@ export default function AboutGuideModal({
                 soundEngine.playHeartbeat();
                 setActiveTab(tab.id);
               }}
-              className={`font-mono text-xs font-bold px-3.5 py-1.5   transition-all whitespace-nowrap flex items-center gap-1.5 ${
+              className={`font-mono text-xs font-bold px-3.5 py-1.5 rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
                 activeTab === tab.id
                   ? "bg-red-600 text-white border border-red-500 shadow-[0_0_12px_rgba(239,68,68,0.4)]"
                   : "bg-zinc-950 text-zinc-400 border border-zinc-800 hover:text-white hover:border-zinc-700"
@@ -87,8 +90,9 @@ export default function AboutGuideModal({
           {/* TAB 1: OVERVIEW */}
           {activeTab === "overview" && (
             <div className="space-y-4 animate-fade-in">
-              <div className="p-4   bg-zinc-950 border border-red-900/40 space-y-2">
+              <div className="p-4 rounded-2xl bg-zinc-950 border border-red-900/40 space-y-2">
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <span>💘</span>
                   <span>{isAm ? "DevSoulmate ምንድን ነው?" : "What is DevSoulmate?"}</span>
                 </h3>
                 <p className="text-xs text-zinc-300 leading-relaxed font-sans">
@@ -99,7 +103,8 @@ export default function AboutGuideModal({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
-                <div className="p-4   bg-zinc-950 border border-zinc-800 space-y-1.5">
+                <div className="p-4 rounded-2xl bg-zinc-950 border border-zinc-800 space-y-1.5">
+                  <span className="text-2xl">👩‍💻</span>
                   <h4 className="font-bold text-white">
                     {isAm ? "የሴት ጓደኛ ይምረጡ" : "Find a Girlfriend"}
                   </h4>
@@ -110,7 +115,8 @@ export default function AboutGuideModal({
                   </p>
                 </div>
 
-                <div className="p-4   bg-zinc-950 border border-zinc-800 space-y-1.5">
+                <div className="p-4 rounded-2xl bg-zinc-950 border border-zinc-800 space-y-1.5">
+                  <span className="text-2xl">👨‍💻</span>
                   <h4 className="font-bold text-white">
                     {isAm ? "የወንድ ጓደኛ ይምረጡ" : "Find a Boyfriend"}
                   </h4>
@@ -122,7 +128,8 @@ export default function AboutGuideModal({
                 </div>
               </div>
 
-              <div className="p-3   bg-zinc-950 border border-zinc-800 flex items-center gap-3">
+              <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center gap-3">
+                <span className="text-red-400 text-lg">💡</span>
                 <p className="text-xs text-zinc-400 font-sans">
                   {isAm
                     ? "የመረጡት ፆታ ብቻ በመድረኩ ላይ ይታያል — በቅንብሮች ውስጥ በፈለጉት ጊዜ መቀየር ይችላሉ!"
@@ -135,7 +142,7 @@ export default function AboutGuideModal({
           {/* TAB 2: AUDIO CHAT */}
           {activeTab === "audio" && (
             <div className="space-y-4 animate-fade-in">
-              <div className="p-4   bg-zinc-950 border border-red-900/40 space-y-2">
+              <div className="p-4 rounded-2xl bg-zinc-950 border border-red-900/40 space-y-2">
                 <h3 className="text-base font-bold text-red-400 flex items-center gap-2">
                   <span>🎙️</span>
                   <span>{isAm ? "የድምፅ ውይይት: መላክ እና ማዳመጥ" : "Voice Audio: Send & Listen"}</span>
@@ -148,8 +155,8 @@ export default function AboutGuideModal({
               </div>
 
               <div className="space-y-3">
-                <div className="p-3.5   bg-zinc-950 border border-zinc-800 flex items-start gap-3">
-                  <div className="p-2   bg-red-950/80 border border-red-700 text-xl">
+                <div className="p-3.5 rounded-2xl bg-zinc-950 border border-zinc-800 flex items-start gap-3">
+                  <div className="p-2 rounded-xl bg-red-950/80 border border-red-700 text-xl">
                     🎙️
                   </div>
                   <div className="space-y-1">
@@ -158,21 +165,24 @@ export default function AboutGuideModal({
                     </h4>
                     <p className="text-xs text-zinc-400 leading-relaxed font-sans">
                       {isAm
-                        ? "በታችኛው የትዕዛዝ ሳጥን ውስጥ የሚገኘውን ማይክራፎን ይጫኑ። ድምፅዎን ሲናገሩ ወዲያው ተቀርጾ እንደ የድምፅ ማስታወሻ ይላካል!"
-                        : "Click the mic button in the chat console. Speak your message; on click send, your voice recording is transmitted and playable directly in chat."}
+                        ? "በታችኛው የትዕዛዝ ሳጥን ውስጥ የሚገኘውን 🎙️ ማይክራፎን ይጫኑ። ድምፅዎን ሲናገሩ ወዲያው ተቀርጾ እንደ የድምፅ ማስታወሻ ይላካል!"
+                        : "Click the 🎙️ mic button in the chat console. Speak your message; on click send, your voice recording is transmitted and playable directly in chat."}
                     </p>
                   </div>
                 </div>
 
-                <div className="p-3.5   bg-zinc-950 border border-zinc-800 flex items-start gap-3">
+                <div className="p-3.5 rounded-2xl bg-zinc-950 border border-zinc-800 flex items-start gap-3">
+                  <div className="p-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xl">
+                    🔊
+                  </div>
                   <div className="space-y-1">
                     <h4 className="font-bold text-white">
                       {isAm ? "2. የፍቅረኛዎን ድምፅ ማዳመጥ (Listen to Partner)" : "2. Listen to Romantic Voice"}
                     </h4>
                     <p className="text-xs text-zinc-400 leading-relaxed font-sans">
                       {isAm
-                        ? "በማንኛውም መልእክት ስር የሚገኘውን 'Voice' ቁልፍ ይጫኑ።"
-                        : "Click 'Voice' on any message bubble to hear real voice playback or synthesized narration."}
+                        ? "በማንኛውም መልእክት ስር የሚገኘውን '🔊 Voice' ቁልፍ ይጫኑ።"
+                        : "Click '🔊 Voice' on any message bubble to hear real voice playback or synthesized narration."}
                     </p>
                   </div>
                 </div>
@@ -183,8 +193,9 @@ export default function AboutGuideModal({
           {/* TAB 3: HOW TO CHAT */}
           {activeTab === "chat" && (
             <div className="space-y-4 animate-fade-in">
-              <div className="p-4   bg-zinc-950 border border-red-900/40 space-y-2">
+              <div className="p-4 rounded-2xl bg-zinc-950 border border-red-900/40 space-y-2">
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <span>💻</span>
                   <span>{isAm ? "እንዴት ማውራት እና ማፍቀር ይቻላል?" : "How to Connect & Chat"}</span>
                 </h3>
                 <p className="text-xs text-zinc-300 leading-relaxed font-sans">
@@ -195,7 +206,7 @@ export default function AboutGuideModal({
               </div>
 
               <div className="space-y-2.5">
-                <div className="p-3   bg-zinc-950 border border-zinc-800 space-y-1">
+                <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800 space-y-1">
                   <div className="flex items-center gap-2 text-white font-bold">
                     <span className="text-red-400">1.</span>
                     <span>{isAm ? "የቀጥታ ማዛመጃ (Live Match)" : "Live 1-on-1 Match"}</span>
@@ -203,11 +214,11 @@ export default function AboutGuideModal({
                   <p className="text-xs text-zinc-400 pl-4 font-sans">
                     {isAm
                       ? "የቀጥታ ግጥሚያ ጀምርን በመጫን ወዲያውኑ ከመስመር ላይ ካሉ ገንቢዎች ጋር ይገናኙ።"
-                      : "Click 'Start Live Match' in the lobby to be instantly paired with an online developer."}
+                      : "Click 'Start Live Match ⚡' in the lobby to be instantly paired with an online developer."}
                   </p>
                 </div>
 
-                <div className="p-3   bg-zinc-950 border border-zinc-800 space-y-1">
+                <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800 space-y-1">
                   <div className="flex items-center gap-2 text-white font-bold">
                     <span className="text-red-400">2.</span>
                     <span>{isAm ? "የጓደኝነት እና የደጋፊነት ስርዓት" : "Friends & Real Followers"}</span>
@@ -225,8 +236,9 @@ export default function AboutGuideModal({
           {/* TAB 4: GIFTS */}
           {activeTab === "gifts" && (
             <div className="space-y-4 animate-fade-in">
-              <div className="p-4   bg-zinc-950 border border-red-900/40 space-y-2">
+              <div className="p-4 rounded-2xl bg-zinc-950 border border-red-900/40 space-y-2">
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <span>🎁</span>
                   <span>{isAm ? "ስጦታዎችን መስጠት" : "Sending Gifts & Dev Swag"}</span>
                 </h3>
                 <p className="text-xs text-zinc-300 leading-relaxed font-sans">
@@ -237,27 +249,32 @@ export default function AboutGuideModal({
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="p-3.5   bg-zinc-950 border border-zinc-800 space-y-1">
+                <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-1">
+                  <span className="text-2xl">☕</span>
                   <h4 className="font-bold text-amber-300">Brew Lab</h4>
                   <p className="text-xs text-zinc-400 font-sans">
                     {isAm ? "የይርጋጨፌ ቡና፣ ቪ60 ፖር-ኦቨር፣ ኮልድ ብሩ" : "Ethiopian Yirgacheffe Pour-Over, Kyoto Cold Brew, Oat Cortado."}
                   </p>
                 </div>
 
-                <div className="p-3.5   bg-zinc-950 border border-zinc-800 space-y-1">
+                <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-1">
+                  <span className="text-2xl">⌨️</span>
                   <h4 className="font-bold text-white">Dev Swag</h4>
                   <p className="text-xs text-zinc-400 font-sans">
                     {isAm ? "ሉብድ ሜካኒካል ኪቦርድ፣ ANC የጆሮ ማዳመጫ" : "Lubed Mechanical Keyboard, ANC Studio Headphones, Ultra-wide OLED."}
                   </p>
                 </div>
 
-                <div className="p-3.5   bg-zinc-950 border border-zinc-800 space-y-1">
+                <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-1">
+                  <span className="text-2xl">💖</span>
+                  <h4 className="font-bold text-red-400">Love Tokens</h4>
                   <p className="text-xs text-zinc-400 font-sans">
                     {isAm ? "የፍቅር git commit፣ የኮድ ግጥም" : "Handwritten Git Commit, Endless While-Loop of Devotion, Signed GPG key."}
                   </p>
                 </div>
 
-                <div className="p-3.5   bg-zinc-950 border border-zinc-800 space-y-1">
+                <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-1">
+                  <span className="text-2xl">🇪🇹</span>
                   <h4 className="font-bold text-amber-400">Ethiopian Corner</h4>
                   <p className="text-xs text-zinc-400 font-sans">
                     {isAm ? "የጀበና ቡና ዝግጅት፣ የሽሮ ድግስ" : "Authentic Jebena Coffee Ceremony, Traditional Shiro & Injera Feast."}
@@ -270,8 +287,9 @@ export default function AboutGuideModal({
           {/* TAB 5: PERSONAS */}
           {activeTab === "personas" && (
             <div className="space-y-4 animate-fade-in">
-              <div className="p-4   bg-zinc-950 border border-red-900/40 space-y-2">
+              <div className="p-4 rounded-2xl bg-zinc-950 border border-red-900/40 space-y-2">
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <span>👥</span>
                   <span>{isAm ? "የ 6ቱ የነፍስ ጓደኞች ዝርዝር" : "Meet The Personas"}</span>
                 </h3>
                 <p className="text-xs text-zinc-300 leading-relaxed font-sans">
@@ -284,10 +302,10 @@ export default function AboutGuideModal({
               {/* Girlfriends */}
               <div className="space-y-2">
                 <p className="font-bold text-xs text-red-400 uppercase tracking-widest">
-                  {isAm ? "የሴት ጓደኞች" : "Girlfriends"}
+                  👩‍💻 {isAm ? "የሴት ጓደኞች" : "Girlfriends"}
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
-                  <div className="p-3   bg-zinc-950 border border-zinc-800 space-y-1">
+                  <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800 space-y-1">
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-white">Lina 🇸🇪</span>
                       <span className="text-xs text-red-400">Tabs</span>
@@ -297,7 +315,7 @@ export default function AboutGuideModal({
                     </p>
                   </div>
 
-                  <div className="p-3   bg-zinc-950 border border-zinc-800 space-y-1">
+                  <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800 space-y-1">
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-white">Dani 🇺🇸</span>
                       <span className="text-xs text-red-400">CSS Wizard</span>
@@ -307,7 +325,7 @@ export default function AboutGuideModal({
                     </p>
                   </div>
 
-                  <div className="p-3   bg-zinc-950 border border-zinc-800 space-y-1">
+                  <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800 space-y-1">
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-white">Senait 🇪🇹</span>
                       <span className="text-xs text-red-400">AI Scientist</span>
@@ -322,10 +340,10 @@ export default function AboutGuideModal({
               {/* Boyfriends */}
               <div className="space-y-2 pt-2">
                 <p className="font-bold text-xs text-white uppercase tracking-widest">
-                  {isAm ? "የወንድ ጓደኞች" : "Boyfriends"}
+                  👨‍💻 {isAm ? "የወንድ ጓደኞች" : "Boyfriends"}
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
-                  <div className="p-3   bg-zinc-950 border border-zinc-800 space-y-1">
+                  <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800 space-y-1">
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-white">Linus 🇫🇮</span>
                       <span className="text-xs text-zinc-400">C / Systems</span>
@@ -335,7 +353,7 @@ export default function AboutGuideModal({
                     </p>
                   </div>
 
-                  <div className="p-3   bg-zinc-950 border border-zinc-800 space-y-1">
+                  <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800 space-y-1">
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-white">Devon 🇬🇧</span>
                       <span className="text-xs text-zinc-400">Three.js</span>
@@ -345,7 +363,7 @@ export default function AboutGuideModal({
                     </p>
                   </div>
 
-                  <div className="p-3   bg-zinc-950 border border-zinc-800 space-y-1">
+                  <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800 space-y-1">
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-white">Dawit 🇪🇹</span>
                       <span className="text-xs text-zinc-400">Rust</span>
@@ -374,7 +392,7 @@ export default function AboutGuideModal({
                 onChooseCategory?.("female");
                 onClose?.();
               }}
-              className="flex-1 sm:flex-initial px-4 py-2   bg-red-600 hover:bg-red-700 text-white font-mono text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5"
+              className="flex-1 sm:flex-initial px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-mono text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5"
             >
               <span>{isAm ? "የሴት ጓደኛ ፈልግ" : "Find Girlfriend"}</span>
             </button>
@@ -386,7 +404,7 @@ export default function AboutGuideModal({
                 onChooseCategory?.("male");
                 onClose?.();
               }}
-              className="flex-1 sm:flex-initial px-4 py-2   bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white font-mono text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5"
+              className="flex-1 sm:flex-initial px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white font-mono text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5"
             >
               <span>{isAm ? "የወንድ ጓደኛ ፈልግ" : "Find Boyfriend"}</span>
             </button>

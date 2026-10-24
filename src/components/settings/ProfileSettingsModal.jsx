@@ -46,11 +46,11 @@ export default function ProfileSettingsModal({
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md animate-fade-in font-mono select-text"
       onClick={(e) => e.target === e.currentTarget && onClose?.()}
     >
-      <div className="relative w-full max-w-lg bg-black border border-zinc-800   shadow-2xl shadow-red-950/40 overflow-hidden flex flex-col max-h-[90vh] animate-slide-up">
+      <div className="relative w-full max-w-lg bg-black border border-zinc-800 rounded-3xl shadow-2xl shadow-red-950/40 overflow-hidden flex flex-col max-h-[90vh] animate-slide-up">
         {/* Header */}
         <div className="px-6 py-4 border-b border-zinc-800 bg-zinc-950/90 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
-            <span className="p-1.5   bg-red-950/70 border border-red-600/50 text-red-400">
+            <span className="p-1.5 rounded-xl bg-red-950/70 border border-red-600/50 text-red-400">
               <IconUser className="w-4 h-4" />
             </span>
             <div>
@@ -63,7 +63,7 @@ export default function ProfileSettingsModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-zinc-400 hover:text-white p-1.5   bg-zinc-900 border border-zinc-800 hover:border-red-600 transition-colors"
+            className="text-zinc-400 hover:text-white p-1.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-red-600 transition-colors"
           >
             <IconX className="w-4 h-4" />
           </button>
@@ -82,7 +82,7 @@ export default function ProfileSettingsModal({
                 type="text"
                 value={profile.emoji}
                 onChange={(e) => setProfile((p) => ({ ...p, emoji: e.target.value }))}
-                className="w-12 h-12 bg-zinc-950 border border-zinc-800   text-center text-2xl focus:border-red-500 focus:outline-none"
+                className="w-12 h-12 bg-zinc-950 border border-zinc-800 rounded-2xl text-center text-2xl focus:border-red-500 focus:outline-none"
                 title="Profile Emoji"
               />
               <div className="flex-1">
@@ -91,7 +91,7 @@ export default function ProfileSettingsModal({
                   value={profile.name || ''}
                   onChange={(e) => setProfile((p) => ({ ...p, name: e.target.value }))}
                   placeholder="Your Name"
-                  className="w-full bg-zinc-950 border border-zinc-800   px-3.5 py-2.5 font-mono text-xs text-white focus:border-red-500 focus:outline-none"
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2.5 font-mono text-xs text-white focus:border-red-500 focus:outline-none"
                 />
               </div>
             </div>
@@ -105,7 +105,7 @@ export default function ProfileSettingsModal({
                   type="text"
                   value={profile.archetype || ''}
                   onChange={(e) => setProfile((p) => ({ ...p, archetype: e.target.value }))}
-                  className="w-full bg-zinc-950 border border-zinc-800   px-3 py-2 font-mono text-xs text-zinc-300 focus:border-red-500 focus:outline-none"
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 font-mono text-xs text-zinc-300 focus:border-red-500 focus:outline-none"
                 />
               </div>
               <div>
@@ -116,7 +116,7 @@ export default function ProfileSettingsModal({
                   type="text"
                   value={profile.favoriteStack || ''}
                   onChange={(e) => setProfile((p) => ({ ...p, favoriteStack: e.target.value }))}
-                  className="w-full bg-zinc-950 border border-zinc-800   px-3 py-2 font-mono text-xs text-zinc-300 focus:border-red-500 focus:outline-none"
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 font-mono text-xs text-zinc-300 focus:border-red-500 focus:outline-none"
                 />
               </div>
             </div>
@@ -136,9 +136,9 @@ export default function ProfileSettingsModal({
                     key={opt.id}
                     type="button"
                     onClick={() => setProfile((p) => ({ ...p, lookingFor: opt.id }))}
-                    className={`py-2 px-1 text-center   font-mono text-xs border transition-all ${
+                    className={`py-2 px-1 text-center rounded-xl font-mono text-xs border transition-all ${
                       profile.lookingFor === opt.id
-                        ? 'border-red-500 bg-red-950/60 text-white font-bold'
+                        ? 'border-red-500 bg-red-950/60 text-white font-bold shadow-[0_0_12px_rgba(239,68,68,0.4)]'
                         : 'border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-white'
                     }`}
                   >
@@ -151,6 +151,44 @@ export default function ProfileSettingsModal({
 
           <div className="h-px bg-zinc-800" />
 
+          {/* Section: Theme Mode (Light / Dark) */}
+          <div className="space-y-2">
+            <h3 className="font-mono text-xs font-bold text-red-400 uppercase tracking-widest">
+              // {lang === 'am' ? 'የገጽታ ቀለም (Theme Mode)' : 'Appearance Theme'}
+            </h3>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (theme !== 'dark') onToggleTheme?.();
+                }}
+                className={`py-2 px-3 rounded-xl border text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all ${
+                  theme === 'dark'
+                    ? 'border-red-500 bg-red-950/60 text-white shadow-sm'
+                    : 'border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-white'
+                }`}
+              >
+                <span>🌙</span>
+                <span>Dark Theme</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (theme !== 'light') onToggleTheme?.();
+                }}
+                className={`py-2 px-3 rounded-xl border text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all ${
+                  theme === 'light'
+                    ? 'border-red-500 bg-red-950/60 text-white shadow-sm'
+                    : 'border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-white'
+                }`}
+              >
+                <span>☀️</span>
+                <span>Light Theme</span>
+              </button>
+            </div>
+          </div>
+
           <div className="h-px bg-zinc-800" />
 
           {/* Section 2: Audio & Romantic Voice */}
@@ -159,34 +197,8 @@ export default function ProfileSettingsModal({
               // {lang === 'am' ? 'የድምፅ እና የሮማንቲክ ኦዲዮ ቅንብር' : 'Audio & Voice Synthesis'}
             </h3>
 
-            {/* Appearance / Theme Toggle */}
-            <div className="flex items-center justify-between p-3   bg-zinc-950 border border-zinc-800">
-              <div>
-                <p className="font-mono text-xs font-bold text-white flex items-center gap-1.5">
-                  <span>{lang === 'am' ? 'የገጽታ ቀለም (Theme)' : 'Theme Appearance'}</span>
-                </p>
-                <p className="font-mono text-[11px] text-zinc-500">
-                  {theme === 'light' ? 'Active: Crisp White Light Mode' : 'Active: Cyber Red & Pitch Black Dark Mode'}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  soundEngine.playRomanticChime();
-                  onToggleTheme?.();
-                }}
-                className={`px-3 py-1.5   border font-bold text-xs transition-all flex items-center gap-1.5 ${
-                  theme === 'light'
-                    ? 'bg-red-600 text-white border-red-500 shadow-sm'
-                    : 'bg-zinc-900 border-zinc-700 text-zinc-300 hover:text-white'
-                }`}
-              >
-                <span>{theme === 'light' ? 'Light Mode' : 'Dark Mode'}</span>
-              </button>
-            </div>
-
             {/* Voice narration toggle */}
-            <div className="flex items-center justify-between p-3   bg-zinc-950 border border-zinc-800">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
               <div>
                 <p className="font-mono text-xs font-bold text-white">
                   {lang === 'am' ? 'የገፀ-ባህሪያት ድምፅ ንግግር' : 'Romantic Voice Narration (TTS)'}
@@ -198,12 +210,12 @@ export default function ProfileSettingsModal({
               <button
                 type="button"
                 onClick={() => setAudio((a) => ({ ...a, voiceNarration: !a.voiceNarration }))}
-                className={`w-12 h-6   transition-colors relative p-0.5 ${
+                className={`w-12 h-6 rounded-full transition-colors relative p-0.5 ${
                   audio.voiceNarration ? 'bg-red-600' : 'bg-zinc-800'
                 }`}
               >
                 <div
-                  className={`w-5 h-5   bg-white transition-transform ${
+                  className={`w-5 h-5 rounded-full bg-white transition-transform ${
                     audio.voiceNarration ? 'translate-x-6' : 'translate-x-0'
                   }`}
                 />
@@ -211,7 +223,7 @@ export default function ProfileSettingsModal({
             </div>
 
             {/* Romantic sound effects toggle */}
-            <div className="flex items-center justify-between p-3   bg-zinc-950 border border-zinc-800">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
               <div>
                 <p className="font-mono text-xs font-bold text-white">
                   {lang === 'am' ? 'የፍቅር ድምፆች (Chimes & Pulse)' : 'Romantic Audio Chimes & Beeps'}
@@ -223,12 +235,12 @@ export default function ProfileSettingsModal({
               <button
                 type="button"
                 onClick={() => setAudio((a) => ({ ...a, soundEffects: !a.soundEffects }))}
-                className={`w-12 h-6   transition-colors relative p-0.5 ${
+                className={`w-12 h-6 rounded-full transition-colors relative p-0.5 ${
                   audio.soundEffects ? 'bg-red-600' : 'bg-zinc-800'
                 }`}
               >
                 <div
-                  className={`w-5 h-5   bg-white transition-transform ${
+                  className={`w-5 h-5 rounded-full bg-white transition-transform ${
                     audio.soundEffects ? 'translate-x-6' : 'translate-x-0'
                   }`}
                 />
@@ -246,7 +258,7 @@ export default function ProfileSettingsModal({
                   lang
                 );
               }}
-              className="w-full py-2.5 px-3   border border-zinc-800 bg-zinc-950 hover:bg-zinc-900 text-zinc-300 hover:text-white hover:border-red-600 font-mono text-xs flex items-center justify-center gap-2 transition-all"
+              className="w-full py-2.5 px-3 rounded-xl border border-zinc-800 bg-zinc-950 hover:bg-zinc-900 text-zinc-300 hover:text-white hover:border-red-600 font-mono text-xs flex items-center justify-center gap-2 transition-all"
             >
               <span>🔊</span>
               <span>{lang === 'am' ? 'የድምፅ ቅምሻ አዳምጥ' : 'Test Romantic Voice'}</span>
@@ -262,7 +274,7 @@ export default function ProfileSettingsModal({
               onClose?.();
               onOpenOnboarding?.();
             }}
-            className="w-full py-2.5 px-3   border border-zinc-800 bg-zinc-950 hover:border-red-600 text-zinc-300 hover:text-white font-mono text-xs text-center transition-all"
+            className="w-full py-2.5 px-3 rounded-xl border border-zinc-800 bg-zinc-950 hover:border-red-600 text-zinc-300 hover:text-white font-mono text-xs text-center transition-all"
           >
              {lang === 'am' ? 'የመግቢያ መጠይቅ በድጋሚ ይክፈቱ' : 'Restart "Tell Me About Yourself" Quiz'}
           </button>
@@ -283,14 +295,14 @@ export default function ProfileSettingsModal({
             <button
               type="button"
               onClick={onClose}
-              className="font-mono text-xs text-zinc-400 hover:text-white px-3 py-2   transition-colors"
+              className="font-mono text-xs text-zinc-400 hover:text-white px-3 py-2 rounded-xl transition-colors"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={handleSave}
-              className="font-mono text-xs font-bold px-5 py-2.5   bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-950/50 transition-all"
+              className="font-mono text-xs font-bold px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-950/50 transition-all"
             >
               {lang === 'am' ? 'አስቀምጥ' : 'Save Changes'}
             </button>
