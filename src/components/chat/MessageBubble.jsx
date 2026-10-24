@@ -14,6 +14,13 @@ function formatTimestamp(ts) {
   return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+function formatAudioDuration(sec) {
+  const s = Math.max(1, Math.round(sec || 0));
+  const m = Math.floor(s / 60);
+  const rem = s % 60;
+  return `${m}:${String(rem).padStart(2, '0')}`;
+}
+
 function QuotedReply({ replyTo }) {
   if (!replyTo) return null;
   return (
@@ -152,7 +159,7 @@ export default function MessageBubble({ message, character, userProfile, onReply
                   <div>
                     <span className="font-bold">{message.audioUrl ? 'Real Voice Note' : 'Voice Note'}</span>
                     <span className="text-[10px] text-cyan-400 block">
-                      0:0{message.audioDuration || 3}
+                      {formatAudioDuration(message.audioDuration || 3)}
                     </span>
                   </div>
                 </div>
@@ -333,7 +340,7 @@ export default function MessageBubble({ message, character, userProfile, onReply
                 <div>
                   <span className="font-bold text-white">{message.audioUrl ? 'Real Voice Note' : 'Voice Note'}</span>
                   <span className="text-[10px] text-slate-400 block">
-                    0:0{message.audioDuration || 3}
+                    {formatAudioDuration(message.audioDuration || 3)}
                   </span>
                 </div>
               </div>

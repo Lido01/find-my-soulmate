@@ -471,6 +471,25 @@ export default function RealChatRoom({
     }
   }
 
+  function cancelVoiceRecording() {
+    if (recordTimerRef.current) clearInterval(recordTimerRef.current);
+    setIsRecordingVoice(false);
+    setRecordSeconds(0);
+    audioChunksRef.current = [];
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      try {
+        mediaRecorderRef.current.onstop = null;
+        mediaRecorderRef.current.stop();
+      } catch {}
+    }
+    if (mediaStreamRef.current) {
+      try {
+        mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+      } catch {}
+      mediaStreamRef.current = null;
+    }
+  }
+
   function handleSendRomanticQuote(quote) {
     setShowQuickDropdown(false);
     soundEngine.playRomanticChime();
@@ -658,23 +677,34 @@ export default function RealChatRoom({
 
       {/* Voice Recording Active Bar */}
       {isRecordingVoice && (
-        <div className="p-2.5 bg-red-950/50 border-t border-red-800/60 animate-fade-in flex items-center justify-between shrink-0">
+        <div className="p-2.5 bg-red-950/70 border-t border-red-800/80 animate-fade-in flex items-center justify-between shrink-0 font-mono">
           <div className="flex items-center gap-2.5">
             <div className="flex items-center gap-1.5 text-red-400 text-xs font-bold">
-              <span className="w-2.5 h-2.5  bg-red-500 animate-ping" />
-              <span>REC 0:0{recordSeconds}</span>
+              <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
+              <span>
+                REC {Math.floor(recordSeconds / 60)}:{String(recordSeconds % 60).padStart(2, '0')}
+              </span>
             </div>
-            <p className="text-xs text-slate-200 truncate max-w-xs">
-              {voiceText || (isAm ? "እየሰማሁ ነው..." : "Listening...")}
+            <p className="text-xs text-slate-200 truncate max-w-[180px] sm:max-w-xs">
+              {mediaRecorderRef.current ? (isAm ? "እየቀረጽኩ ነው... 🎙️" : "Recording voice... 🎙️") : (isAm ? "የድምጽ መልእክት 🎙️" : "Voice message 🎙️")}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={stopVoiceAndSend}
-            className="px-3 py-1  bg-red-900 border border-red-600 text-xs font-bold text-red-200"
-          >
-            Send
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={cancelVoiceRecording}
+              className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs font-bold text-slate-300 hover:text-white transition-colors"
+            >
+              ✕ {isAm ? 'ሰርዝ' : 'Cancel'}
+            </button>
+            <button
+              type="button"
+              onClick={stopVoiceAndSend}
+              className="px-3 py-1 rounded-lg bg-red-800 hover:bg-red-700 border border-red-500 text-xs font-bold text-white shadow-sm transition-colors"
+            >
+              ✓ {isAm ? 'ላክ' : 'Send'}
+            </button>
+          </div>
         </div>
       )}
 
