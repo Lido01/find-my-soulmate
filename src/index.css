@@ -3,25 +3,44 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --brand-ink: #000000;
+    --brand-surface: #09090b;
+    --brand-surface-raised: #121214;
+    --brand-line: #27272a;
+    --brand-signal: #ef4444;
+    --brand-signal-strong: #dc2626;
+    --brand-text: #ffffff;
+    --brand-muted: #a1a1aa;
+  }
   *, *::before, *::after { box-sizing: border-box; }
   html, body, #root { height: 100%; margin: 0; padding: 0; overflow: hidden; }
   body {
-    background-color: #020617;
-    color: #e2e8f0;
-    font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(220, 38, 38, 0.08), transparent 30rem),
+      radial-gradient(circle at 85% 15%, rgba(185, 28, 28, 0.06), transparent 32rem),
+      #000000;
+    color: #f4f4f5;
+    font-family: 'Space Grotesk', 'Plus Jakarta Sans', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+  button, input, textarea, select { font: inherit; }
+  button { cursor: pointer; }
+  ::selection { color: #ffffff; background: #dc2626; }
   /* Amharic font fallback */
-  [lang="am"], .am-text { font-family: 'Noto Sans Ethiopic', 'JetBrains Mono', monospace; }
+  [lang="am"], .am-text { font-family: 'Noto Sans Ethiopic', 'Space Grotesk', sans-serif; }
 }
 
 @layer components {
   /* Scrollbar */
-  .scrollbar-slim::-webkit-scrollbar { width: 4px; height: 4px; }
-  .scrollbar-slim::-webkit-scrollbar-track { background: #0f172a; }
-  .scrollbar-slim::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
-  .scrollbar-slim::-webkit-scrollbar-thumb:hover { background: #475569; }
+  /* Scrolling remains available, but browser chrome stays out of the way. */
+  *, *::before, *::after {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none;
+  }
+  *::-webkit-scrollbar { display: none !important; width: 0; height: 0; }
+  .scrollbar-slim::-webkit-scrollbar { display: none !important; }
 
   /* CRT scanline overlay */
   .crt-overlay::before {
@@ -66,11 +85,53 @@
 
 @layer utilities {
   .glass-panel {
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+      background: rgba(10, 22, 40, 0.86);
+      border: 1px solid rgba(71, 101, 137, 0.42);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
   }
-}
+
+  /* Shared product surface: a calm, technical workspace instead of flat terminal chrome. */
+  .app-shell {
+    background:
+      linear-gradient(rgba(91, 132, 173, 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(91, 132, 173, 0.045) 1px, transparent 1px),
+      radial-gradient(circle at 50% -20%, rgba(14, 116, 144, 0.16), transparent 36rem),
+      var(--brand-ink);
+    background-size: 32px 32px, 32px 32px, auto;
+  }
+  .app-shell .bg-slate-950 { background-color: rgba(7, 20, 29, 0.92); }
+  .app-shell .bg-slate-900 { background-color: rgba(12, 32, 40, 0.94); }
+  .app-shell .border-slate-800 { border-color: rgba(36, 81, 90, 0.7); }
+  .app-shell .border-slate-700 { border-color: rgba(63, 125, 130, 0.65); }
+  .app-shell .text-cyan-300, .app-shell .text-cyan-400 { color: var(--brand-signal); }
+  .app-shell .border-cyan-500, .app-shell .border-cyan-600, .app-shell .border-cyan-700 { border-color: var(--brand-signal-strong); }
+  .app-shell .bg-cyan-950, .app-shell .bg-cyan-950\/60, .app-shell .bg-cyan-950\/90 { background-color: rgba(18, 74, 73, .72); }
+  .app-shell .text-fuchsia-300, .app-shell .text-fuchsia-400 { color: #9cefe0; }
+  .app-shell header { box-shadow: 0 1px 0 rgba(80, 170, 203, 0.12), 0 12px 28px rgba(0, 0, 0, 0.18); }
+  .app-shell button { transition: border-color .2s ease, background-color .2s ease, color .2s ease, transform .2s ease; }
+  .app-shell button:active { transform: translateY(1px); }
+  .app-shell input:focus, .app-shell textarea:focus, .app-shell select:focus {
+    outline: 2px solid rgba(34, 211, 238, 0.28);
+    outline-offset: 1px;
+  }
+  .surface-card {
+    background: linear-gradient(145deg, rgba(17, 47, 56, .96), rgba(8, 27, 35, .98));
+    border: 1px solid rgba(98, 230, 197, .25);
+    box-shadow: 0 14px 38px rgba(0, 0, 0, .22);
+  }
+  .eyebrow {
+    color: #7dd3fc;
+    font: 700 10px/1.2 'JetBrains Mono', monospace;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+  @media (max-width: 640px) {
+    .app-shell { background-size: 24px 24px, 24px 24px, auto; }
+    .app-shell .hide-mobile { display: none; }
+  }
 
 /* Custom animations beyond Tailwind */
 @keyframes slideUp {
