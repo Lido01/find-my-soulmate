@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import CharacterCard from "./CharacterCard.jsx";
 import { soundEngine } from '../../utils/audio.js';
+import { IconChevronRight, IconLogIn } from '../ui/Icons.jsx';
 
 export default function CharacterSelectScreen({
   allCharacters = {},
@@ -13,6 +14,7 @@ export default function CharacterSelectScreen({
   onSelect,
   userProfile,
   onOpenRegister,
+  onOpenLogin,
   onOpenOnboarding,
   onOpenAbout,
   onSwitchToRealWs,
@@ -99,34 +101,54 @@ export default function CharacterSelectScreen({
             ═══════════════════════════════════════════════════════════════════ */}
         {activeTarget === null ? (
           <div className="w-full max-w-3xl mt-6 animate-fade-in space-y-6">
-            <div className="text-center">
-              <span className="px-3 py-1 rounded-full bg-slate-900 border border-slate-700 text-xs text-slate-300 font-mono">
-                {isAm ? "በመጀመሪያ የሚፈልጉትን ይምረጡ" : "Choose Who You Want to Find"}
-              </span>
-            </div>
-
+            {!userProfile?.isRegistered && (
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-2xl border border-cyan-700/60 bg-cyan-950/40 shadow-lg shadow-cyan-950/20">
+                <div>
+                  <p className="eyebrow">Session ready</p>
+                  <p className="text-sm text-slate-200 mt-1">Log in again to restore your dev card, or start a new profile.</p>
+                </div>
+                <div className="flex w-full sm:w-auto flex-col sm:flex-row gap-2">
+                  <button
+                    type="button"
+                    onClick={onOpenLogin}
+                    className="shrink-0 inline-flex items-center justify-center gap-2 rounded-xl border border-cyan-500/70 bg-cyan-900/40 px-3 py-2 text-xs font-bold text-cyan-100 hover:bg-cyan-800/60"
+                  >
+                    <IconLogIn className="w-4 h-4" />
+                    Log in again
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onOpenRegister?.()}
+                    className="shrink-0 inline-flex items-center justify-center gap-1 rounded-xl border border-slate-600 bg-slate-900/70 px-3 py-2 text-xs font-bold text-slate-200 hover:border-cyan-700 hover:text-cyan-200"
+                  >
+                    Start new profile
+                    <IconChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            )}
             {/* Exactly 2 Options: Strictly Girlfriend OR Boyfriend */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
               {/* Option A: Girlfriend */}
               <div
                 onClick={() => handleSelectCategory('female')}
-                className="group relative border-2 border-slate-800 hover:border-fuchsia-500 bg-slate-900/90 p-6 cursor-pointer transition-all duration-300 hover:scale-[1.03] shadow-2xl overflow-hidden flex flex-col justify-between rounded-2xl"
+                className="group relative border-2 border-slate-800 hover:border-fuchsia-500 bg-slate-900/90 p-6 cursor-pointer transition-all duration-300 hover:scale-[1.03] shadow-2xl overflow-hidden flex flex-col justify-between "
               >
                 <div className="absolute -top-12 -right-12 w-40 h-40 bg-fuchsia-600/20 blur-2xl group-hover:bg-fuchsia-600/35 transition-all" />
 
                 <div className="relative z-10 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-4xl p-3 bg-fuchsia-950/60 border border-fuchsia-800/80 rounded-2xl inline-block">
-                      👩‍💻
+                    <span className="text-4xl p-3 bg-fuchsia-950/60 border border-fuchsia-800/80  inline-block">
+                      F
                     </span>
-                    <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-fuchsia-950 border border-fuchsia-700 text-fuchsia-300">
+                    <span className="font-mono text-xs font-bold px-2.5 py-1  bg-fuchsia-950 border border-fuchsia-700 text-fuchsia-300">
                       {girlfriends.length} {isAm ? 'ጓደኞች' : 'Profiles'}
                     </span>
                   </div>
 
                   <div>
                     <h3 className="font-mono text-xl font-black text-white group-hover:text-fuchsia-300 transition-colors">
-                      {isAm ? 'የሴት ጓደኛ ፈልግ' : 'Find a Girlfriend 👩‍💻'}
+                      {isAm ? 'የሴት ጓደኛ ፈልግ' : 'Find a Girlfriend'}
                     </h3>
                     <p className="font-mono text-xs text-slate-400 mt-1 leading-relaxed">
                       {isAm
@@ -139,7 +161,7 @@ export default function CharacterSelectScreen({
                     {girlfriends.map((g) => (
                       <div
                         key={g.id}
-                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-xs font-mono text-slate-300"
+                        className="flex items-center gap-1.5 px-2.5 py-1  bg-slate-950 border border-slate-800 text-xs font-mono text-slate-300"
                       >
                         <span>{g.nationality}</span>
                         <span className="font-bold">{g.name}</span>
@@ -157,23 +179,23 @@ export default function CharacterSelectScreen({
               {/* Option B: Boyfriend */}
               <div
                 onClick={() => handleSelectCategory('male')}
-                className="group relative border-2 border-slate-800 hover:border-cyan-500 bg-slate-900/90 p-6 cursor-pointer transition-all duration-300 hover:scale-[1.03] shadow-2xl overflow-hidden flex flex-col justify-between rounded-2xl"
+                className="group relative border-2 border-slate-800 hover:border-cyan-500 bg-slate-900/90 p-6 cursor-pointer transition-all duration-300 hover:scale-[1.03] shadow-2xl overflow-hidden flex flex-col justify-between "
               >
                 <div className="absolute -top-12 -right-12 w-40 h-40 bg-cyan-600/20 blur-2xl group-hover:bg-cyan-600/35 transition-all" />
 
                 <div className="relative z-10 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-4xl p-3 bg-cyan-950/60 border border-cyan-800/80 rounded-2xl inline-block">
-                      👨‍💻
+                    <span className="text-4xl p-3 bg-cyan-950/60 border border-cyan-800/80  inline-block">
+                      M
                     </span>
-                    <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-cyan-950 border border-cyan-700 text-cyan-300">
+                    <span className="font-mono text-xs font-bold px-2.5 py-1  bg-cyan-950 border border-cyan-700 text-cyan-300">
                       {boyfriends.length} {isAm ? 'ጓደኞች' : 'Profiles'}
                     </span>
                   </div>
 
                   <div>
                     <h3 className="font-mono text-xl font-black text-white group-hover:text-cyan-300 transition-colors">
-                      {isAm ? 'የወንድ ጓደኛ ፈልግ' : 'Find a Boyfriend 👨‍💻'}
+                      {isAm ? 'የወንድ ጓደኛ ፈልግ' : 'Find a Boyfriend'}
                     </h3>
                     <p className="font-mono text-xs text-slate-400 mt-1 leading-relaxed">
                       {isAm
@@ -186,7 +208,7 @@ export default function CharacterSelectScreen({
                     {boyfriends.map((b) => (
                       <div
                         key={b.id}
-                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-xs font-mono text-slate-300"
+                        className="flex items-center gap-1.5 px-2.5 py-1  bg-slate-950 border border-slate-800 text-xs font-mono text-slate-300"
                       >
                         <span>{b.nationality}</span>
                         <span className="font-bold">{b.name}</span>
@@ -208,14 +230,14 @@ export default function CharacterSelectScreen({
              ═══════════════════════════════════════════════════════════════════ */
           <div className="w-full mt-4 animate-fade-in space-y-5">
             {/* Target Status Banner */}
-            <div className="w-full flex items-center justify-between p-3 rounded-2xl bg-slate-900 border border-slate-800 shadow-md flex-wrap gap-2">
+            <div className="w-full flex items-center justify-between p-3  bg-slate-900 border border-slate-800 shadow-md flex-wrap gap-2">
               <div className="flex items-center gap-2 font-mono text-xs">
-                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                <span className="w-2 h-2  bg-cyan-400 animate-pulse" />
                 <span className="text-slate-400">{isAm ? "የተመረጠ:" : "Active Preference:"}</span>
-                <span className="font-bold text-white px-2 py-0.5 rounded-lg bg-slate-950 border border-slate-800 text-cyan-300">
+                <span className="font-bold text-white px-2 py-0.5  bg-slate-950 border border-slate-800 text-cyan-300">
                   {activeTarget === 'female'
-                    ? (isAm ? 'የሴት ጓደኞች 👩‍💻' : 'Girlfriends 👩‍💻')
-                    : (isAm ? 'የወንድ ጓደኞች 👨‍💻' : 'Boyfriends 👨‍💻')}
+                    ? (isAm ? 'የሴት ጓደኞች' : 'Girlfriends')
+                    : (isAm ? 'የወንድ ጓደኞች ' : 'Boyfriends')}
                 </span>
                 <span className="text-slate-500 text-[11px]">
                   ({activeRoster.length} {isAm ? 'ገንቢዎች' : 'soulmates'})

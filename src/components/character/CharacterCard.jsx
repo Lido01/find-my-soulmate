@@ -66,7 +66,7 @@ export default function CharacterCard({ character, charState, onSelect, t, lang 
               </h3>
               {character.nationality && <span className="text-sm">{character.nationality}</span>}
               <span className="font-mono text-[10px] text-fuchsia-300 border border-fuchsia-800/80 bg-fuchsia-950/60  px-1.5 py-0.5">
-                {character.gender === 'female' ? 'Girlfriend 👩‍💻' : 'Boyfriend 👨‍💻'}
+                {character.gender === 'female' ? 'Girlfriend' : 'Boyfriend'}
               </span>
             </div>
             <p className="font-mono text-xs text-slate-500 mt-0.5">{character.handle}</p>
@@ -74,7 +74,7 @@ export default function CharacterCard({ character, charState, onSelect, t, lang 
           </div>
 
           {/* Mood emoji */}
-          <span className="text-2xl shrink-0">{moodMeta.emoji || "🤔"}</span>
+          <span className="text-[11px] shrink-0 font-mono text-slate-500 uppercase tracking-widest">mood</span>
         </div>
 
         {/* Mood description pill */}
@@ -82,7 +82,7 @@ export default function CharacterCard({ character, charState, onSelect, t, lang 
           className={`flex items-center justify-between  px-3 py-1.5 border border-slate-700/50 ${moodMeta.bgClass || 'bg-slate-800/50'}`}
         >
           <div className="flex items-center gap-1.5">
-            <span className="text-sm">{moodMeta.emoji || "🤔"}</span>
+            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: moodMeta.borderColor || borderColor }} />
             <span className={`font-mono text-xs font-bold ${moodMeta.textClass || 'text-cyan-400'}`}>
               {t?.moods?.[mood] ?? mood}
             </span>
@@ -116,7 +116,7 @@ export default function CharacterCard({ character, charState, onSelect, t, lang 
         {/* Fun fact preview */}
         {randomFact && (
           <p className="font-mono text-[11px] text-slate-400 italic bg-slate-950/60 border border-slate-800/60  p-2.5 leading-relaxed">
-            💡 {randomFact}
+            // {randomFact}
           </p>
         )}
       </div>
