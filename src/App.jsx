@@ -89,6 +89,25 @@ export default function App() {
     });
   }, []);
 
+  // Synchronize theme attribute and classes across html and body
+  useEffect(() => {
+    const root = document.documentElement;
+    const body = document.body;
+    if (theme === 'light') {
+      root.classList.add('theme-light');
+      root.classList.remove('theme-dark');
+      body.classList.add('theme-light');
+      body.classList.remove('theme-dark');
+      root.setAttribute('data-theme', 'light');
+    } else {
+      root.classList.add('theme-dark');
+      root.classList.remove('theme-light');
+      body.classList.add('theme-dark');
+      body.classList.remove('theme-light');
+      root.setAttribute('data-theme', 'dark');
+    }
+  }, [theme]);
+
   // Mode switcher: 'virtual' (AI Soulmates) vs 'real_ws' (Live WebSocket Real Users)
   const [chatMode, setChatMode] = useState('virtual');
   const [activeRealPeer, setActiveRealPeer] = useState(null);
