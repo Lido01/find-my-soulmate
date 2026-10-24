@@ -1,4 +1,7 @@
-// Commit: fix(chat): polish ChatFeed with smooth scroll and clean empty state
+// ─────────────────────────────────────────────────────────────────────────────
+// ChatFeed.jsx — Clean Developer Message Feed with Smooth Scroll & Empty State
+// High-tech Red, Black & White developer theme with Space Grotesk / JetBrains Mono
+// ─────────────────────────────────────────────────────────────────────────────
 
 import MessageBubble from "./MessageBubble.jsx";
 import TypingIndicator from "./TypingIndicator.jsx";
@@ -8,25 +11,17 @@ function EmptyState({ character, lang }) {
     ? character.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
     : "??");
 
-  const borderColor = character?.borderColor || "#10b981";
-
   return (
-    <div className="flex flex-col items-center justify-center flex-1 gap-4 py-16 select-none">
-      <div
-        className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${character?.avatarBg || 'from-slate-800 to-slate-950'} flex items-center justify-center text-2xl font-mono font-black text-white border-2 shadow-xl`}
-        style={{
-          borderColor: borderColor,
-          boxShadow: `0 0 24px ${borderColor}50`,
-        }}
-      >
+    <div className="flex flex-col items-center justify-center flex-1 gap-4 py-16 select-none font-mono">
+      <div className="w-16 h-16 rounded-2xl bg-black border-2 border-red-600 flex items-center justify-center text-2xl font-mono font-black text-white shadow-xl shadow-red-950/40">
         {initials}
       </div>
       <div className="text-center space-y-1">
-        <p className={`font-mono font-bold text-base ${character?.textClass || 'text-white'}`}>
-          {character?.name ?? "..."}
+        <p className="font-mono font-bold text-base text-white">
+          {character?.name ?? "Developer"}
         </p>
-        <p className="font-mono text-xs text-slate-500 tracking-widest animate-pulse">
-          // channel open... send a message or choose a prompt below
+        <p className="font-mono text-xs text-red-400 tracking-widest animate-pulse font-bold">
+          // channel open... send a message, code snippet, or prompt below
         </p>
       </div>
     </div>
@@ -39,8 +34,8 @@ export default function ChatFeed({ messages = [], character, isTyping, feedRef, 
   return (
     <div
       ref={feedRef}
-      className="flex-1 overflow-y-auto flex flex-col gap-3 py-4 scroll-smooth"
-      style={{ scrollbarWidth: "thin", scrollbarColor: "#334155 transparent" }}
+      className="flex-1 overflow-y-auto flex flex-col gap-3 py-4 scroll-smooth bg-black font-mono select-text"
+      style={{ scrollbarWidth: "thin", scrollbarColor: "#27272a transparent" }}
     >
       {!hasMessages ? (
         <EmptyState character={character} lang={lang} />

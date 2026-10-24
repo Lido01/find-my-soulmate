@@ -218,6 +218,22 @@ export class Database {
           u.loveCode = generateLoveCode();
           dirty = true;
         }
+        if (!Array.isArray(u.friends)) {
+          u.friends = [];
+          dirty = true;
+        }
+        if (!Array.isArray(u.followers)) {
+          u.followers = [];
+          dirty = true;
+        }
+        if (!Array.isArray(u.following)) {
+          u.following = [];
+          dirty = true;
+        }
+        if (!Array.isArray(u.likedBy)) {
+          u.likedBy = [];
+          dirty = true;
+        }
       }
 
       if (dirty) {
@@ -259,8 +275,11 @@ export class Database {
         indentation: userData.indentation || 'Tabs',
         drink: userData.drink || '☕ Ethiopian Bunna',
         emoji: userData.emoji || (userData.gender === 'female' ? '👩‍💻' : '👨‍💻'),
-        likes: userData.likes || (existingIdx >= 0 ? users[existingIdx].likes : 1),
+        likes: typeof userData.likes === 'number' ? userData.likes : (existingIdx >= 0 ? users[existingIdx].likes : 1),
+        likedBy: userData.likedBy || (existingIdx >= 0 ? users[existingIdx].likedBy : []),
         friends: userData.friends || (existingIdx >= 0 ? users[existingIdx].friends : []),
+        followers: userData.followers || (existingIdx >= 0 ? users[existingIdx].followers : []),
+        following: userData.following || (existingIdx >= 0 ? users[existingIdx].following : []),
         loveCode: loveCode,
         status: 'offline',
         currentStatus: userData.currentStatus || 'Just registered on DevSoulmate! Say hi',
@@ -504,41 +523,65 @@ export class Database {
     }
   }
 
-  // Social interactions: like, wave, friend
+  // Social interactions: like, wave, friend, follow
   interact(action, fromUser, targetUserId) {
     try {
       const users = this.getUsers();
       const targetUser = users.find((u) => u.id === targetUserId);
       if (!targetUser) return null;
+      const actor = users.find((u) => u.id === fromUser.id);
 
       if (action === 'like') {
-        targetUser.likes = (targetUser.likes || 0) + 1;
+        if (!Array.isArray(targetUser.likedBy)) targetUser.likedBy = [];
+        const idx = targetUser.likedBy.indexOf(fromUser.id);
+        if (idx >= 0) {
+          targetUser.likedBy.splice(idx, 1);
+          targetUser.likes = Math.max(0, (targetUser.likes || 1) - 1);
+        } else {
+          targetUser.likedBy.push(fromUser.id);
+          targetUser.likes = (targetUser.likes || 0) + 1;
+        }
+      } else if (action === 'follow' || action === 'toggle_follow') {
+        if (!Array.isArray(targetUser.followers)) targetUser.followers = [];
+        const idx = targetUser.followers.indexOf(fromUser.id);
+        if (idx >= 0) {
+          targetUser.followers.splice(idx, 1);
+          if (actor) {
+            actor.following = (actor.following || []).filter((id) => id !== targetUserId);
+          }
+        } else {
+          targetUser.followers.push(fromUser.id);
+          if (actor) {
+            if (!Array.isArray(actor.following)) actor.following = [];
+            if (!actor.following.includes(targetUserId)) {
+              actor.following.push(targetUserId);
+            }
+          }
+        }
       } else if (action === 'confirm_friend') {
-        if (!targetUser.friends) targetUser.friends = [];
+        if (!Array.isArray(targetUser.friends)) targetUser.friends = [];
         if (!targetUser.friends.includes(fromUser.id)) {
           targetUser.friends.push(fromUser.id);
         }
 
         // Add reciprocally for user
-        const actor = users.find((u) => u.id === fromUser.id);
         if (actor) {
-          if (!actor.friends) actor.friends = [];
+          if (!Array.isArray(actor.friends)) actor.friends = [];
           if (!actor.friends.includes(targetUserId)) {
             actor.friends.push(targetUserId);
           }
         }
       } else if (action === 'remove_friend') {
-        if (targetUser.friends) {
+        if (Array.isArray(targetUser.friends)) {
           targetUser.friends = targetUser.friends.filter((id) => id !== fromUser.id);
         }
-        const actor = users.find((u) => u.id === fromUser.id);
-        if (actor && actor.friends) {
+        if (actor && Array.isArray(actor.friends)) {
           actor.friends = actor.friends.filter((id) => id !== targetUserId);
         }
       }
 
       fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), 'utf-8');
-      return targetUser;
+      return { targetUser, actor };
     } catch (err) {
       console.error('[DB] Error interacting:', err.message);
       return null;

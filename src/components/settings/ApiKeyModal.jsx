@@ -1,5 +1,6 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // ApiKeyModal.jsx — Resilient Gemini API key setup with detailed diagnostics
+// Styled in high-tech Red, Black & White developer theme with Space Grotesk / JetBrains Mono
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState } from "react";
@@ -108,44 +109,50 @@ export default function ApiKeyModal({ isOpen, onClose, onSave, currentKey = "", 
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md animate-fade-in font-mono select-text"
       onClick={(e) => e.target === e.currentTarget && onClose?.()}
     >
-      <div className="w-full max-w-md bg-slate-900 border border-slate-700  shadow-2xl overflow-hidden flex flex-col">
+      <div className="w-full max-w-md bg-black border border-zinc-800 rounded-3xl shadow-2xl shadow-red-950/40 overflow-hidden flex flex-col animate-slide-up">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
-          <div className="flex items-center gap-2">
-            <IconKey className="w-5 h-5 text-emerald-400" />
-            <h2 className="font-mono font-bold text-sm text-white">
-              {t?.apiKeyTitle ?? "Connect Gemini AI Chat"}
-            </h2>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-zinc-950/90 shrink-0">
+          <div className="flex items-center gap-2.5">
+            <span className="p-1.5 rounded-xl bg-red-950/70 border border-red-600/50 text-red-400">
+              <IconKey className="w-4 h-4" />
+            </span>
+            <div>
+              <h2 className="font-heading font-bold text-sm sm:text-base text-white">
+                {t?.apiKeyTitle ?? "Connect Gemini AI Chat"}
+              </h2>
+              <p className="text-[10px] text-zinc-500 font-mono">Google AI Studio API Key</p>
+            </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="text-slate-500 hover:text-white p-1  hover:bg-slate-800 transition-colors"
+            className="text-zinc-400 hover:text-white p-1.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-red-600 transition-colors"
           >
             <IconX className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-4 bg-black">
           {/* Explanation */}
-          <p className="font-mono text-xs text-slate-400 leading-relaxed">
-            Connect your Gemini API key to unlock unscripted, real-time AI roleplay with your soulmates in English or Amharic!
+          <p className="font-sans text-xs text-zinc-300 leading-relaxed">
+            Connect your Gemini API key to unlock unscripted, real-time AI roleplay with your developer soulmates in English or Amharic!
           </p>
 
           {/* Current key indicator */}
           {hasKey && (
-            <div className="flex items-center justify-between p-3  bg-emerald-950/40 border border-emerald-700/60">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-zinc-950 border border-zinc-800">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2  bg-emerald-400 animate-pulse" />
-                <span className="font-mono text-xs text-emerald-300 font-bold">Active Key:</span>
-                <span className="font-mono text-xs text-slate-400">{maskKey(currentKey)}</span>
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                <span className="font-mono text-xs text-white font-bold">Active Key:</span>
+                <span className="font-mono text-xs text-zinc-400">{maskKey(currentKey)}</span>
               </div>
               <button
                 type="button"
                 onClick={handleDisconnect}
-                className="font-mono text-[10px] text-red-400 hover:text-red-300 underline"
+                className="font-mono text-[10px] text-red-400 hover:text-red-300 underline font-bold"
               >
                 Disconnect
               </button>
@@ -154,7 +161,7 @@ export default function ApiKeyModal({ isOpen, onClose, onSave, currentKey = "", 
 
           {/* Input field */}
           <div className="space-y-1.5">
-            <label className="font-mono text-[11px] text-slate-400 block font-bold">
+            <label className="font-mono text-[11px] text-zinc-300 block font-bold">
               Gemini API Key:
             </label>
             <div className="relative">
@@ -167,23 +174,23 @@ export default function ApiKeyModal({ isOpen, onClose, onSave, currentKey = "", 
                   setFeedback("");
                 }}
                 placeholder="Paste API key (starts with AIzaSy...)"
-                className="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500  px-3.5 py-2.5 pr-10 font-mono text-xs text-white placeholder:text-slate-600 focus:outline-none transition-colors"
+                className="w-full bg-zinc-950 border border-zinc-800 focus:border-red-600 rounded-xl px-3.5 py-2.5 pr-10 font-mono text-xs text-white placeholder:text-zinc-600 focus:outline-none transition-colors"
               />
               <button
                 type="button"
                 onClick={() => setShowKey(!showKey)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
               >
                 {showKey ? <IconEyeOff className="w-4 h-4" /> : <IconEye className="w-4 h-4" />}
               </button>
             </div>
-            <p className="font-mono text-[10px] text-slate-500 pt-0.5">
+            <p className="font-mono text-[10px] text-zinc-500 pt-0.5">
               Get your free key at{" "}
               <a
                 href="https://aistudio.google.com"
                 target="_blank"
                 rel="noreferrer"
-                className="text-cyan-400 hover:underline"
+                className="text-red-400 hover:underline font-bold"
               >
                 aistudio.google.com
               </a>
@@ -193,20 +200,20 @@ export default function ApiKeyModal({ isOpen, onClose, onSave, currentKey = "", 
           {/* Status feedback block */}
           {feedback && (
             <div
-              className={`p-3  font-mono text-xs leading-relaxed border ${
+              className={`p-3 rounded-2xl font-mono text-xs leading-relaxed border ${
                 status === "success"
-                  ? "bg-emerald-950/60 border-emerald-700 text-emerald-300"
-                  : "bg-amber-950/60 border-amber-700 text-amber-300"
+                  ? "bg-red-950/80 border-red-600 text-white"
+                  : "bg-zinc-950 border-red-900/60 text-red-300"
               }`}
             >
               <p>{feedback}</p>
               {allowForceSave && (
-                <div className="mt-2 pt-2 border-t border-amber-800/80 flex items-center justify-between">
-                  <span className="text-[10px] text-slate-400">If you know this key is correct:</span>
+                <div className="mt-2 pt-2 border-t border-zinc-800 flex items-center justify-between">
+                  <span className="text-[10px] text-zinc-400">If you know this key is correct:</span>
                   <button
                     type="button"
                     onClick={handleForceSave}
-                    className="px-2.5 py-1  bg-amber-800/60 hover:bg-amber-700/80 text-white font-bold text-[10px]"
+                    className="px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-[10px]"
                   >
                     Save Key Anyway →
                   </button>
@@ -221,10 +228,10 @@ export default function ApiKeyModal({ isOpen, onClose, onSave, currentKey = "", 
               type="button"
               disabled={loading || !inputKey.trim()}
               onClick={handleTestAndSave}
-              className={`flex-1 py-2.5  font-mono text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+              className={`flex-1 py-3 rounded-xl font-mono text-xs font-bold transition-all flex items-center justify-center gap-2 ${
                 loading || !inputKey.trim()
-                  ? "bg-slate-800 text-slate-500 cursor-not-allowed"
-                  : "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-950/50 cursor-pointer"
+                  ? "bg-zinc-900 border border-zinc-800 text-zinc-600 cursor-not-allowed"
+                  : "bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-950/50 cursor-pointer"
               }`}
             >
               {loading ? (

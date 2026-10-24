@@ -7,7 +7,10 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        mono: ['JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', 'monospace'],
+        sans: ['"Plus Jakarta Sans"', 'Manrope', 'Segoe UI', 'sans-serif'],
+        mono: ['"JetBrains Mono"', '"DM Mono"', 'Cascadia Mono', 'Consolas', 'monospace'],
+        heading: ['"Space Grotesk"', '"Plus Jakarta Sans"', 'sans-serif'],
+        brand: ['"Space Grotesk"', 'sans-serif'],
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',

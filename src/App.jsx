@@ -17,6 +17,7 @@ import {
 } from './utils/storage.js';
 import { validateApiKey, cleanApiKey } from './utils/gemini.js';
 import { soundEngine } from './utils/audio.js';
+import { IconChevronDown, IconChevronUp } from './components/ui/Icons.jsx';
 
 // Layout components
 import HeaderBar from './components/layout/HeaderBar.jsx';
@@ -68,7 +69,9 @@ export default function App() {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
-  const [showDevRegisterModal, setShowDevRegisterModal] = useState(() => !loadUserProfile()?.isRegistered);
+  // Keep the discovery screen visible on first load; registration opens when the
+  // user chooses a target or uses the Dev Card action.
+  const [showDevRegisterModal, setShowDevRegisterModal] = useState(false);
   const [registerModalAuthMode, setRegisterModalAuthMode] = useState('register');
   const [defaultRegisterTarget, setDefaultRegisterTarget] = useState(null);
   const [showMobileNav, setShowMobileNav] = useState(false);
@@ -86,11 +89,29 @@ export default function App() {
     });
   }, []);
 
+  // Synchronize theme attribute and classes across html and body
+  useEffect(() => {
+    const root = document.documentElement;
+    const body = document.body;
+    if (theme === 'light') {
+      root.classList.add('theme-light');
+      root.classList.remove('theme-dark');
+      body.classList.add('theme-light');
+      body.classList.remove('theme-dark');
+      root.setAttribute('data-theme', 'light');
+    } else {
+      root.classList.add('theme-dark');
+      root.classList.remove('theme-light');
+      body.classList.add('theme-dark');
+      body.classList.remove('theme-light');
+      root.setAttribute('data-theme', 'dark');
+    }
+  }, [theme]);
+
   // Mode switcher: 'virtual' (AI Soulmates) vs 'real_ws' (Live WebSocket Real Users)
   const [chatMode, setChatMode] = useState('virtual');
   const [activeRealPeer, setActiveRealPeer] = useState(null);
   const [onlinePeers, setOnlinePeers] = useState([]);
-  const [chatNotification, setChatNotification] = useState(null);
 
   // Unread message tracking per peer
   const [unreadCounts, setUnreadCounts] = useState(() => {
@@ -126,6 +147,21 @@ export default function App() {
     }
   }, [userProfile?.id, userProfile?.isRegistered]);
 
+  // Sync latest user profile (friends, followers, following) from server on load
+  useEffect(() => {
+    if (userProfile?.id) {
+      wsService.fetchUserProfile(userProfile.id).then((freshUser) => {
+        if (freshUser) {
+          setUserProfileState((prev) => {
+            const merged = { ...prev, ...freshUser };
+            saveUserProfile(merged);
+            return merged;
+          });
+        }
+      });
+    }
+  }, [userProfile?.id]);
+
   // Listen for room entry, presence and incoming chat notifications from WebSocket service
   useEffect(() => {
     const unbindRoom = wsService.on('room:entered', ({ peer }) => {
@@ -133,6 +169,26 @@ export default function App() {
       setChatMode('real_ws');
       if (peer?.id) {
         setUnreadCounts((prev) => ({ ...prev, [peer.id]: 0 }));
+      }
+    });
+
+    const unbindIncomingInvite = wsService.on('chat:incoming_invite', ({ peer, inviter }) => {
+      const fromPeer = peer || inviter;
+      if (fromPeer?.id) {
+        soundEngine.playRomanticChime();
+        setUnreadCounts((prev) => ({ ...prev, [fromPeer.id]: (prev[fromPeer.id] || 0) + 1 }));
+        setNotifications((prev) => [
+          {
+            id: `invite_${Date.now()}_${fromPeer.id}`,
+            type: 'message',
+            targetUserId: userProfile?.id,
+            fromUser: fromPeer,
+            text: `${fromPeer.name || 'Developer'} started a chat conversation with you! 💬`,
+            read: false,
+            timestamp: new Date().toISOString(),
+          },
+          ...prev,
+        ]);
       }
     });
 
@@ -150,24 +206,12 @@ export default function App() {
           return { ...prev, [msg.senderId]: nextCount };
         });
 
-        setChatNotification({
-          id: msg.id,
-          senderId: msg.senderId,
-          senderName: msg.senderName || 'Developer',
-          senderHandle: msg.senderHandle || '@dev',
-          senderEmoji: msg.senderEmoji || '👩‍💻',
-          senderAvatarUrl: msg.senderAvatarUrl || null,
-          text: msg.text || (msg.isImage ? 'Shared a photo 📷' : msg.isCode ? 'Sent code 💻' : 'New message'),
-        });
-
-        setTimeout(() => {
-          setChatNotification((prev) => (prev?.id === msg.id ? null : prev));
-        }, 6000);
       }
     });
 
     return () => {
       unbindRoom();
+      unbindIncomingInvite();
       unbindPresence();
       unbindIncoming();
     };
@@ -268,8 +312,8 @@ export default function App() {
   const aiModeActive = Boolean(apiKey);
 
   return (
-    <div className={`h-[100dvh] min-h-[100dvh] w-full flex flex-col font-mono overflow-hidden select-text transition-colors duration-200 ${
-      theme === 'light' ? 'theme-light bg-slate-50 text-slate-900' : 'bg-slate-950 text-slate-200'
+    <div className={`app-shell h-[100dvh] min-h-[100dvh] w-full flex flex-col overflow-hidden select-text transition-colors duration-200 ${
+      theme === 'light' ? 'theme-light bg-zinc-50 text-zinc-900' : 'bg-black text-white'
     }`}>
       {/* Top header */}
       <HeaderBar
@@ -284,6 +328,11 @@ export default function App() {
         onOpenProfile={() => setShowProfileModal(true)}
         onOpenRegister={(target) => {
           setDefaultRegisterTarget(target || null);
+          setShowDevRegisterModal(true);
+        }}
+        onOpenLogin={() => {
+          setRegisterModalAuthMode('login');
+          setDefaultRegisterTarget(null);
           setShowDevRegisterModal(true);
         }}
         onOpenAbout={() => setShowAboutModal(true)}
@@ -344,15 +393,15 @@ export default function App() {
             onClick={() => setMobileSidebarOpen(false)}
           >
             <div
-              className="w-72 h-full bg-slate-950 border-r border-slate-800 shadow-2xl flex flex-col animate-slide-right"
+              className="w-72 h-full bg-black border-r border-zinc-800 shadow-2xl flex flex-col animate-slide-right"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="p-3 border-b border-slate-800 flex justify-between items-center bg-slate-900/90">
-                <span className="font-mono text-xs font-bold text-slate-300">// Partner Stats & Switch</span>
+              <div className="p-3 border-b border-zinc-800 flex justify-between items-center bg-zinc-950/90">
+                <span className="font-mono text-xs font-bold text-white">// Partner Stats & Switch</span>
                 <button
                   type="button"
                   onClick={() => setMobileSidebarOpen(false)}
-                  className="px-2 py-1  text-slate-400 hover:text-white bg-slate-800 text-xs font-mono"
+                  className="px-2 py-1 rounded-lg text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 text-xs font-mono"
                 >
                   ✕
                 </button>
@@ -377,7 +426,7 @@ export default function App() {
         )}
 
         {/* Main panel */}
-        <main className="flex-1 flex flex-col overflow-hidden bg-slate-950 min-w-0">
+        <main className="flex-1 flex flex-col overflow-hidden bg-black min-w-0">
           {chatMode === 'real_ws' ? (
             activeRealPeer ? (
               <RealChatRoom
@@ -395,6 +444,7 @@ export default function App() {
                 unreadCounts={unreadCounts}
                 onSelectPeer={(peer) => handleOpenPeerChat(peer)}
                 onOpenProfile={() => setShowProfileModal(true)}
+                onUpdateUserProfile={handleSaveProfile}
                 onOpenRegister={(target) => {
                   setDefaultRegisterTarget(target || null);
                   setShowDevRegisterModal(true);
@@ -436,6 +486,7 @@ export default function App() {
                   userProfile={userProfile}
                   onOpenLoveHub={() => setLoveDrawerOpen((prev) => !prev)}
                   onToggleMobileSidebar={() => setMobileSidebarOpen((prev) => !prev)}
+                  mobileSidebarOpen={mobileSidebarOpen}
                   t={t}
                   lang={lang}
                   aiModeActive={aiModeActive}
@@ -605,107 +656,39 @@ export default function App() {
       <MoodToast mood={moodToast.mood} visible={moodToast.visible} t={t} lang={lang} />
       <LoveWordBubble lang={lang} />
 
-      {/* Real-Time Incoming Social Chat Notification Toast (Clickable with Unread Count) */}
-      {chatNotification && (
-        <div
-          onClick={() => {
-            const peer = onlinePeers.find((p) => p.id === chatNotification.senderId) || {
-              id: chatNotification.senderId,
-              name: chatNotification.senderName,
-              handle: chatNotification.senderHandle,
-              emoji: chatNotification.senderEmoji,
-              avatarUrl: chatNotification.senderAvatarUrl,
-            };
-            handleOpenPeerChat(peer);
-            setChatNotification(null);
-          }}
-          className="fixed top-14 right-3 sm:right-6 z-50 max-w-sm w-full bg-slate-900 border-2 border-cyan-400 rounded-2xl p-3 shadow-2xl flex items-center gap-3 animate-slide-up cursor-pointer hover:bg-slate-850 hover:scale-[1.02] transition-all font-mono"
-          title="Click to view message and start chat"
-        >
-          <div className="relative shrink-0">
-            <div className="w-11 h-11 rounded-xl bg-slate-950 border border-slate-700 flex items-center justify-center overflow-hidden">
-              {chatNotification.senderAvatarUrl ? (
-                <img src={chatNotification.senderAvatarUrl} alt={chatNotification.senderName} className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-2xl">{chatNotification.senderEmoji}</span>
-              )}
-            </div>
-            {/* Pulsing indicator */}
-            <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-rose-500 animate-ping" />
-            <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-rose-500" />
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between">
-              <h4 className="font-bold text-xs text-white truncate flex items-center gap-1.5">
-                <span>{chatNotification.senderName}</span>
-                <span className="text-[10px] text-slate-400">{chatNotification.senderHandle}</span>
-              </h4>
-              <div className="flex items-center gap-1">
-                {(unreadCounts[chatNotification.senderId] || 1) > 1 && (
-                  <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-black">
-                    {unreadCounts[chatNotification.senderId]} msgs
-                  </span>
-                )}
-                <span className="text-[10px] text-cyan-400 font-bold">New</span>
-              </div>
-            </div>
-            <p className="text-[11px] text-slate-300 truncate mt-0.5">{chatNotification.text}</p>
-            <span className="text-[10px] text-cyan-300 font-bold block mt-1 hover:underline">
-              {lang === 'am' ? 'መልእክት ይመልከቱ →' : 'Click to reply in chat →'}
-            </span>
-          </div>
-
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setChatNotification(null);
-            }}
-            className="text-slate-400 hover:text-white text-xs p-1 rounded-lg bg-slate-850 border border-slate-800"
-            title="Dismiss notification"
-          >
-            ✕
-          </button>
-        </div>
-      )}
     </div>
   );
 }
 
 // ── Inline Chat Header ────────────────────────────────────────────────────────
-function ChatHeader({ character, charState, userProfile, onOpenLoveHub, onToggleMobileSidebar, t, lang, aiModeActive }) {
+function ChatHeader({ character, charState, userProfile, onOpenLoveHub, onToggleMobileSidebar, mobileSidebarOpen, t, lang, aiModeActive }) {
   const mood = MOOD_META[charState.mood] || MOOD_META.curious;
-  const borderColor = character?.borderColor || '#10b981';
 
   return (
-    <div className="flex-shrink-0 flex items-center gap-3 px-3 sm:px-5 py-2.5 border-b border-slate-800 bg-slate-950/90 backdrop-blur-sm">
+    <div className="flex-shrink-0 flex items-center gap-3 px-3 sm:px-5 py-2.5 border-b border-zinc-800 bg-black/95 backdrop-blur-sm font-mono select-text">
       {/* Avatar */}
-      <div
-        className={`w-9 h-9  bg-gradient-to-br ${character.avatarBg || 'from-slate-800 to-slate-950'} flex items-center justify-center text-sm font-black text-white border-2 flex-shrink-0 shadow`}
-        style={{ borderColor: borderColor, boxShadow: `0 0 10px ${borderColor}50` }}
-      >
+      <div className="w-9 h-9 rounded-xl bg-black flex items-center justify-center text-sm font-black text-white border-2 border-red-600 flex-shrink-0 shadow-md shadow-red-950/40">
         {character.avatarInitials}
       </div>
 
       {/* Name row */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-          <span className={`text-sm font-black truncate ${character.textClass || 'text-white'}`}>{character.name}</span>
-          <span className="text-xs text-slate-500 hidden sm:inline">{character.handle}</span>
+          <span className="text-sm font-heading font-black truncate text-white">{character.name}</span>
+          <span className="text-xs text-red-400 font-bold hidden sm:inline">{character.handle}</span>
           <span>{mood?.emoji}</span>
-          <span className="text-[10px] text-fuchsia-300 border border-fuchsia-800/80 bg-fuchsia-950/60 rounded px-1.5 py-0.5">
+          <span className="text-[10px] text-white border border-zinc-800 bg-zinc-950 rounded-lg px-2 py-0.5 font-bold">
             {character.gender === 'female' ? 'Girlfriend 👩‍💻' : 'Boyfriend 👨‍💻'}
           </span>
           {aiModeActive && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-700/60 text-emerald-400 font-bold">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-600 text-white font-bold">
               🤖 AI
             </span>
           )}
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-1.5 h-1.5  bg-emerald-500 animate-pulse" />
-          <span className="text-xs text-slate-500 truncate">
+          <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+          <span className="text-xs text-zinc-400 truncate">
             {t?.online ?? "online"} · {typeof character.title === 'object' ? character.title[lang] || character.title.en : character.title}
           </span>
         </div>
@@ -715,30 +698,30 @@ function ChatHeader({ character, charState, userProfile, onOpenLoveHub, onToggle
       <button
         type="button"
         onClick={onToggleMobileSidebar}
-        className="md:hidden flex items-center gap-1 font-mono text-xs px-2.5 py-1  bg-slate-900 border border-slate-700 text-slate-300 hover:text-white shrink-0"
+        className={`md:hidden flex items-center gap-1.5 font-mono text-xs px-2.5 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-white hover:border-red-600 shrink-0 shadow-sm ${
+          mobileSidebarOpen ? 'ring-1 ring-red-500/50' : ''
+        }`}
         title="View partner stats & switcher"
       >
-        <span>📊</span>
-        <span>Stats</span>
+        <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+        <span>Partner</span>
+        {mobileSidebarOpen ? <IconChevronUp className="w-3.5 h-3.5" /> : <IconChevronDown className="w-3.5 h-3.5" />}
       </button>
 
       {/* Desktop stats right cluster */}
-      <div className="ml-auto hidden sm:flex items-center gap-3 shrink-0">
+      <div className="ml-auto hidden sm:flex items-center gap-2.5 shrink-0">
         {/* Quick Love Hub Pill Button */}
         <button
           onClick={onOpenLoveHub}
-          className="flex items-center gap-1.5 px-3 py-1  bg-slate-900 border border-slate-700 hover:border-fuchsia-500 transition-all text-xs font-mono"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-red-600 transition-all text-xs font-mono shadow-sm"
           title="Open Love Metrics & Reactions"
         >
           <span>💖</span>
-          <span className="text-slate-300 font-bold">{charState.relationship}%</span>
-          <span className="text-slate-500 text-[10px]">Bond</span>
+          <span className="text-white font-bold">{charState.relationship}%</span>
+          <span className="text-zinc-500 text-[10px]">Bond</span>
         </button>
 
-        <div
-          className={`px-3 py-1  text-xs font-bold border ${mood?.bgClass || 'bg-slate-900'} ${mood?.textClass || 'text-cyan-400'}`}
-          style={{ borderColor: borderColor + '60' }}
-        >
+        <div className="px-3 py-1.5 rounded-xl text-xs font-bold border border-zinc-800 bg-zinc-950 text-red-400">
           {t?.moods?.[charState.mood] || charState.mood}
         </div>
       </div>
