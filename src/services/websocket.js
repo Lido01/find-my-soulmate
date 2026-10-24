@@ -242,8 +242,8 @@ class WebSocketManager {
 
       case 'room:invited':
         this.currentRoomId = msg.roomId;
-        this.currentPeer = msg.inviter;
-        this.emit('room:entered', { roomId: msg.roomId, peer: msg.inviter });
+        // Do NOT force screen redirect on recipient; notify them politely
+        this.emit('chat:incoming_invite', { roomId: msg.roomId, peer: msg.inviter, inviter: msg.inviter });
         break;
 
       case 'chat:message':
@@ -584,8 +584,22 @@ class WebSocketManager {
     return { ...postPayload, id: `local_${Date.now()}`, timestamp: new Date().toISOString(), likes: 1 };
   }
 
+  async fetchUserProfile(userId) {
+    if (!userId) return null;
+    try {
+      const res = await fetch(`${getApiBase()}/api/users/profile?userId=${encodeURIComponent(userId)}`);
+      if (res.ok) {
+        const data = await res.json();
+        return data.user || null;
+      }
+    } catch (err) {
+      console.warn('[WS-Client] Profile sync error:', err.message);
+    }
+    return null;
+  }
+
   async sendSocialAction(action, targetUserId) {
-    if (!this.currentUser) return;
+    if (!this.currentUser) return null;
     try {
       // Send over socket if connected
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
@@ -596,8 +610,8 @@ class WebSocketManager {
         }));
       }
 
-      // Also persist in REST API database
-      await fetch(`${getApiBase()}/api/social/action`, {
+      // Also call REST to get guaranteed updated targetUser and actor
+      const res = await fetch(`${getApiBase()}/api/social/action`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -606,9 +620,13 @@ class WebSocketManager {
           targetUserId,
         }),
       });
+      if (res.ok) {
+        return await res.json();
+      }
     } catch (err) {
       console.warn('[WS-Client] Social action fallback:', err.message);
     }
+    return null;
   }
 }
 
