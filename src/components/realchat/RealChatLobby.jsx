@@ -524,13 +524,28 @@ export default function RealChatLobby({
                   return (
                     <div
                       key={user.id}
-                      className={`p-4 sm:p-5  bg-zinc-950 border transition-all flex flex-col justify-between space-y-3.5 shadow-xl hover:shadow-2xl hover:shadow-red-950/20 ${
+                      className={`p-4 sm:p-5 rounded-3xl bg-zinc-950 border transition-all flex flex-col justify-between space-y-3.5 shadow-xl hover:shadow-2xl hover:shadow-red-950/20 ${
                         unread > 0
                           ? 'border-red-500 shadow-red-950/50 ring-2 ring-red-500/50'
                           : 'border-zinc-800/90 hover:border-red-600/70'
                       }`}
                     >
                       <div className="space-y-3">
+                        {/* Top Card Badge: Role/Specialty & Location */}
+                        <div className="flex items-center justify-between text-[10px] font-mono text-zinc-400 border-b border-zinc-900 pb-2">
+                          <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-black border border-zinc-800">
+                            <span>{user.nationality || '🌍'}</span>
+                            <span className="font-bold text-zinc-300">
+                              {user.title || (user.gender === 'female' ? 'Software Engineer' : 'Full-Stack Dev')}
+                            </span>
+                          </span>
+
+                          <span className="font-bold text-red-400 flex items-center gap-1 bg-red-950/40 border border-red-900/60 px-2 py-0.5 rounded-full">
+                            <span>🔥</span>
+                            <span>{matchScore}% Match</span>
+                          </span>
+                        </div>
+
                         {/* Header: Avatar, Name, Handle & Live Status */}
                         <div className="flex items-start justify-between gap-3">
                           <button
@@ -539,7 +554,7 @@ export default function RealChatLobby({
                             className="flex items-center gap-3 min-w-0 text-left group cursor-pointer flex-1"
                             title="Click to view full developer profile"
                           >
-                            <div className="relative w-12 h-12 sm:w-14 sm:h-14  bg-black border-2 border-zinc-800 flex items-center justify-center overflow-hidden shrink-0 group-hover:border-red-500 transition-colors shadow-md">
+                            <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-black border-2 border-zinc-800 flex items-center justify-center overflow-hidden shrink-0 group-hover:border-red-500 transition-colors shadow-md">
                               {user.avatarUrl ? (
                                 <img
                                   src={user.avatarUrl}
@@ -552,7 +567,7 @@ export default function RealChatLobby({
                                 </span>
                               )}
                               {user.isLiveNow && (
-                                <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3  bg-red-500 ring-2 ring-black animate-pulse" />
+                                <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-red-500 ring-2 ring-black animate-pulse" />
                               )}
                             </div>
 
@@ -565,21 +580,23 @@ export default function RealChatLobby({
                                   </span>
                                 )}
                               </h4>
+                              <p className="text-xs text-zinc-500 font-mono truncate">{user.handle}</p>
                               <div className="flex items-center gap-2 text-[10px] text-zinc-400 font-mono mt-1">
-                                <span>{followerCount} followers</span>
+                                <span>🌟 {followerCount} followers</span>
                                 <span>·</span>
-                                <span>likes {user.likes || 1}</span>
+                                <span>💖 {user.likes || 1}</span>
                               </div>
                             </div>
                           </button>
 
                           <div className="shrink-0 flex flex-col items-end">
                             {user.isLiveNow ? (
-                              <span className="flex items-center gap-1 px-2.5 py-1  bg-red-950/80 border border-red-600/70 text-red-300 text-[10px] font-bold shadow-sm">
+                              <span className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-950/80 border border-red-600/70 text-red-300 text-[10px] font-bold shadow-sm">
+                                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
                                 <span>Live Now</span>
                               </span>
                             ) : (
-                              <span className="px-2 py-0.5  bg-zinc-900 border border-zinc-800 text-zinc-500 text-[10px] font-mono">
+                              <span className="px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-500 text-[10px] font-mono">
                                 Offline
                               </span>
                             )}
@@ -587,8 +604,34 @@ export default function RealChatLobby({
                         </div>
 
                         {/* Special Quote / Bio snippet */}
-                        <div className="p-2.5  text-zinc-300 italic leading-relaxed">
+                        <div className="p-2.5 rounded-xl bg-black/60 border border-zinc-800/80 text-xs text-zinc-300 italic leading-relaxed">
                           "{user.quote || user.bio || 'Coding with passion...'}"
+                        </div>
+
+                        {/* Tech Stack Pills & Coding Style */}
+                        <div className="flex flex-wrap items-center gap-1.5 pt-0.5 font-mono text-[10px]">
+                          {user.drink && (
+                            <span className="px-2 py-0.5 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-300">
+                              ☕ {user.drink}
+                            </span>
+                          )}
+                          {user.indentation && (
+                            <span className="px-2 py-0.5 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-400">
+                              ⌨️ {user.indentation}
+                            </span>
+                          )}
+                          {(user.techStack || []).slice(0, 3).map((tech, idx) => (
+                            <span
+                              key={idx}
+                              className={`px-2 py-0.5 rounded-md border font-semibold ${
+                                sharedTech.includes(tech)
+                                  ? 'bg-red-950/70 border-red-700/80 text-white'
+                                  : 'bg-black border-zinc-800 text-zinc-400'
+                              }`}
+                            >
+                              {tech}
+                            </span>
+                          ))}
                         </div>
                       </div>
 
@@ -618,9 +661,23 @@ export default function RealChatLobby({
                                 ? 'bg-zinc-900 border-zinc-700 text-red-400'
                                 : 'bg-black border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700'
                             }`}
-                            title="Wave to break the ice"
+                            title="Send developer love"
                           >
                             {isWaved ? 'Waved' : 'Wave'}
+                          </button>
+
+                          {/* Wave Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleWave(user)}
+                            className={`py-1.5 rounded-xl border text-center transition-colors font-bold ${
+                              isWaved
+                                ? 'bg-zinc-900 border-zinc-700 text-red-400'
+                                : 'bg-black border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700'
+                            }`}
+                            title="Wave to break the ice"
+                          >
+                            👋 {isWaved ? 'Waved' : 'Wave'}
                           </button>
 
                           {/* Friend Button */}
@@ -645,14 +702,25 @@ export default function RealChatLobby({
                         <div className="flex items-center gap-2 pt-0.5">
                           <button
                             type="button"
+                            onClick={() => setInspectPeer(user)}
+                            className="px-3.5 py-2.5 rounded-xl bg-black hover:bg-zinc-900 border border-zinc-800 hover:border-red-600 text-zinc-300 hover:text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 shrink-0"
+                            title="Inspect Developer Profile & Stats"
+                          >
+                            <span>👤</span>
+                            <span>Profile</span>
+                          </button>
+
+                          <button
+                            type="button"
                             onClick={() => handleDirectChat(user)}
-                            className={`flex-1 py-2.5 px-3  border font-bold text-xs transition-all flex items-center justify-center gap-1.5 shadow-md active:scale-[0.98] ${
+                            className={`flex-1 py-2.5 px-3 rounded-xl border font-bold text-xs transition-all flex items-center justify-center gap-1.5 shadow-md active:scale-[0.98] ${
                               unread > 0
                                 ? 'bg-red-600 hover:bg-red-500 border-red-400 text-white shadow-[0_0_15px_rgba(239,68,68,0.5)] animate-pulse'
                                 : 'bg-red-600 hover:bg-red-500 border-red-500 text-white shadow-red-950/40'
                             }`}
                           >
-                            <span>{unread > 0 ? `Chat (${unread} New) ➔` : `Chat`}</span>
+                            <span>💬</span>
+                            <span>{unread > 0 ? `Chat (${unread} New) ➔` : `Start Chat with ${user.name} ➔`}</span>
                           </button>
                         </div>
                       </div>
