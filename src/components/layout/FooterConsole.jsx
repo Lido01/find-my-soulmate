@@ -193,9 +193,9 @@ export default function FooterConsole({
         <div className="flex items-center gap-2 min-w-0">
           {/* Traffic dots */}
           <div className="hidden xs:flex items-center gap-1 mr-1">
-            <span className="w-2 h-2   bg-red-600/90 shadow-[0_0_6px_rgba(239,68,68,0.5)]" />
-            <span className="w-2 h-2   bg-zinc-700" />
-            <span className="w-2 h-2   bg-zinc-800" />
+            <span className="w-2 h-2 rounded-full bg-red-600/90 shadow-[0_0_6px_rgba(239,68,68,0.5)]" />
+            <span className="w-2 h-2 rounded-full bg-zinc-700" />
+            <span className="w-2 h-2 rounded-full bg-zinc-800" />
           </div>
           <div className="flex items-center gap-1.5 text-zinc-400 min-w-0">
             <IconTerminal className="w-3.5 h-3.5 text-red-500 shrink-0" />
@@ -210,7 +210,7 @@ export default function FooterConsole({
           <button
             type="button"
             onClick={() => setShowVoicePresets((prev) => !prev)}
-            className={`flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1   text-[10px] sm:text-[11px] font-bold border transition-all ${
+            className={`flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg text-[10px] sm:text-[11px] font-bold border transition-all ${
               showVoicePresets
                 ? 'bg-red-950/80 border-red-600 text-white shadow-sm'
                 : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700'
@@ -228,7 +228,7 @@ export default function FooterConsole({
               soundEngine.playHeartbeat();
               onToggleLoveDrawer?.();
             }}
-            className={`flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1   text-[10px] sm:text-[11px] font-bold border transition-all ${
+            className={`flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg text-[10px] sm:text-[11px] font-bold border transition-all ${
               loveDrawerOpen
                 ? 'bg-red-950/80 border-red-500 text-white shadow-sm'
                 : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-red-400 hover:border-red-600'
@@ -241,7 +241,7 @@ export default function FooterConsole({
 
           {/* Mood indicator */}
           {moodMeta.emoji && (
-            <div className="flex items-center gap-1 px-1.5 py-0.5   bg-zinc-950 border border-zinc-800/80">
+            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-zinc-950 border border-zinc-800/80">
               <span className="text-xs">{moodMeta.emoji}</span>
               <span className={`font-mono text-[10px] font-bold hidden sm:inline ${moodMeta.textClass || 'text-red-400'}`}>
                 {t?.moods?.[mood] ?? mood}
@@ -279,7 +279,7 @@ export default function FooterConsole({
                 key={i}
                 type="button"
                 onClick={() => handleSendVoicePreset(phrase)}
-                className="text-left p-2   bg-black border border-zinc-800 hover:border-red-600 text-xs text-zinc-300 hover:text-white transition-all flex items-center justify-between group shadow-sm"
+                className="text-left p-2 rounded-xl bg-black border border-zinc-800 hover:border-red-600 text-xs text-zinc-300 hover:text-white transition-all flex items-center justify-between group shadow-sm"
               >
                 <span className="truncate pr-2 font-mono text-[11px]">"{phrase}"</span>
                 <span className="text-red-400 font-bold shrink-0 text-[10px] opacity-80 group-hover:opacity-100">
@@ -296,7 +296,7 @@ export default function FooterConsole({
         <div className="p-2.5 bg-red-950/60 border-b border-red-600/70 animate-fade-in flex flex-col sm:flex-row items-center justify-between gap-2">
           <div className="flex items-center gap-2.5">
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5   bg-red-500 animate-ping" />
+              <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
               <span className="font-mono text-xs font-bold text-red-300">
                 REC 0:0{recordSeconds}
               </span>
@@ -319,14 +319,14 @@ export default function FooterConsole({
             <button
               type="button"
               onClick={cancelRecording}
-              className="px-2.5 py-1   border border-zinc-700 bg-zinc-900 text-zinc-400 hover:text-white text-xs font-mono"
+              className="px-2.5 py-1 rounded-lg border border-zinc-700 bg-zinc-900 text-zinc-400 hover:text-white text-xs font-mono"
             >
               ✕ Cancel
             </button>
             <button
               type="button"
               onClick={stopRecordingAndSend}
-              className="px-3 py-1   border border-red-500 bg-red-600 text-white hover:bg-red-500 text-xs font-mono font-bold flex items-center gap-1 shadow-md shadow-red-950/50"
+              className="px-3 py-1 rounded-lg border border-red-500 bg-red-600 text-white hover:bg-red-500 text-xs font-mono font-bold flex items-center gap-1 shadow-md shadow-red-950/50"
             >
               <span>Send Audio ➔</span>
             </button>
@@ -366,7 +366,7 @@ export default function FooterConsole({
                     }}
                     disabled={isTyping}
                     className={`
-                      shrink-0 sm:shrink max-w-[280px] sm:max-w-none text-left font-mono text-xs px-2.5 py-1.5 sm:px-3 sm:py-2   border
+                      shrink-0 sm:shrink max-w-[280px] sm:max-w-none text-left font-mono text-xs px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl border
                       bg-zinc-950/90 border-zinc-800 text-zinc-200
                       transition-all duration-150
                       hover:border-red-600 hover:text-white hover:bg-zinc-900 active:scale-[0.98]
@@ -406,7 +406,7 @@ export default function FooterConsole({
                   : (isAm ? "መልእክት ጻፍ ወይም 🎙️ ይጫኑ..." : "Type custom message or tap 🎙️...")
               }
               disabled={isTyping}
-              className="w-full bg-zinc-950 border border-zinc-800 focus:border-red-500   pl-6 pr-2.5 py-2 sm:py-2.5 font-mono text-xs text-white placeholder:text-zinc-600 focus:outline-none transition-colors"
+              className="w-full bg-zinc-950 border border-zinc-800 focus:border-red-500 rounded-xl pl-6 pr-2.5 py-2 sm:py-2.5 font-mono text-xs text-white placeholder:text-zinc-600 focus:outline-none transition-colors"
             />
           </div>
 
@@ -415,7 +415,7 @@ export default function FooterConsole({
             type="button"
             onClick={handleToggleVoiceRecord}
             disabled={isTyping}
-            className={`font-mono text-xs font-bold px-2.5 sm:px-3 py-2 sm:py-2.5   border flex items-center gap-1 transition-all shrink-0
+            className={`font-mono text-xs font-bold px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-xl border flex items-center gap-1 transition-all shrink-0
               ${isRecording
                 ? "bg-red-600 border-red-500 text-white animate-pulse shadow-md shadow-red-900/50"
                 : "bg-zinc-950 border-zinc-800 text-zinc-300 hover:text-white hover:border-red-600"
@@ -430,7 +430,7 @@ export default function FooterConsole({
           <button
             type="submit"
             disabled={!inputText.trim() || isTyping}
-            className={`font-mono text-xs font-bold px-3 sm:px-3.5 py-2 sm:py-2.5   border flex items-center gap-1 transition-all shrink-0
+            className={`font-mono text-xs font-bold px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl border flex items-center gap-1 transition-all shrink-0
               ${!inputText.trim() || isTyping
                 ? "bg-zinc-950 border-zinc-800/80 text-zinc-600 cursor-not-allowed"
                 : "bg-red-600 border-red-500 text-white hover:bg-red-500 cursor-pointer shadow-md shadow-red-950/40"
@@ -450,7 +450,7 @@ export default function FooterConsole({
                 onGiftClick();
               }}
               disabled={isTyping}
-              className="flex items-center gap-1 font-mono text-xs px-2.5 sm:px-3 py-2 sm:py-2.5   border border-zinc-800 bg-zinc-950 text-red-400 hover:border-red-600 hover:text-white transition-all shadow-sm shrink-0"
+              className="flex items-center gap-1 font-mono text-xs px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-xl border border-zinc-800 bg-zinc-950 text-red-400 hover:border-red-600 hover:text-white transition-all shadow-sm shrink-0"
               title={t?.sendGift ?? "Send a Gift"}
             >
               <IconGift className="w-3.5 h-3.5 text-red-500" />

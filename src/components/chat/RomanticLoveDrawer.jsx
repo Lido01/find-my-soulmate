@@ -40,7 +40,7 @@ export default function RomanticLoveDrawer({
   }
 
   return (
-    <div className="border-t border-zinc-800 bg-black/98 backdrop-blur-md p-4 animate-slide-up shadow-2xl font-mono select-text">
+    <div className="border-t border-zinc-800 bg-black/98 backdrop-blur-md p-3 sm:p-4 max-h-[38vh] sm:max-h-[48vh] overflow-y-auto animate-slide-up shadow-2xl font-mono select-text">
       {/* Top Bar with How Much Love Summary */}
       <div className="flex items-center justify-between pb-3 border-b border-zinc-800 mb-3 flex-wrap gap-2">
         <div className="flex items-center gap-3">
