@@ -1,4 +1,6 @@
-// Commit: feat(ui): add RelationshipMeter with animated progress and label thresholds
+// ─────────────────────────────────────────────────────────────────────────────
+// RelationshipMeter.jsx — Red, Black & White animated relationship progress bar
+// ─────────────────────────────────────────────────────────────────────────────
 
 const THRESHOLDS = [
   { min: 0,  key: 0  },
@@ -20,37 +22,42 @@ function getLabel(value, labels) {
 }
 
 const ACCENT_MAP = {
+  red: {
+    bar: "bg-gradient-to-r from-red-700 via-red-500 to-white",
+    text: "text-red-400",
+    glow: "shadow-red-500/40",
+  },
   emerald: {
-    bar: "bg-emerald-500",
-    text: "text-emerald-400",
-    glow: "shadow-emerald-500/30",
+    bar: "bg-gradient-to-r from-red-700 via-red-500 to-white",
+    text: "text-red-400",
+    glow: "shadow-red-500/40",
   },
   fuchsia: {
-    bar: "bg-fuchsia-500",
-    text: "text-fuchsia-400",
-    glow: "shadow-fuchsia-500/30",
+    bar: "bg-gradient-to-r from-red-700 via-red-500 to-white",
+    text: "text-red-400",
+    glow: "shadow-red-500/40",
   },
 };
 
-export default function RelationshipMeter({ value = 0, accentColor = "emerald", t = {} }) {
+export default function RelationshipMeter({ value = 0, accentColor = "red", t = {} }) {
   const pct = Math.max(0, Math.min(100, value));
-  const colors = ACCENT_MAP[accentColor] ?? ACCENT_MAP.emerald;
+  const colors = ACCENT_MAP[accentColor] ?? ACCENT_MAP.red;
   const label = getLabel(pct, t.relationship_labels);
 
   return (
-    <div className="w-full space-y-1">
+    <div className="w-full space-y-1 font-mono">
       <div className="flex items-center justify-between">
-        <span className="font-mono text-xs text-slate-400">{t.relationship ?? "relationship"}</span>
+        <span className="font-mono text-xs text-zinc-400">{t.relationship ?? "relationship"}</span>
         <span className={`font-mono text-xs font-bold ${colors.text}`}>{pct}%</span>
       </div>
-      <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+      <div className="w-full bg-black border border-zinc-800   h-2 overflow-hidden">
         <div
-          className={`h-full rounded-full transition-all duration-700 ease-out ${colors.bar} shadow-sm ${colors.glow}`}
+          className={`h-full   transition-all duration-700 ease-out ${colors.bar} shadow-sm ${colors.glow}`}
           style={{ width: `${pct}%` }}
         />
       </div>
       {label && (
-        <p className={`font-mono text-xs ${colors.text} opacity-80`}>{label}</p>
+        <p className={`font-mono text-xs ${colors.text} font-bold opacity-90`}>{label}</p>
       )}
     </div>
   );
