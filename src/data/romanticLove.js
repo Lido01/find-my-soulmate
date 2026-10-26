@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const DEV_LOVE_EMOJIS = [
-  { emoji: '💖', label: { en: 'Smitten Heart', am: 'የፍቅር ልብ' }, code: 'git.heart = 100%' },
+  { emoji: '❤️', label: { en: 'Smitten Heart', am: 'የፍቅር ልብ' }, code: 'git.heart = 100%' },
   { emoji: '☕❤️', label: { en: 'Brew Romance', am: 'የቡና ፍቅር' }, code: 'caffeine.love++' },
   { emoji: '🫀⚡', label: { en: 'Overclocked Pulse', am: 'ፈጣን የልብ ምት' }, code: 'heart.overclock()' },
   { emoji: '💻🌹', label: { en: 'Code & Roses', am: 'ኮድና ጽጌረዳ' }, code: 'import { Rose }' },
@@ -27,7 +27,7 @@ export function getRomanticQuotes(targetGender = 'female', lang = 'en') {
     if (isFemale) {
       // Sent to a GIRLFRIEND (female partner)
       return [
-        { text: "የልቤን root access ወስደሻል የኔ ቆንጆ 💖", devTag: "#root-ፍቅር" },
+        { text: "የልቤን root access ወስደሻል የኔ ቆንጆ ❤️", devTag: "#root-ፍቅር" },
         { text: "ካንቺ ጋር ስሆን ህይወቴ ዜሮ compile error ነው 🥰", devTag: "#ፍጹም-ኮድ" },
         { text: "ልቤ እንዳለቀለት infinite loop በስምሽ ይሮጣል ☕", devTag: "#የማያልቅ-ፍቅር" },
         { text: "የኔ ቆንጆ፣ አንቺ የኔ ተወዳጅ PR ነሽ 💍", devTag: "#የልብ-መርጅ" },
@@ -39,7 +39,7 @@ export function getRomanticQuotes(targetGender = 'female', lang = 'en') {
     } else {
       // Sent to a BOYFRIEND (male partner)
       return [
-        { text: "የልቤን root access ወስደሃል የኔ ጀግና 💖", devTag: "#root-ፍቅር" },
+        { text: "የልቤን root access ወስደሃል የኔ ጀግና ❤️", devTag: "#root-ፍቅር" },
         { text: "ካንተ ጋር ስሆን ህይወቴ ዜሮ compile error ነው 🥰", devTag: "#ፍጹም-ኮድ" },
         { text: "ልቤ እንዳለቀለት infinite loop በስምህ ይሮጣል ☕", devTag: "#የማያልቅ-ፍቅር" },
         { text: "የኔ ጎበዝ፣ አንተ የኔ ተወዳጅ PR ነህ 💍", devTag: "#የልብ-መርጅ" },
@@ -54,25 +54,25 @@ export function getRomanticQuotes(targetGender = 'female', lang = 'en') {
   // English quotes
   if (isFemale) {
     return [
-      { text: "You're the queen of my codebase and the smile of my day 💖", devTag: "#syntax-romance" },
+      { text: "You're the queen of my codebase and the smile of my day ❤️", devTag: "#syntax-romance" },
       { text: "My heart has 100% test coverage whenever you're around, beautiful 🥰", devTag: "#qa-love" },
       { text: "Can I be the CSS to your HTML? You make everything look gorgeous ✨", devTag: "#frontend-soul" },
       { text: "You're my only commit with zero merge conflicts, darling 💍", devTag: "#clean-merge" },
       { text: "I'd never garbage-collect you from my memory heap, sweet girl 🧠❤️", devTag: "#memory-safe" },
       { text: "You turn all my fatal errors into butterflies in my stomach 🦋", devTag: "#exception-handled" },
       { text: "My ping to your heart is 0ms. Direct fiber connection ⚡", devTag: "#low-latency" },
-      { text: "You're the open source license I will honor forever, my love 📜💖", devTag: "#mit-forever" },
+      { text: "You're the open source license I will honor forever, my love 📜❤️", devTag: "#mit-forever" },
     ];
   } else {
     return [
-      { text: "You're the architect of my heart and the reason I love coding 💖", devTag: "#syntax-romance" },
+      { text: "You're the architect of my heart and the reason I love coding ❤️", devTag: "#syntax-romance" },
       { text: "My heart has 100% test coverage whenever you're by my side, handsome 🥰", devTag: "#qa-love" },
       { text: "You turn all my stack traces into pure butterflies in my stomach ✨", devTag: "#frontend-soul" },
       { text: "You're my only commit with zero merge conflicts, handsome 💍", devTag: "#clean-merge" },
       { text: "I'd never garbage-collect you from my memory heap, my dev king 🧠❤️", devTag: "#memory-safe" },
       { text: "Let's push to production together and never look back 🚀", devTag: "#prod-ready" },
       { text: "My ping to your heart is 0ms. Direct fiber connection ⚡", devTag: "#low-latency" },
-      { text: "You're the open source license I will honor forever, my love 📜💖", devTag: "#mit-forever" },
+      { text: "You're the open source license I will honor forever, my love 📜❤️", devTag: "#mit-forever" },
     ];
   }
 }
@@ -94,11 +94,11 @@ export function calculateLoveMetrics(relationship = 10, totalChoices = 0, giftsG
   let tier = "Curious Ping";
   let statusEmoji = "🤔";
   if (bond >= 90) {
-    tier = "Soulmate & Eternal Pair 💖";
+    tier = "Soulmate & Eternal Pair ❤️";
     statusEmoji = "💍";
   } else if (bond >= 75) {
     tier = "Deep Devotion & Smitten 🥰";
-    statusEmoji = "💖";
+    statusEmoji = "❤️";
   } else if (bond >= 55) {
     tier = "Warm Chemistry & Late Night Calls ✨";
     statusEmoji = "☕";
