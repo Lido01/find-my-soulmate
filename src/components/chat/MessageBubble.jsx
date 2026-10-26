@@ -41,7 +41,7 @@ function GiftBadge({ message, lang = "en" }) {
   const boost = gift.boost || message.relationshipBoost;
 
   return (
-    <div className="flex items-center gap-3 bg-zinc-950 border border-zinc-800 rounded-2xl p-3 min-w-[200px] shadow-lg select-text">
+    <div className="flex items-center gap-3 bg-zinc-950 border border-zinc-800   p-3 min-w-[200px] shadow-lg select-text">
       <span className="text-3xl shrink-0">{giftIcon}</span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 mb-1">
@@ -149,11 +149,11 @@ export default function MessageBubble({ message, character, userProfile, onReply
             <GiftBadge message={message} lang={lang} />
           ) : isAudio ? (
             /* Voice Audio Note */
-            <div className="bg-red-950/85 border border-red-700/80 rounded-2xl rounded-tr-xs p-3 shadow-md space-y-2 select-text">
+            <div className="bg-red-950/85 border border-red-700/80   rounded-tr-xs p-3 shadow-md space-y-2 select-text">
               <QuotedReply replyTo={message.replyTo} />
               <div className="flex items-center justify-between gap-3 text-xs font-mono">
                 <div className="flex items-center gap-2 text-red-200">
-                  <span className="p-1.5 rounded-lg bg-red-900 border border-red-600 text-sm">
+                  <span className="p-1.5   bg-red-900 border border-red-600 text-sm">
                     🎙️
                   </span>
                   <div>
@@ -168,7 +168,7 @@ export default function MessageBubble({ message, character, userProfile, onReply
                   <button
                     type="button"
                     onClick={() => handlePlayVoice(userProfile?.gender || 'male')}
-                    className="px-2.5 py-1 rounded-lg bg-red-900 hover:bg-red-800 border border-red-500 text-[11px] font-bold text-white flex items-center gap-1 transition-all"
+                    className="px-2.5 py-1   bg-red-900 hover:bg-red-800 border border-red-500 text-[11px] font-bold text-white flex items-center gap-1 transition-all"
                   >
                     <span>{isPlayingVoice ? '⏹' : '▶'}</span>
                     <span>{isPlayingVoice ? 'Stop' : 'Play'}</span>
@@ -181,7 +181,7 @@ export default function MessageBubble({ message, character, userProfile, onReply
                 {[10, 18, 14, 22, 16, 12, 20, 8, 16, 22, 12, 18, 9].map((h, idx) => (
                   <span
                     key={idx}
-                    className={`flex-1 rounded-full transition-all ${
+                    className={`flex-1   transition-all ${
                       isPlayingVoice ? 'bg-white animate-pulse' : 'bg-red-800'
                     }`}
                     style={{ height: `${h}px` }}
@@ -197,13 +197,13 @@ export default function MessageBubble({ message, character, userProfile, onReply
             </div>
           ) : isImage ? (
             /* Image / Asset Attachment (Telegram Style) */
-            <div className="bg-zinc-950 border border-red-800/80 rounded-2xl rounded-tr-xs p-1.5 shadow-md space-y-1.5 overflow-hidden">
+            <div className="bg-zinc-950 border border-red-800/80   rounded-tr-xs p-1.5 shadow-md space-y-1.5 overflow-hidden">
               <QuotedReply replyTo={message.replyTo} />
               <div 
-                className="rounded-xl overflow-hidden cursor-pointer hover:opacity-95 transition-opacity max-h-64 bg-black flex items-center justify-center"
+                className="  overflow-hidden cursor-pointer hover:opacity-95 transition-opacity max-h-64 bg-black flex items-center justify-center"
                 onClick={() => setShowImageModal(true)}
               >
-                <img src={message.imageUrl} alt="Asset" className="max-h-64 w-auto object-cover rounded-lg" />
+                <img src={message.imageUrl} alt="Asset" className="max-h-64 w-auto object-cover  " />
               </div>
               {message.text && message.text !== 'Shared a photo 📷' && (
                 <p className="px-2 py-1 font-mono text-xs text-white whitespace-pre-wrap select-text">
@@ -213,7 +213,7 @@ export default function MessageBubble({ message, character, userProfile, onReply
             </div>
           ) : isCode ? (
             /* Code Snippet Attachment */
-            <div className="bg-zinc-950 border border-red-800/80 rounded-2xl rounded-tr-xs p-3 shadow-md space-y-1.5 max-w-full overflow-hidden">
+            <div className="bg-zinc-950 border border-red-800/80   rounded-tr-xs p-3 shadow-md space-y-1.5 max-w-full overflow-hidden">
               <QuotedReply replyTo={message.replyTo} />
               <div className="flex items-center justify-between text-[10px] text-red-400 font-bold pb-1 border-b border-zinc-800">
                 <span>💻 {message.codeLang || 'Code'}</span>
@@ -227,7 +227,7 @@ export default function MessageBubble({ message, character, userProfile, onReply
             </div>
           ) : (
             /* Standard Text Bubble */
-            <div className="bg-red-950/85 border border-red-700/70 rounded-2xl rounded-tr-xs px-3.5 py-2 shadow-md relative group/bubble">
+            <div className="bg-red-950/85 border border-red-700/70   rounded-tr-xs px-3.5 py-2 shadow-md relative group/bubble">
               <QuotedReply replyTo={message.replyTo} />
               <p className="font-mono text-xs sm:text-sm text-white leading-relaxed whitespace-pre-wrap select-text cursor-text">
                 {message.text}
@@ -284,10 +284,10 @@ export default function MessageBubble({ message, character, userProfile, onReply
             onClick={() => setShowImageModal(false)}
           >
             <div className="relative max-w-2xl max-h-[90vh] flex flex-col items-center">
-              <img src={message.imageUrl} alt="Full view" className="max-h-[80vh] w-auto rounded-2xl shadow-2xl border border-zinc-800 object-contain" />
+              <img src={message.imageUrl} alt="Full view" className="max-h-[80vh] w-auto   shadow-2xl border border-zinc-800 object-contain" />
               <button
                 onClick={() => setShowImageModal(false)}
-                className="mt-3 px-4 py-1.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-mono text-xs font-bold"
+                className="mt-3 px-4 py-1.5   bg-zinc-900 border border-zinc-700 text-white font-mono text-xs font-bold"
               >
                 Close ✕
               </button>
@@ -302,7 +302,7 @@ export default function MessageBubble({ message, character, userProfile, onReply
   return (
     <div className="flex items-start gap-2 sm:gap-2.5 animate-slide-up px-2 sm:px-3 group">
       {/* Partner Avatar Photo or Initials */}
-      <div className="w-8 h-8 rounded-xl overflow-hidden shrink-0 border border-zinc-700 mt-0.5 shadow flex items-center justify-center bg-black text-xs font-mono font-bold text-white">
+      <div className="w-8 h-8   overflow-hidden shrink-0 border border-zinc-700 mt-0.5 shadow flex items-center justify-center bg-black text-xs font-mono font-bold text-white">
         {partnerAvatarUrl ? (
           <img src={partnerAvatarUrl} alt={character?.name || 'Partner'} className="w-full h-full object-cover" />
         ) : character?.emoji ? (
@@ -327,11 +327,11 @@ export default function MessageBubble({ message, character, userProfile, onReply
           <GiftBadge message={message} lang={lang} />
         ) : isAudio ? (
           /* Partner Voice Note */
-          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl rounded-tl-xs p-3 shadow-md space-y-2 select-text">
+          <div className="bg-zinc-950 border border-zinc-800   rounded-tl-xs p-3 shadow-md space-y-2 select-text">
             <QuotedReply replyTo={message.replyTo} />
             <div className="flex items-center justify-between gap-3 text-xs font-mono">
               <div className="flex items-center gap-2 text-zinc-300">
-                <span className="p-1.5 rounded-lg bg-black border border-zinc-800 text-sm">
+                <span className="p-1.5   bg-black border border-zinc-800 text-sm">
                   🎙️
                 </span>
                 <div>
@@ -346,7 +346,7 @@ export default function MessageBubble({ message, character, userProfile, onReply
                 <button
                   type="button"
                   onClick={() => handlePlayVoice(character?.gender || 'female')}
-                  className="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-[11px] font-bold text-white flex items-center gap-1 transition-all"
+                  className="px-2.5 py-1   bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-[11px] font-bold text-white flex items-center gap-1 transition-all"
                 >
                   <span>{isPlayingVoice ? '⏹' : '▶'}</span>
                   <span>{isPlayingVoice ? 'Stop' : 'Play'}</span>
@@ -359,7 +359,7 @@ export default function MessageBubble({ message, character, userProfile, onReply
               {[10, 18, 14, 22, 16, 12, 20, 8, 16, 22, 12, 18, 9].map((h, idx) => (
                 <span
                   key={idx}
-                  className={`flex-1 rounded-full transition-all ${
+                  className={`flex-1   transition-all ${
                     isPlayingVoice ? 'bg-red-500 animate-pulse' : 'bg-zinc-800'
                   }`}
                   style={{ height: `${h}px` }}
@@ -375,13 +375,13 @@ export default function MessageBubble({ message, character, userProfile, onReply
           </div>
         ) : isImage ? (
           /* Partner Shared Photo */
-          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl rounded-tl-xs p-1.5 shadow-md space-y-1.5 overflow-hidden">
+          <div className="bg-zinc-950 border border-zinc-800   rounded-tl-xs p-1.5 shadow-md space-y-1.5 overflow-hidden">
             <QuotedReply replyTo={message.replyTo} />
             <div 
-              className="rounded-xl overflow-hidden cursor-pointer hover:opacity-95 transition-opacity max-h-64 bg-black flex items-center justify-center"
+              className="  overflow-hidden cursor-pointer hover:opacity-95 transition-opacity max-h-64 bg-black flex items-center justify-center"
               onClick={() => setShowImageModal(true)}
             >
-              <img src={message.imageUrl} alt="Asset" className="max-h-64 w-auto object-cover rounded-lg" />
+              <img src={message.imageUrl} alt="Asset" className="max-h-64 w-auto object-cover  " />
             </div>
             {message.text && (
               <p className="px-2 py-1 font-mono text-xs text-zinc-200 whitespace-pre-wrap select-text">
@@ -391,7 +391,7 @@ export default function MessageBubble({ message, character, userProfile, onReply
           </div>
         ) : isCode ? (
           /* Partner Code Snippet */
-          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl rounded-tl-xs p-3 shadow-md space-y-1.5 max-w-full overflow-hidden">
+          <div className="bg-zinc-950 border border-zinc-800   rounded-tl-xs p-3 shadow-md space-y-1.5 max-w-full overflow-hidden">
             <QuotedReply replyTo={message.replyTo} />
             <div className="flex items-center justify-between text-[10px] text-red-400 font-bold pb-1 border-b border-zinc-800">
               <span>💻 {message.codeLang || 'Code'}</span>
@@ -404,7 +404,7 @@ export default function MessageBubble({ message, character, userProfile, onReply
             </pre>
           </div>
         ) : (
-          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl rounded-tl-xs px-3.5 py-2 shadow-md relative">
+          <div className="bg-zinc-950 border border-zinc-800   rounded-tl-xs px-3.5 py-2 shadow-md relative">
             <QuotedReply replyTo={message.replyTo} />
             {message.isAI && (
               <div className="flex items-center gap-1 mb-1 text-[10px] font-mono text-red-400 font-bold">
@@ -420,7 +420,7 @@ export default function MessageBubble({ message, character, userProfile, onReply
               <button
                 type="button"
                 onClick={() => handlePlayVoice(character?.gender || 'female')}
-                className={`flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-lg border transition-all ${
+                className={`flex items-center gap-1 text-[10px] font-mono px-2 py-0.5   border transition-all ${
                   isPlayingVoice
                     ? 'bg-red-950 border-red-600 text-red-300 shadow-sm'
                     : 'bg-black border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700'
@@ -467,10 +467,10 @@ export default function MessageBubble({ message, character, userProfile, onReply
           onClick={() => setShowImageModal(false)}
         >
           <div className="relative max-w-2xl max-h-[90vh] flex flex-col items-center">
-            <img src={message.imageUrl} alt="Full view" className="max-h-[80vh] w-auto rounded-2xl shadow-2xl border border-zinc-800 object-contain" />
+            <img src={message.imageUrl} alt="Full view" className="max-h-[80vh] w-auto   shadow-2xl border border-zinc-800 object-contain" />
             <button
               onClick={() => setShowImageModal(false)}
-              className="mt-3 px-4 py-1.5 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-mono text-xs font-bold"
+              className="mt-3 px-4 py-1.5   bg-zinc-900 border border-zinc-700 text-white font-mono text-xs font-bold"
             >
               Close ✕
             </button>
