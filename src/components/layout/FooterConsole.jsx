@@ -10,13 +10,13 @@ import { soundEngine, isSpeechRecognitionSupported, createSpeechRecognizer } fro
 const QUICK_VOICE_NOTES = {
   female: {
     en: [
-      "Hey... just pushed my commit and was thinking of you, beautiful. 💖",
+      "Hey... just pushed my commit and was thinking of you, beautiful. ❤️",
       "Can you review my pull request? Need your brilliant mind. ☕",
       "Zero bugs in my code, but 100% bugs in my heart for you. 🥺",
       "Take a break and drink some water, my favorite dev girl. ✨",
     ],
     am: [
-      "የኔ ቆንጆ፣ ስራሽን አብረን እንጨርሰው? ☕💖",
+      "የኔ ቆንጆ፣ ስራሽን አብረን እንጨርሰው? ☕❤️",
       "ስለ አንቺ ሳስብ ኮዴ ሁሉ ያለ ስህተት ይሰራል! ✨",
       "የኔ ልብ፣ ዛሬ ቀንሽ እንዴት ነበር? 🥺❤️",
       "ትንሽ እረፍት አድርጊ፣ ቡና እንጠጣ? 🇪🇹",
@@ -24,13 +24,13 @@ const QUICK_VOICE_NOTES = {
   },
   male: {
     en: [
-      "Hey... just pushed my commit and was thinking of you, handsome. 💖",
+      "Hey... just pushed my commit and was thinking of you, handsome. ❤️",
       "Can you review my pull request? Need your systems mind. ☕",
       "Zero bugs in my code, but 100% bugs in my heart for you. 🥺",
       "Take a break and drink some water, my dev king. ✨",
     ],
     am: [
-      "የኔ ጀግና፣ ስራህን አብረን እንጨርሰው? ☕💖",
+      "የኔ ጀግና፣ ስራህን አብረን እንጨርሰው? ☕❤️",
       "ስለ አንተ ሳስብ ኮዴ ሁሉ ያለ ስህተት ይሰራል! ✨",
       "የኔ ልብ፣ ዛሬ ቀንህ እንዴት ነበር? 🥺❤️",
       "ትንሽ እረፍት አድርግ፣ ቡና እንጠጣ? 🇪🇹",
@@ -155,8 +155,8 @@ export default function FooterConsole({
 
     const isFemale = character?.gender === 'female';
     const defaultVoiceNote = lang === "am"
-      ? (isFemale ? "የኔ ፍቅር፣ ድምፅሽን መስማት ደስ ይለኛል 💖" : "የኔ ፍቅር፣ ድምፅህን መስማት ደስ ይለኛል 💖")
-      : (isFemale ? "Hey gorgeous... sending you a warm voice note! 💖" : "Hey handsome... sending you a warm voice note! 💖");
+      ? (isFemale ? "የኔ ፍቅር፣ ድምፅሽን መስማት ደስ ይለኛል ❤️" : "የኔ ፍቅር፣ ድምፅህን መስማት ደስ ይለኛል ❤️")
+      : (isFemale ? "Hey gorgeous... sending you a warm voice note! ❤️" : "Hey handsome... sending you a warm voice note! ❤️");
 
     const finalVoice = voiceText.trim() || inputText.trim() || defaultVoiceNote;
     soundEngine.playRomanticChime();
@@ -187,32 +187,38 @@ export default function FooterConsole({
   const voicePresets = presetsGroup[lang] || presetsGroup.en;
 
   return (
-    <footer className="border-t border-slate-800 bg-slate-950/95 backdrop-blur shrink-0 relative">
-      {/* Terminal title bar */}
-      <div className="flex items-center gap-2 px-4 py-2 border-b border-slate-800/60">
-        {/* macOS traffic lights */}
-        <div className="flex items-center gap-1.5 mr-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
-          <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
-        </div>
-        <div className="flex items-center gap-1.5 text-slate-500">
-          <IconTerminal className="w-3.5 h-3.5" />
-          <span className="font-mono text-xs tracking-widest font-semibold">
-            {t?.devTerminal ?? "DEV_TERMINAL"}
-          </span>
+    <footer className="border-t border-zinc-800 bg-black/95 backdrop-blur-md shrink-0 relative font-mono select-text transition-all">
+      {/* Terminal title bar - Ultra compact on small screens */}
+      <div className="flex items-center justify-between gap-2 px-3 py-1.5 sm:px-4 sm:py-2 border-b border-zinc-800/80 text-xs">
+        <div className="flex items-center gap-2 min-w-0">
+          {/* Traffic dots */}
+          <div className="hidden xs:flex items-center gap-1 mr-1">
+            <span className="w-2 h-2   bg-red-600/90 shadow-[0_0_6px_rgba(239,68,68,0.5)]" />
+            <span className="w-2 h-2   bg-zinc-700" />
+            <span className="w-2 h-2   bg-zinc-800" />
+          </div>
+          <div className="flex items-center gap-1.5 text-zinc-400 min-w-0">
+            <IconTerminal className="w-3.5 h-3.5 text-red-500 shrink-0" />
+            <span className="font-mono text-[11px] sm:text-xs tracking-wider font-bold truncate">
+              {t?.devTerminal ?? "DEV_TERMINAL"}
+            </span>
+          </div>
         </div>
 
-        <div className="ml-auto flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Quick Voice Audio Presets Button */}
           <button
             type="button"
             onClick={() => setShowVoicePresets((prev) => !prev)}
-            className="flex items-center gap-1 px-2.5 py-0.5 rounded-full font-mono text-[11px] font-bold border border-slate-700 bg-slate-900 text-slate-300 hover:text-cyan-300 hover:border-cyan-600 transition-all"
-            title="Send romantic voice audio clips"
+            className={`flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1   text-[10px] sm:text-[11px] font-bold border transition-all ${
+              showVoicePresets
+                ? 'bg-red-950/80 border-red-600 text-white shadow-sm'
+                : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700'
+            }`}
+            title="Send saved voice note audio clips"
           >
-            {/* <span>🎙️</span> */}
-            <span className="hidden sm:inline">{isAm ? "የድምፅ ቅንጥብ" : "Voice Note"}</span>
+            <span>🎙️</span>
+            <span className="hidden xs:inline">{isAm ? "ፈጣን ድምፅ" : "Voice Note"}</span>
           </button>
 
           {/* Romantic Love Drawer Button */}
@@ -222,22 +228,22 @@ export default function FooterConsole({
               soundEngine.playHeartbeat();
               onToggleLoveDrawer?.();
             }}
-            className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full font-mono text-[11px] font-bold border transition-all ${
+            className={`flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1   text-[10px] sm:text-[11px] font-bold border transition-all ${
               loveDrawerOpen
-                ? 'bg-fuchsia-950 border-fuchsia-500 text-fuchsia-300 shadow-md shadow-fuchsia-900/40'
-                : 'bg-slate-900 border-slate-700 text-slate-400 hover:text-fuchsia-300 hover:border-fuchsia-600'
+                ? 'bg-red-950/80 border-red-500 text-white shadow-sm'
+                : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-red-400 hover:border-red-600'
             }`}
-            title="Open Developer Love Indicators & Romantic Emojis"
+            title="Open Developer Love Indicators & Emojis"
           >
-            <IconHeart className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Love Hub</span>
+            <IconHeart className="w-3 h-3 text-red-500" />
+            <span className="hidden xs:inline">Love Hub</span>
           </button>
 
           {/* Mood indicator */}
           {moodMeta.emoji && (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 px-1.5 py-0.5   bg-zinc-950 border border-zinc-800/80">
               <span className="text-xs">{moodMeta.emoji}</span>
-              <span className={`font-mono text-[10px] font-bold ${moodMeta.textClass || 'text-cyan-400'}`}>
+              <span className={`font-mono text-[10px] font-bold hidden sm:inline ${moodMeta.textClass || 'text-red-400'}`}>
                 {t?.moods?.[mood] ?? mood}
               </span>
             </div>
@@ -245,39 +251,39 @@ export default function FooterConsole({
 
           {/* Typing status */}
           {isTyping && (
-            <span className="font-mono text-[10px] text-amber-400 animate-pulse">
+            <span className="font-mono text-[10px] text-red-400 animate-pulse font-bold">
               {t?.isTyping ?? "typing..."}
             </span>
           )}
         </div>
       </div>
 
-      {/* Voice Presets Dropdown Drawer */}
+      {/* Voice Presets Dropdown Drawer - Compact sheet that does NOT overtake screen */}
       {showVoicePresets && (
-        <div className="p-3 bg-slate-900/95 border-b border-slate-800 animate-slide-up space-y-2">
+        <div className="p-2 sm:p-3 bg-zinc-950/98 border-b border-zinc-800 animate-slide-up space-y-2 max-h-44 sm:max-h-56 overflow-y-auto">
           <div className="flex items-center justify-between">
-            <span className="font-mono text-xs font-bold text-cyan-300 flex items-center gap-1.5">
-              <span className="text-cyan-300">REC</span>
-              <span>{isAm ? "ፈጣን የድምፅ መልእክት ምረጥ" : "Select a Romantic Voice Note to Send"}</span>
+            <span className="font-mono text-[11px] sm:text-xs font-bold text-red-400 flex items-center gap-1.5">
+              <span>🎙️</span>
+              <span>{isAm ? "ፈጣን የድምፅ መልእክት ምረጥ" : "Select Quick Voice Note to Send"}</span>
             </span>
             <button
               onClick={() => setShowVoicePresets(false)}
-              className="text-xs text-slate-500 hover:text-white"
+              className="text-xs px-2 py-0.5 rounded text-zinc-400 hover:text-white hover:bg-zinc-900"
             >
               ✕
             </button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
             {voicePresets.map((phrase, i) => (
               <button
                 key={i}
                 type="button"
                 onClick={() => handleSendVoicePreset(phrase)}
-                className="text-left p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-cyan-500 text-xs text-slate-300 hover:text-white transition-all flex items-center justify-between group"
+                className="text-left p-2   bg-black border border-zinc-800 hover:border-red-600 text-xs text-zinc-300 hover:text-white transition-all flex items-center justify-between group shadow-sm"
               >
-                <span className="truncate pr-2">"{phrase}"</span>
-                <span className="text-cyan-400 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                  Send
+                <span className="truncate pr-2 font-mono text-[11px]">"{phrase}"</span>
+                <span className="text-red-400 font-bold shrink-0 text-[10px] opacity-80 group-hover:opacity-100">
+                  Send ➔
                 </span>
               </button>
             ))}
@@ -287,62 +293,64 @@ export default function FooterConsole({
 
       {/* Live Voice Recording Overlay */}
       {isRecording && (
-        <div className="p-3 bg-red-950/40 border-b border-red-800/60 animate-fade-in flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+        <div className="p-2.5 bg-red-950/60 border-b border-red-600/70 animate-fade-in flex flex-col sm:flex-row items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5">
             <div className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-full bg-red-500 animate-ping" />
-              <span className="font-mono text-xs font-bold text-red-400">
+              <span className="w-2.5 h-2.5   bg-red-500 animate-ping" />
+              <span className="font-mono text-xs font-bold text-red-300">
                 REC 0:0{recordSeconds}
               </span>
             </div>
 
             {/* Audio wave animation */}
-            <div className="flex items-center gap-1 h-5">
-              <span className="w-1 h-3 bg-red-400 animate-pulse" />
-              <span className="w-1 h-5 bg-red-400 animate-pulse delay-75" />
-              <span className="w-1 h-4 bg-red-400 animate-pulse delay-150" />
-              <span className="w-1 h-2 bg-red-400 animate-pulse delay-200" />
+            <div className="flex items-center gap-0.5 h-4">
+              <span className="w-1 h-2.5 bg-red-400 animate-pulse" />
+              <span className="w-1 h-4 bg-red-400 animate-pulse delay-75" />
+              <span className="w-1 h-3 bg-red-400 animate-pulse delay-150" />
+              <span className="w-1 h-1.5 bg-red-400 animate-pulse delay-200" />
             </div>
 
-            <p className="font-mono text-xs text-slate-200 truncate max-w-xs sm:max-w-md">
+            <p className="font-mono text-xs text-white truncate max-w-[200px] sm:max-w-md">
               {voiceText || (isAm ? "እየሰማሁ ነው... ተናገሩ" : "Listening... speak now")}
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
               onClick={cancelRecording}
-              className="px-3 py-1 rounded-lg border border-slate-700 bg-slate-900 text-slate-400 hover:text-white text-xs font-mono"
+              className="px-2.5 py-1   border border-zinc-700 bg-zinc-900 text-zinc-400 hover:text-white text-xs font-mono"
             >
               ✕ Cancel
             </button>
             <button
               type="button"
               onClick={stopRecordingAndSend}
-              className="px-3 py-1 rounded-lg border border-red-600 bg-red-950 text-red-200 hover:bg-red-900 text-xs font-mono font-bold flex items-center gap-1 shadow-md shadow-red-950/50"
+              className="px-3 py-1   border border-red-500 bg-red-600 text-white hover:bg-red-500 text-xs font-mono font-bold flex items-center gap-1 shadow-md shadow-red-950/50"
             >
-              <span className="text-red-300">REC</span>
-              <span>Send Voice</span>
+              <span>Send Audio ➔</span>
             </button>
           </div>
         </div>
       )}
 
-      <div className="p-3 space-y-2.5">
-        {/* Branching choices (when available in scripted mode) */}
+      <div className="p-2 sm:p-3 space-y-2">
+        {/* Branching choices / Quick chat responses:
+            On small screens: renders as horizontal scrollable carousel chips so it NEVER overtakes screen!
+            On medium+ screens: renders as compact 2-col grid */}
         {choices.length > 0 && (
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <p className="font-mono text-[10px] text-slate-500 uppercase tracking-wider">
-                {t?.selectResponse ?? "QUICK RESPONSES"}
-              </p>
-              <span className="font-mono text-[10px] text-slate-600">
-                {choices.length} options
+          <div className="space-y-1">
+            <div className="flex items-center justify-between text-[10px] text-zinc-500 font-mono">
+              <span className="uppercase tracking-wider font-bold">
+                {t?.selectResponse ?? "QUICK CHAT"}
+              </span>
+              <span className="text-zinc-600">
+                {choices.length} options {typeof window !== 'undefined' && window.innerWidth < 640 ? '· swipe ➔' : ''}
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {/* Mobile: horizontal scrollable single-row chip bar. Desktop: 2-column grid */}
+            <div className="flex sm:grid sm:grid-cols-2 gap-1.5 overflow-x-auto pb-1 no-scrollbar shrink-0">
               {choices.map((choice, i) => {
                 const label = typeof choice === "object"
                   ? (choice[lang] ?? choice.label ?? choice.en ?? choice.text ?? "")
@@ -358,26 +366,23 @@ export default function FooterConsole({
                     }}
                     disabled={isTyping}
                     className={`
-                      group relative w-full text-left font-mono text-xs px-3 py-2 rounded-xl border
-                      bg-slate-900/90 border-slate-700/80 text-slate-300
-                      transition-all duration-200
-                      hover:border-opacity-100 hover:text-white hover:bg-slate-800
+                      shrink-0 sm:shrink max-w-[280px] sm:max-w-none text-left font-mono text-xs px-2.5 py-1.5 sm:px-3 sm:py-2   border
+                      bg-zinc-950/90 border-zinc-800 text-zinc-200
+                      transition-all duration-150
+                      hover:border-red-600 hover:text-white hover:bg-zinc-900 active:scale-[0.98]
                       ${isTyping ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}
                     `}
-                    onMouseEnter={(e) => {
-                      if (!isTyping) e.currentTarget.style.borderColor = borderColor;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = "";
-                    }}
+                    title={label}
                   >
-                    <span className="text-slate-600 mr-1.5">{i + 1}.</span>
-                    {label}
-                    {!isTyping && (
-                      <span className="absolute right-2.5 top-1/2 -translate-y-1/2 font-mono text-[10px] text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                        ↵
+                    <div className="flex items-center justify-between gap-1.5">
+                      <span className="truncate">
+                        <span className="text-red-400 font-bold mr-1.5">{i + 1}.</span>
+                        {label}
                       </span>
-                    )}
+                      {!isTyping && (
+                        <span className="text-zinc-500 text-[10px] shrink-0 font-bold">↵</span>
+                      )}
+                    </div>
                   </button>
                 );
               })}
@@ -386,9 +391,9 @@ export default function FooterConsole({
         )}
 
         {/* Freeform custom text and voice audio input row */}
-        <form onSubmit={handleFormSubmit} className="flex items-center gap-2 pt-1">
-          <div className="relative flex-1">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs text-emerald-400 select-none">
+        <form onSubmit={handleFormSubmit} className="flex items-center gap-1.5 sm:gap-2">
+          <div className="relative flex-1 min-w-0">
+            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 font-mono text-xs text-red-500 select-none font-bold">
               &gt;
             </span>
             <input
@@ -397,11 +402,11 @@ export default function FooterConsole({
               onChange={(e) => setInputText(e.target.value)}
               placeholder={
                 aiModeActive
-                  ? (isAm ? "ለ AI ነፍስ ጓደኛህ/ሽን መልእክት ጻፍ ወይም 🎙️ ተጭነህ ተናገር..." : "Chat freely with your AI soulmate or tap 🎙️ to speak...")
-                  : (isAm ? "መልእክት ይተይቡ፣ ከላይ ይምረጡ ወይም 🎙️ ይጫኑ..." : "Type custom message, choose above, or tap 🎙️...")
+                  ? (isAm ? "ለ AI ነፍስ ጓደኛህ/ሽን ጻፍ ወይም 🎙️ ተናገር..." : "Chat with your AI soulmate or tap 🎙️...")
+                  : (isAm ? "መልእክት ጻፍ ወይም 🎙️ ይጫኑ..." : "Type custom message or tap 🎙️...")
               }
               disabled={isTyping}
-              className="w-full bg-slate-900 border border-slate-700 focus:border-emerald-500 rounded-xl pl-7 pr-3 py-2.5 font-mono text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none transition-colors"
+              className="w-full bg-zinc-950 border border-zinc-800 focus:border-red-500   pl-6 pr-2.5 py-2 sm:py-2.5 font-mono text-xs text-white placeholder:text-zinc-600 focus:outline-none transition-colors"
             />
           </div>
 
@@ -410,10 +415,10 @@ export default function FooterConsole({
             type="button"
             onClick={handleToggleVoiceRecord}
             disabled={isTyping}
-            className={`font-mono text-xs font-bold px-3 py-2.5 rounded-xl border flex items-center gap-1.5 transition-all
+            className={`font-mono text-xs font-bold px-2.5 sm:px-3 py-2 sm:py-2.5   border flex items-center gap-1 transition-all shrink-0
               ${isRecording
-                ? "bg-red-950 border-red-500 text-red-300 animate-pulse shadow-md shadow-red-900/50"
-                : "bg-slate-900 border-slate-700 text-slate-300 hover:text-cyan-300 hover:border-cyan-500"
+                ? "bg-red-600 border-red-500 text-white animate-pulse shadow-md shadow-red-900/50"
+                : "bg-zinc-950 border-zinc-800 text-zinc-300 hover:text-white hover:border-red-600"
               }`}
             title="Record and send voice audio note"
           >
@@ -425,11 +430,12 @@ export default function FooterConsole({
           <button
             type="submit"
             disabled={!inputText.trim() || isTyping}
-            className={`font-mono text-xs font-bold px-3 py-2.5 rounded-xl border flex items-center gap-1.5 transition-all
+            className={`font-mono text-xs font-bold px-3 sm:px-3.5 py-2 sm:py-2.5   border flex items-center gap-1 transition-all shrink-0
               ${!inputText.trim() || isTyping
-                ? "bg-slate-900 border-slate-800 text-slate-600 cursor-not-allowed"
-                : "bg-emerald-950 border-emerald-700 text-emerald-300 hover:bg-emerald-900 cursor-pointer shadow-md shadow-emerald-900/30"
+                ? "bg-zinc-950 border-zinc-800/80 text-zinc-600 cursor-not-allowed"
+                : "bg-red-600 border-red-500 text-white hover:bg-red-500 cursor-pointer shadow-md shadow-red-950/40"
               }`}
+            title="Send Message"
           >
             <IconSend className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Send</span>
@@ -444,11 +450,11 @@ export default function FooterConsole({
                 onGiftClick();
               }}
               disabled={isTyping}
-              className="flex items-center gap-1.5 font-mono text-xs px-3 py-2.5 rounded-xl border border-fuchsia-700/60 bg-fuchsia-950/40 text-fuchsia-300 hover:bg-fuchsia-900/50 hover:border-fuchsia-500 transition-all shadow-md shadow-fuchsia-900/20"
+              className="flex items-center gap-1 font-mono text-xs px-2.5 sm:px-3 py-2 sm:py-2.5   border border-zinc-800 bg-zinc-950 text-red-400 hover:border-red-600 hover:text-white transition-all shadow-sm shrink-0"
               title={t?.sendGift ?? "Send a Gift"}
             >
-              <IconGift className="w-3.5 h-3.5 text-fuchsia-400" />
-              <span className="hidden sm:inline">{t?.sendGift ?? "🎁 Gift"}</span>
+              <IconGift className="w-3.5 h-3.5 text-red-500" />
+              <span className="hidden md:inline">{t?.sendGift ?? "Gift"}</span>
             </button>
           )}
         </form>
