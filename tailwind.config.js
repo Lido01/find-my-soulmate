@@ -7,9 +7,10 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Space Grotesk"', '"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-        mono: ['"JetBrains Mono"', 'Fira Code', 'Cascadia Code', 'Consolas', 'monospace'],
-        heading: ['"Space Grotesk"', 'sans-serif'],
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        mono: ['"JetBrains Mono"', '"Fira Code"', 'Cascadia Mono', 'Consolas', 'monospace'],
+        heading: ['Outfit', 'Inter', 'sans-serif'],
+        brand: ['Outfit', 'sans-serif'],
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
