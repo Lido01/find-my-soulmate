@@ -22,7 +22,7 @@ flowchart TD
     WSConnect --> Lobby["RealChatLobby\n(Discover Devs, My Friends, Social Feed)"]
 
     Lobby --> ActionChoice{"User Action"}
-    ActionChoice -->|"Wave 👋 / Like 💖"| RealtimeInteract["Real-Time Social Notification Toasts"]
+    ActionChoice -->|"Wave 👋 / Like ❤️"| RealtimeInteract["Real-Time Social Notification Toasts"]
     ActionChoice -->|"Post Status 🚀"| PostFeed["HTTP POST /api/social/post -> Community Feed"]
     ActionChoice -->|"Start Chat 💬 / Auto-Match ⚡"| DirectRoom["Join 1-on-1 WebSocket Room"]
 
