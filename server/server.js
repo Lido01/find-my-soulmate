@@ -141,7 +141,7 @@ const server = http.createServer(async (req, res) => {
         let notifText = '';
         let notifType = action;
         if (action === 'wave') notifText = `${fromUser.name} sent you a warm coffee wave ☕`;
-        else if (action === 'like') notifText = `${fromUser.name} liked your developer card 💖`;
+        else if (action === 'like') notifText = `${fromUser.name} liked your developer card ❤️`;
         else if (action === 'follow' || action === 'toggle_follow') notifText = `${fromUser.name} started following your developer journey 🌟`;
         else if (action === 'add_friend' || action === 'friend_request') {
           // Check if already friends
@@ -408,7 +408,7 @@ wss.on('connection', (ws) => {
   // Handle client disconnect
   ws.on('close', () => {
     const user = clients.get(ws);
-    console.log(`[Soulmate-WS] ❌ Client disconnected: ${user?.handle || user?.id || clientId}`);
+    console.log(`[Soulmate-WS] Client disconnected: ${user?.handle || user?.id || clientId}`);
 
     if (user?.roomId) {
       leaveRoom(ws, user.roomId);
@@ -521,7 +521,7 @@ function handleClientMessage(ws, msg) {
         ws.send(JSON.stringify(matchPayloadForUser));
         matchedPeerWs.send(JSON.stringify(matchPayloadForPeer));
 
-        console.log(`[Soulmate-WS] 💖 Match made! ${user.handle} <-> ${peer.handle} in ${roomId}`);
+        console.log(`[Soulmate-WS] Match made! ${user.handle} <-> ${peer.handle} in ${roomId}`);
         broadcastOnlineUsers();
       } else {
         const targetQueue = matchmakingQueues[user.gender] || new Set();
@@ -742,11 +742,11 @@ function handleClientMessage(ws, msg) {
 
       // Create notification
       let notifText = '';
-      if (action === 'wave') notifText = `${user.name} sent you a warm coffee wave ☕`;
-      else if (action === 'like') notifText = `${user.name} liked your developer card 💖`;
-      else if (action === 'follow' || action === 'toggle_follow') notifText = `${user.name} started following your developer journey 🌟`;
+      if (action === 'wave') notifText = `${user.name} sent you a warm coffee wave`;
+      else if (action === 'like') notifText = `${user.name} liked your developer card`;
+      else if (action === 'follow' || action === 'toggle_follow') notifText = `${user.name} started following you`;
       else if (action === 'add_friend' || action === 'friend_request') {
-        notifText = `${user.name} sent you a developer friend request 👥`;
+        notifText = `${user.name} sent you a developer friend request`;
       }
 
       if (targetUserId && notifText) {
@@ -829,7 +829,7 @@ function leaveRoom(ws, roomId) {
 server.listen(PORT, () => {
   console.log(`
 ╔════════════════════════════════════════════════════════════════╗
-║   🚀 Find My Soulmate — WebSocket Server & REST API Live       ║
+║   Find My Soulmate — WebSocket Server & REST API Live       ║
 ║   Listening on ws://localhost:${PORT}                           ║
 ║   Database: server/data/users.json (${db.getUsers().length} devs)            ║
 ║   Health check: http://localhost:${PORT}/health                ║
