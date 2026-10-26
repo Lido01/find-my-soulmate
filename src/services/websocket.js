@@ -487,13 +487,13 @@ class WebSocketManager {
       const lower = playerText.toLowerCase();
 
       if (options.isImage) {
-        replyText = `Whoa, love the photo! 📸 Look at that clarity. Saving this to my favorites! 💖`;
+        replyText = `Whoa, love the photo! 📸 Look at that clarity. Saving this to my favorites! ❤️`;
       } else if (options.isCode) {
         replyText = `That's clean code! 🔥 Zero memory leaks, pristine logic. Truly a 10x soulmate move.`;
       } else if (lower.includes('hi') || lower.includes('hello') || lower.includes('ሰላም')) {
         replyText = `Hey ${this.currentUser?.name || 'there'}! 👋 Loved seeing your profile pop up. What are you coding tonight?`;
       } else if (lower.includes('love') || lower.includes('cute') || lower.includes('ቆንጆ') || lower.includes('ፍቅር')) {
-        replyText = `Aww, you're so sweet! 🥺💖 My heart just dropped zero packets. Let's finish this sprint together!`;
+        replyText = `Aww, you're so sweet! 🥺❤️ My heart just dropped zero packets. Let's finish this sprint together!`;
       } else if (lower.includes('coffee') || lower.includes('tea') || lower.includes('ቡና')) {
         replyText = `Coffee is the only valid love language! ☕ In ${peer.location || 'town'}, the brew hits just right.`;
       } else {
