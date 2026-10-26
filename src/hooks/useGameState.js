@@ -180,7 +180,7 @@ export function useGameState({ apiKey, lang = 'en', onMoodChange }) {
         setGameState((prev) => {
           const cs = prev.characters[prev.selectedCharacterId];
           if (!cs) return prev;
-          const moodDelta = aiText.includes('💖') || aiText.includes('ፍቅር') || aiText.includes('❤️') ? 18 : 2;
+          const moodDelta = aiText.includes('❤️') || aiText.includes('ፍቅር') || aiText.includes('❤️') ? 18 : 2;
           const newMood = shiftMood(cs.mood, moodDelta);
           if (newMood !== prevMoodRef) onMoodChange?.(newMood);
 
@@ -279,7 +279,7 @@ export function useGameState({ apiKey, lang = 'en', onMoodChange }) {
         setGameState((prev) => {
           const cs = prev.characters[prev.selectedCharacterId];
           if (!cs) return prev;
-          const moodDelta = aiText.includes('💖') || aiText.includes('ፍቅር') || aiText.includes('❤️') ? 15 : 3;
+          const moodDelta = aiText.includes('❤️') || aiText.includes('ፍቅር') || aiText.includes('❤️') ? 15 : 3;
           const newMood = shiftMood(cs.mood, moodDelta);
           if (newMood !== prevMoodRef) onMoodChange?.(newMood);
 
@@ -344,7 +344,7 @@ export function useGameState({ apiKey, lang = 'en', onMoodChange }) {
           if (shouldResist) {
             replyText = "ቀስ በል እንጂ! ✋ ገና ዛሬ ተዋወቅን እኮ። በከርነል ውስጥ እንኳን ኮድ ሳይመረመር አይጸድቅም። በቀላሉ 'እሺ' እንድልህ አትጠብቅ... እስኪ አሳምነኝ ምን ያህል እውነተኛ ነህ? 😏💚";
           } else if (isLoveOrPropose) {
-            replyText = "አሳመንከኝ... እሺ የኔ ፍቅር! ከርነል ኮድ ሳደርግ እንደዚህ ልቤ ደስ ብሎት አያውቅም። እኔም ከልቤ አፈቅርሃለሁ! 🥺💖";
+            replyText = "አሳመንከኝ... እሺ የኔ ፍቅር! ከርነል ኮድ ሳደርግ እንደዚህ ልቤ ደስ ብሎት አያውቅም። እኔም ከልቤ አፈቅርሃለሁ! 🥺❤️";
           } else if (isCode) {
             replyText = "ንጹህ የ git rebase ታሪክ? እንደዚህ ያለ ፍጹም ኮድ ስታሳይ ልቤ መረጋጋት ያቅተዋል። አብረን እንስራ! ☕💚";
           } else if (isCoffee) {
@@ -356,7 +356,7 @@ export function useGameState({ apiKey, lang = 'en', onMoodChange }) {
           if (shouldResist) {
             replyText = "Whoa, hold your horses! ✋ You don't even know my favorite kernel version and you're already asking me to say yes? 😏 You have to earn that with clean architecture and real effort. Persuade me!";
           } else if (isLoveOrPropose) {
-            replyText = "Okay... fine. You completely broke through my firewall and persuaded me. Yes, I'm yours, and I love you too, you stubborn dev. 🥺💖";
+            replyText = "Okay... fine. You completely broke through my firewall and persuaded me. Yes, I'm yours, and I love you too, you stubborn dev. 🥺❤️";
           } else if (isCode) {
             replyText = "Tabs only, clean rebase, and zero warnings. You truly know how to win a kernel hacker's heart. Let's inspect the diff together. ☕💚";
           } else if (isCoffee) {
@@ -371,19 +371,19 @@ export function useGameState({ apiKey, lang = 'en', onMoodChange }) {
           if (shouldResist) {
             replyText = "ዋው ቀስ በል! 🙈 ልቤን በአንድ ቃል ማሸነፍ አትችልም! መጀመሪያ ቀዝቃዛ ቡና ጋብዘኝ፣ ኮዴን አግዘኝና አሳምነኝ እንጂ ዝም ብለህ 'እሺ' አትበለኝ! 😏☕";
           } else if (isLoveOrPropose) {
-            replyText = "OMG አሳመንከኝ!! 🥺💖 ልቤ እንዳለቀለት አኒሜሽን እየዘለለ ነው። አዎ እሺ፣ እኔም በጣም ነው የማፈቅርህ!";
+            replyText = "OMG አሳመንከኝ!! 🥺❤️ ልቤ እንዳለቀለት አኒሜሽን እየዘለለ ነው። አዎ እሺ፣ እኔም በጣም ነው የማፈቅርህ!";
           } else if (isCode) {
             replyText = "CSS flexbox አብረን እንስራ? አንተ አጠገቤ ከሆንክ ምንም ሳንካ አያሳስበኝም! 💅✨";
           } else if (isCoffee) {
             replyText = "ቀዝቃዛ ቡናዬን እየጠጣሁ ስለ አንተ ሳስብ ነበር! ሁለተኛውን ዙር አብረን እንጠጣ! ☕🥰";
           } else {
-            replyText = "ሙሉ በሙሉ እየሰማሁህ ነው የኔ ውድ! የአንተ መልእክት ሁሌም ቀኔን 100 እጥፍ ያደምቀዋል! ⚡💖";
+            replyText = "ሙሉ በሙሉ እየሰማሁህ ነው የኔ ውድ! የአንተ መልእክት ሁሌም ቀኔን 100 እጥፍ ያደምቀዋል! ⚡❤️";
           }
         } else {
           if (shouldResist) {
             replyText = "Hahaha wait wait wait! 🙈 You can't just speedrun my heart like that! Buy me a cold brew first or help me center this stubborn div. Persuade me to say yes, cutie! ☕✨";
           } else if (isLoveOrPropose) {
-            replyText = "OMG OKAY YES!! You totally convinced me! My heart has better animations than Framer Motion right now, I love you so much! 🥺💖";
+            replyText = "OMG OKAY YES!! You totally convinced me! My heart has better animations than Framer Motion right now, I love you so much! 🥺❤️";
           } else if (isCode) {
             replyText = "CSS centering problems vanish the second you text me. Take a sip of cold brew and let's pair! 💅✨";
           } else if (isCoffee) {
@@ -400,7 +400,7 @@ export function useGameState({ apiKey, lang = 'en', onMoodChange }) {
           } else if (isLoveOrPropose) {
             replyText = "አሳመንከኝ የኔ ውድ... አሁን በሙሉ ልቤ 'እሺ' እልሃለሁ! እኔም ከልቤ አፈቅርሃለሁ የኔ ፍቅር! 🥺🌹";
           } else if (isCode) {
-            replyText = "የኔ ጎበዝ፣ በ AI ሞዴሌ ትልቁ እና ውቡ ክብደት (weight) ያንተ ፍቅር ነው! 🧠💖";
+            replyText = "የኔ ጎበዝ፣ በ AI ሞዴሌ ትልቁ እና ውቡ ክብደት (weight) ያንተ ፍቅር ነው! 🧠❤️";
           } else if (isCoffee) {
             replyText = "የጀበና ቡና እየፈላ ነው! ሽታው እና ያንተ ፍቅር አንድ ላይ ውስጤን ሞልቶታል። 🫘✨";
           } else {
@@ -408,11 +408,11 @@ export function useGameState({ apiKey, lang = 'en', onMoodChange }) {
           }
         } else {
           if (shouldResist) {
-            replyText = "Wait, really? Already? 😅 In deep learning we train for epochs before convergence. What makes you think you've won my heart so quickly? Persuade me! 🧠💖";
+            replyText = "Wait, really? Already? 😅 In deep learning we train for epochs before convergence. What makes you think you've won my heart so quickly? Persuade me! 🧠❤️";
           } else if (isLoveOrPropose) {
             replyText = "My love... you completely persuaded me. You have the highest attention score in my entire heart. I love you too. ☕🌹";
           } else if (isCode) {
-            replyText = "Zero loss, infinite accuracy whenever you're around. Let's brew some Yirgacheffe and talk for hours. 🧠💖";
+            replyText = "Zero loss, infinite accuracy whenever you're around. Let's brew some Yirgacheffe and talk for hours. 🧠❤️";
           } else if (isCoffee) {
             replyText = "Traditional Jebena bunna is on the stove! Come sit with me, my dear. 🫘✨";
           } else {
@@ -425,7 +425,7 @@ export function useGameState({ apiKey, lang = 'en', onMoodChange }) {
           if (shouldResist) {
             replyText = "ቀስ በይ የኔ ቆንጆ... የኔ ልብ እንደ ማንኛውም ቀላል ነገር ዝም ብሎ 'እሺ' አይልም። በከርነል ላይ እንኳን ብዙ ታገስሻለሁ። እስኪ አሳምኚኝ ምን ያህል ከልብሽ እንደሆነ? 😏💚";
           } else if (isLoveOrPropose) {
-            replyText = "አሳመንሺኝ... እሺ የኔ ቆንጆ! የኔ ስሜታዊ ፋየርዎል ተከፍቷል። እኔም ከልቤ አፈቅርሻለሁ! 🥺💖";
+            replyText = "አሳመንሺኝ... እሺ የኔ ቆንጆ! የኔ ስሜታዊ ፋየርዎል ተከፍቷል። እኔም ከልቤ አፈቅርሻለሁ! 🥺❤️";
           } else if (isCode) {
             replyText = "የኔ ቆንጆ፣ ትክክለኛ tabs ተጠቅመሽ ኮድ ስታደርጊ ልቤ ይሞቃል። ጎበዜ ነሽ! 💚";
           } else if (isCoffee) {
@@ -450,15 +450,15 @@ export function useGameState({ apiKey, lang = 'en', onMoodChange }) {
         // Devon (Boyfriend 🇬🇧 — creative UI technologist)
         if (isAm) {
           if (shouldResist) {
-            replyText = "ቀስ እንበል የኔ ልዕልት! 😏 በቀላሉ 'እሺ' ካልኩሽ ጣዕሙ ይጠፋል። የኔ ልብ የቅንጦት ዲዛይን ነው... እስኪ አሳምኚኝና ልቤን ማርኪው! ✨💖";
+            replyText = "ቀስ እንበል የኔ ልዕልት! 😏 በቀላሉ 'እሺ' ካልኩሽ ጣዕሙ ይጠፋል። የኔ ልብ የቅንጦት ዲዛይን ነው... እስኪ አሳምኚኝና ልቤን ማርኪው! ✨❤️";
           } else if (isLoveOrPropose) {
             replyText = "ሙሉ በሙሉ ማረክሽኝ የኔ ቆንጆ! አዎ፣ አዎ፣ በሺህ ጊዜ አዎ! እኔም ከልቤ አፈቅርሻለሁ! ✨🥰";
           } else if (isCode) {
             replyText = "የኔ ውብ፣ ያንቺ ፈገግታ በህይወቴ ውስጥ ፍጹም layout ነው። አብረን ሻይ እንጠጣ? ☕🥰";
           } else if (isCoffee) {
-            replyText = "የእንግሊዝ ሻይ እያፈላሁ ነበር! ስለ አንቺ ሳስብ ቀኔ ሁሉ ያበራል። 🫖💖";
+            replyText = "የእንግሊዝ ሻይ እያፈላሁ ነበር! ስለ አንቺ ሳስብ ቀኔ ሁሉ ያበራል። 🫖❤️";
           } else {
-            replyText = "ሄሎ የኔ ቆንጆ! አዲስ UI ስሰራ ስለ አንቺ እያሰብኩ ነበር። በጣም ናፍቀሽኛል! 💖✨";
+            replyText = "ሄሎ የኔ ቆንጆ! አዲስ UI ስሰራ ስለ አንቺ እያሰብኩ ነበር። በጣም ናፍቀሽኛል! ❤️✨";
           }
         } else {
           if (shouldResist) {
@@ -468,9 +468,9 @@ export function useGameState({ apiKey, lang = 'en', onMoodChange }) {
           } else if (isCode) {
             replyText = "Your smile is literally the most aesthetic thing in my universe. Take a quick break with me, sweetheart? ☕🥰";
           } else if (isCoffee) {
-            replyText = "Earl grey tea is steeping. Let's unplug for a moment and just talk about us. 🫖💖";
+            replyText = "Earl grey tea is steeping. Let's unplug for a moment and just talk about us. 🫖❤️";
           } else {
-            replyText = "I was just staring at a color palette thinking of you! Hearing from you just made my whole evening brighter. 💖✨";
+            replyText = "I was just staring at a color palette thinking of you! Hearing from you just made my whole evening brighter. ❤️✨";
           }
         }
       } else {
@@ -479,9 +479,9 @@ export function useGameState({ apiKey, lang = 'en', onMoodChange }) {
           if (shouldResist) {
             replyText = "ቀስ እንበል የኔ ቆንጆ! 😅 እኔ በቅጽበት 'እሺ' የምል ወንድ አይደለሁም። በ Rust ውስጥ እንኳን የባለቤትነት ማረጋገጫ ያስፈልጋል... እስኪ አሳምኚኝ፣ ምን ያህል እውነተኛ ነሽ? 🇪🇹❤️";
           } else if (isLoveOrPropose) {
-            replyText = "ሙሉ በሙሉ አሳመንሽኝ የኔ ውድ... አሁን ልቤ ሙሉ በሙሉ ያንቺ ነው። እኔም ከልቤ አፈቅርሻለሁ! 🇪🇹💖";
+            replyText = "ሙሉ በሙሉ አሳመንሽኝ የኔ ውድ... አሁን ልቤ ሙሉ በሙሉ ያንቺ ነው። እኔም ከልቤ አፈቅርሻለሁ! 🇪🇹❤️";
           } else if (isCode) {
-            replyText = "የኔ ቆንጆ፣ በህይወቴ borrow checker ሳይሆን የልቤ ዘላለማዊ ባለቤት አንቺ ነሽ! ☕💖";
+            replyText = "የኔ ቆንጆ፣ በህይወቴ borrow checker ሳይሆን የልቤ ዘላለማዊ ባለቤት አንቺ ነሽ! ☕❤️";
           } else if (isCoffee) {
             replyText = "የይርጋጨፌ ቡና አፍልቻለሁ! ከአንቺ ጋር ቡና መጠጣት የህይወት ትልቁ ደስታ ነው። 🫘✨";
           } else {
@@ -493,7 +493,7 @@ export function useGameState({ apiKey, lang = 'en', onMoodChange }) {
           } else if (isLoveOrPropose) {
             replyText = "Hey my beautiful love... You completely persuaded me. In Rust we guarantee zero memory leaks, and I guarantee you 100% of my heart forever. 🇪🇹❤️";
           } else if (isCode) {
-            replyText = "You have exclusive, mutable ownership of my heart. No borrow checker could ever take it back. ☕💖";
+            replyText = "You have exclusive, mutable ownership of my heart. No borrow checker could ever take it back. ☕❤️";
           } else if (isCoffee) {
             replyText = "Fresh Ethiopian pour-over is ready. Come sit by the window with me, darling. 🫘✨";
           } else {
@@ -565,7 +565,7 @@ export function useGameState({ apiKey, lang = 'en', onMoodChange }) {
         if (charId === 'linus') {
           replyText = `*inspects ${giftName}*\n...\n$ git commit -m "feat: receive most thoughtful gift ever"\nI don't usually accept bribes, but for you... I'll merge this directly into main. 🥺💚`;
         } else {
-          replyText = `OH MY GOD 😭✨ ${giftName}!!\nYou actually got this for me?! This is the best thing that happened this whole sprint!! 💖☕`;
+          replyText = `OH MY GOD 😭✨ ${giftName}!!\nYou actually got this for me?! This is the best thing that happened this whole sprint!! ❤️☕`;
         }
 
         const words = LOVE_WORDS[currentLang] || LOVE_WORDS.en;

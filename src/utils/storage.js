@@ -15,7 +15,7 @@ export const DEFAULT_USER_PROFILE = {
   archetype: 'Full-Stack Dreamer',
   favoriteStack: 'TypeScript & React',
   lookingFor: 'all', // 'female' (girlfriend) | 'male' (boyfriend) | 'all'
-  goal: 'Pair Programming & Production Soulmate 💖',
+  goal: 'Pair Programming & Production Soulmate ❤️',
   bio: 'Searching for someone whose code compiles as cleanly as our chemistry.',
 };
 
