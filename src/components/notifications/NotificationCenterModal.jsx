@@ -90,13 +90,13 @@ export default function NotificationCenterModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg bg-black border border-zinc-800 rounded-3xl shadow-2xl shadow-red-950/30 flex flex-col max-h-[88vh] overflow-hidden animate-slide-up"
+        className="w-full max-w-lg bg-black border border-zinc-800   shadow-2xl shadow-red-950/30 flex flex-col max-h-[88vh] overflow-hidden animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="p-4 border-b border-zinc-800 bg-zinc-950/90 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
-            <span className="p-1.5 rounded-xl bg-red-950/60 border border-red-600/50 text-red-400 text-sm">
+            <span className="p-1.5   bg-red-950/60 border border-red-600/50 text-red-400 text-sm">
               🔔
             </span>
             <div>
@@ -106,7 +106,7 @@ export default function NotificationCenterModal({
               <p className="text-[10px] text-zinc-500 font-mono">DevSoulmate Event Bus</p>
             </div>
             {unreadCount > 0 && (
-              <span className="ml-1 px-2 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-black animate-pulse">
+              <span className="ml-1 px-2 py-0.5   bg-red-600 text-white text-[10px] font-black animate-pulse">
                 {unreadCount} new
               </span>
             )}
@@ -125,7 +125,7 @@ export default function NotificationCenterModal({
             <button
               type="button"
               onClick={onClose}
-              className="p-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white text-xs transition-colors"
+              className="p-1   bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white text-xs transition-colors"
             >
               ✕
             </button>
@@ -135,13 +135,11 @@ export default function NotificationCenterModal({
         {/* Stats Strip */}
         <div className="p-3 bg-zinc-950/70 border-b border-zinc-800 flex items-center justify-around text-xs shrink-0">
           <div className="flex items-center gap-1.5">
-            <span className="text-zinc-400">👥</span>
             <span className="font-bold text-white">{friendCount}</span>
             <span className="text-zinc-500 text-[11px]">{isAm ? "ጓደኞች" : "Friends"}</span>
           </div>
           <div className="w-px h-4 bg-zinc-800" />
           <div className="flex items-center gap-1.5">
-            <span className="text-red-400">🌟</span>
             <span className="font-bold text-white">{followerCount}</span>
             <span className="text-zinc-500 text-[11px]">Followers</span>
           </div>
@@ -153,7 +151,6 @@ export default function NotificationCenterModal({
           </div>
           <div className="w-px h-4 bg-zinc-800" />
           <div className="flex items-center gap-1.5">
-            <span className="text-red-500">❤️</span>
             <span className="font-bold text-white">{likeCount}</span>
             <span className="text-zinc-500 text-[11px]">{isAm ? "ተወዳጅነት" : "Likes"}</span>
           </div>
@@ -164,7 +161,7 @@ export default function NotificationCenterModal({
           <button
             type="button"
             onClick={() => setActiveTab('all')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
+            className={`px-3 py-1.5   font-bold transition-all ${
               activeTab === 'all'
                 ? 'bg-red-600 text-white shadow-sm'
                 : 'text-zinc-400 hover:text-white bg-zinc-900/50'
@@ -175,7 +172,7 @@ export default function NotificationCenterModal({
           <button
             type="button"
             onClick={() => setActiveTab('requests')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
+            className={`px-3 py-1.5   font-bold transition-all ${
               activeTab === 'requests'
                 ? 'bg-red-600 text-white shadow-sm'
                 : 'text-zinc-400 hover:text-white bg-zinc-900/50'
@@ -186,7 +183,7 @@ export default function NotificationCenterModal({
           <button
             type="button"
             onClick={() => setActiveTab('social')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
+            className={`px-3 py-1.5   font-bold transition-all ${
               activeTab === 'social'
                 ? 'bg-red-600 text-white shadow-sm'
                 : 'text-zinc-400 hover:text-white bg-zinc-900/50'
@@ -218,14 +215,14 @@ export default function NotificationCenterModal({
               return (
                 <div
                   key={notif.id}
-                  className={`p-3 rounded-2xl border transition-all text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
+                  className={`p-3   border transition-all text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
                     notif.read
                       ? 'bg-zinc-950/80 border-zinc-800'
                       : 'bg-zinc-900/90 border-red-900/70 shadow-md'
                   }`}
                 >
                   <div className="flex items-start gap-2.5 min-w-0 flex-1">
-                    <div className="w-10 h-10 rounded-xl bg-black border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
+                    <div className="w-10 h-10   bg-black border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
                       {notif.fromUser?.avatarUrl ? (
                         <img
                           src={notif.fromUser.avatarUrl}
@@ -253,11 +250,11 @@ export default function NotificationCenterModal({
                   {isReq && (
                     <div className="flex items-center gap-1.5 self-end sm:self-center shrink-0">
                       {isAccepted ? (
-                        <span className="px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-700 text-white text-[10px] font-bold">
+                        <span className="px-2.5 py-1   bg-zinc-900 border border-zinc-700 text-white text-[10px] font-bold">
                           ✓ {isAm ? "ጓደኛ ሆነዋል" : "Friends"}
                         </span>
                       ) : isDeclined ? (
-                        <span className="px-2.5 py-1 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-500 text-[10px]">
+                        <span className="px-2.5 py-1   bg-zinc-950 border border-zinc-800 text-zinc-500 text-[10px]">
                           Declined
                         </span>
                       ) : (
@@ -265,14 +262,14 @@ export default function NotificationCenterModal({
                           <button
                             type="button"
                             onClick={() => handleAcceptFriend(notif)}
-                            className="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition-all shadow"
+                            className="px-3 py-1.5   bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition-all shadow"
                           >
                             {isAm ? "ተቀበል ✓" : "Accept"}
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDeclineFriend(notif)}
-                            className="px-2.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white text-xs transition-all"
+                            className="px-2.5 py-1.5   bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white text-xs transition-all"
                           >
                             ✕
                           </button>
@@ -289,9 +286,9 @@ export default function NotificationCenterModal({
                         onClose();
                         onOpenChatWithPeer?.(notif.fromUser);
                       }}
-                      className="px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-red-600/70 text-red-300 font-bold text-[11px] transition-all shrink-0 self-end sm:self-center"
+                      className="px-3 py-1.5   bg-zinc-900 hover:bg-zinc-800 border border-red-600/70 text-red-300 font-bold text-[11px] transition-all shrink-0 self-end sm:self-center"
                     >
-                      {isAm ? "አውራ 💬" : "Chat 💬"}
+                      {isAm ? "አውራ" : "Chat"}
                     </button>
                   )}
                 </div>
