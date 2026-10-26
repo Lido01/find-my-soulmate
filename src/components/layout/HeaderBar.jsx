@@ -64,36 +64,22 @@ export default function HeaderBar({
     <header className="h-12 flex items-center gap-2 px-3 bg-black border-b border-zinc-800/90 shrink-0 z-30 font-sans">
       {/* macOS window dots */}
       <div className="flex items-center gap-1.5 mr-1">
-        <span className="w-2.5 h-2.5 rounded-full bg-red-600/90 shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
-        <span className="w-2.5 h-2.5 rounded-full bg-zinc-700" />
-        <span className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
+        <span className="w-2.5 h-2.5   bg-red-600/90 shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
+        <span className="w-2.5 h-2.5   bg-[rgb(223,175,17)]" />
+        <span className="w-2.5 h-2.5   bg-[#1dcf1d]" />
       </div>
-
-      {/* Back button (chat phase only) */}
-      {isChat && onBack && (
-        <button
-          onClick={() => {
-            soundEngine.playHeartbeat();
-            onBack();
-          }}
-          className="font-mono text-xs text-zinc-400 hover:text-white transition-colors px-2 py-1 rounded-lg hover:bg-zinc-900 flex items-center gap-1"
-        >
-          <span>{t?.back ?? "back"}</span>
-        </button>
-      )}
 
       {/* Breadcrumb Brand */}
       <div className="flex items-center gap-1.5 font-sans font-bold text-xs sm:text-sm tracking-tight min-w-0">
         <span className="text-red-500 flex items-center gap-1">
-          <span className="text-base">❤️</span>
-          <span className="hidden xs:inline">DevSoulmate</span>
+          <span className="hidden xs:inline">find_my_soulmate</span>
         </span>
         <span className="text-zinc-600 hidden sm:inline">/</span>
-        <span className="text-zinc-300 font-mono text-[11px] hidden sm:inline">tech_social</span>
+        <span className="text-zinc-300 font-mono text-[11px] hidden sm:inline">find_my_soulmate</span>
       </div>
 
       {/* Mode Switcher: Virtual AI vs Real WebSocket (Visible on ALL devices) */}
-      <div className="flex items-center bg-zinc-950 border border-zinc-800 rounded-xl p-0.5 ml-1 sm:ml-2 shrink-0">
+      <div className="flex items-center bg-zinc-950 border border-zinc-800   p-0.5 ml-1 sm:ml-2 shrink-0">
         <button
           type="button"
           onClick={() => {
@@ -105,7 +91,7 @@ export default function HeaderBar({
             soundEngine.playHeartbeat();
             onToggleChatMode?.('virtual');
           }}
-          className={`font-mono text-[10px] sm:text-[11px] px-2 sm:px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 ${
+          className={`font-mono text-[10px] sm:text-[11px] px-2 sm:px-2.5 py-1   transition-all flex items-center gap-1 ${
             chatMode === 'virtual'
               ? 'bg-zinc-900 border border-zinc-700 text-white font-bold shadow-sm'
               : 'text-zinc-400 hover:text-white'
@@ -127,22 +113,20 @@ export default function HeaderBar({
             soundEngine.playRomanticChime();
             onToggleChatMode?.('real_ws');
           }}
-          className={`font-mono text-[10px] sm:text-[11px] px-2 sm:px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 ${
+          className={`font-mono text-[10px] sm:text-[11px] px-2 sm:px-2.5 py-1   transition-all flex items-center gap-1 ${
             chatMode === 'real_ws'
               ? 'bg-red-950/80 border border-red-600 text-white font-bold shadow-[0_0_12px_rgba(239,68,68,0.3)]'
               : 'text-zinc-400 hover:text-white'
           }`}
           title="Match & Chat with Real Online Developers via WebSockets"
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
           <span className="hidden sm:inline">Live Match</span>
           <span className="sm:hidden font-bold">Live</span>
           {unreadCount > 0 && (
             <span
-              className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-red-600 text-white text-[9px] sm:text-[10px] font-black animate-pulse shadow-md ml-0.5"
+              className="flex items-center gap-0.5 px-1.5 py-0.5   bg-red-600 text-white text-[9px] sm:text-[10px] font-black animate-pulse shadow-md ml-0.5"
               title={`${unreadCount} unread message${unreadCount > 1 ? 's' : ''}`}
             >
-              <span className="hidden sm:inline">💬</span>
               <span>{unreadCount}</span>
             </span>
           )}
@@ -161,12 +145,12 @@ export default function HeaderBar({
             soundEngine.playHeartbeat();
             onOpenNotifications?.();
           }}
-          className="relative flex items-center justify-center p-1.5 rounded-xl border border-zinc-800 bg-zinc-950 text-zinc-300 hover:text-white hover:border-red-500 transition-all shadow-sm"
+          className="relative flex items-center justify-center p-1.5   border border-zinc-800 bg-zinc-950 text-zinc-300 hover:text-white hover:border-red-500 transition-all shadow-sm"
           title="Notifications & Friend Requests"
         >
           <IconBell className="w-4 h-4" />
           {unreadNotifCount > 0 && (
-            <span className="absolute -top-1 -right-1 px-1.5 py-0.2 rounded-full bg-red-600 text-white text-[9px] font-black animate-pulse shadow-[0_0_6px_rgba(239,68,68,0.7)]">
+            <span className="absolute -top-1 -right-1 px-1.5 py-0.2   bg-red-600 text-white text-[9px] font-black animate-pulse shadow-[0_0_6px_rgba(239,68,68,0.7)]">
               {unreadNotifCount}
             </span>
           )}
@@ -179,11 +163,14 @@ export default function HeaderBar({
             soundEngine.playRomanticChime();
             onToggleTheme?.();
           }}
-          className="flex items-center gap-1 font-mono text-[11px] px-2.5 py-1 rounded-xl border border-zinc-800 bg-zinc-950 text-zinc-300 hover:text-white transition-colors shadow-sm"
-          title="Toggle Light / Dark Mode"
+          className={`flex items-center gap-1.5 font-mono text-[11px] px-2.5 py-1   border transition-all shadow-sm ${
+            theme === 'light'
+              ? 'bg-red-50 border-red-300 text-red-600 shadow-sm'
+              : 'bg-zinc-950 border-zinc-800 text-zinc-300 hover:text-white hover:border-red-600'
+          }`}
+          title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
         >
-          {theme === 'light' ? <IconMoon className="w-3.5 h-3.5" /> : <IconSun className="w-3.5 h-3.5" />}
-          <span className="hidden md:inline">{theme === 'light' ? 'Dark' : 'Light'}</span>
+          <span className="hidden sm:inline font-bold">{theme === 'light' ? 'Light' : 'Dark'}</span>
         </button>
 
         {/* Mobile Hamburger Menu Button (Visible on screens < md) */}
@@ -193,7 +180,7 @@ export default function HeaderBar({
             soundEngine.playHeartbeat();
             onOpenMobileMenu?.();
           }}
-          className="md:hidden flex items-center gap-1.5 font-mono text-xs px-2.5 py-1.5 rounded-xl border border-zinc-800 bg-zinc-950 text-white hover:border-red-500 transition-all shadow-sm"
+          className="md:hidden flex items-center gap-1.5 font-mono text-xs px-2.5 py-1.5   border border-zinc-800 bg-zinc-950 text-white hover:border-red-500 transition-all shadow-sm"
           title="Open Mobile Navigation Menu"
         >
           <IconMenu className="w-4 h-4" />
@@ -206,7 +193,7 @@ export default function HeaderBar({
             soundEngine.playHeartbeat();
             onOpenAbout?.();
           }}
-          className="hidden md:flex items-center gap-1.5 font-mono text-xs px-2.5 py-1 rounded-xl border border-zinc-800 bg-zinc-950 hover:border-red-500/80 text-zinc-300 hover:text-white transition-all shadow-sm"
+          className="hidden md:flex items-center gap-1.5 font-mono text-xs px-2.5 py-1   border border-zinc-800 bg-zinc-950 hover:border-red-500/80 text-zinc-300 hover:text-white transition-all shadow-sm"
           title="About & Dating Guide"
         >
           <span className="font-bold">Guide</span>
@@ -218,11 +205,10 @@ export default function HeaderBar({
             soundEngine.playHeartbeat();
             onOpenProfile?.();
           }}
-          className="hidden sm:flex items-center gap-1.5 font-mono text-xs px-2.5 py-1 rounded-xl border border-zinc-800 bg-zinc-950 hover:border-red-500/80 text-white transition-all shadow-sm"
+          className="hidden sm:flex items-center gap-1.5 font-mono text-xs px-2.5 py-1   border border-zinc-800 bg-zinc-950 hover:border-red-500/80 text-white transition-all shadow-sm"
           title="Profile & Audio Voice Settings"
         >
           <IconUser className="w-3.5 h-3.5 text-red-400" />
-          <span className="font-bold">{userProfile?.name || 'Profile'}</span>
         </button>
 
         {/* Language toggle (Desktop) */}
@@ -233,7 +219,7 @@ export default function HeaderBar({
         {/* AI Mode button (Desktop) */}
         <button
           onClick={onApiKeyClick}
-          className={`hidden sm:flex items-center gap-1.5 font-mono text-xs px-2.5 py-1 rounded-xl border transition-all duration-200
+          className={`hidden sm:flex items-center gap-1.5 font-mono text-xs px-2.5 py-1   border transition-all duration-200
             ${apiKeySet
               ? "border-emerald-600 text-emerald-300 bg-emerald-950/60 hover:bg-emerald-900/60"
               : "border-zinc-800 text-zinc-400 bg-zinc-950 hover:border-zinc-700 hover:text-white"
@@ -250,7 +236,7 @@ export default function HeaderBar({
         {/* Logout Button (Desktop) */}
         <button
           onClick={handleLogoutClick}
-          className={`hidden md:flex items-center gap-1.5 font-mono text-xs px-2.5 py-1 rounded-xl border transition-all duration-200
+          className={`hidden md:flex items-center gap-1.5 font-mono text-xs px-2.5 py-1   border transition-all duration-200
             ${logoutConfirm
               ? "bg-red-950 border-red-500 text-white animate-pulse font-bold shadow-[0_0_10px_rgba(239,68,68,0.5)]"
               : "bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-red-600 hover:text-red-400"
