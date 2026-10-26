@@ -70,7 +70,7 @@ export default function RealPeerSidebar({
       {/* Top Header */}
       <div className="p-3 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/90 sticky top-0 z-10 backdrop-blur-sm">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+          <span className="w-2 h-2   bg-red-500 animate-pulse" />
           <span className="text-xs text-white font-bold tracking-widest uppercase">
             {isAm ? "የቀጥታ ገንቢ ግንኙነት" : "Live Terminal"}
           </span>
@@ -81,7 +81,7 @@ export default function RealPeerSidebar({
             <button
               type="button"
               onClick={onCloseMobile}
-              className="md:hidden p-1 rounded-lg text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 text-xs font-bold"
+              className="md:hidden p-1   text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 text-xs font-bold"
             >
               ✕
             </button>
@@ -91,9 +91,9 @@ export default function RealPeerSidebar({
 
       <div className="flex flex-col gap-3.5 p-3 flex-1">
         {/* Active Real Peer Card with Red Glow */}
-        <div className="bg-zinc-950 border border-red-900/60 rounded-2xl p-3.5 space-y-3 transition-all relative overflow-hidden shadow-lg shadow-red-950/20">
+        <div className="bg-zinc-950 border border-red-900/60   p-3.5 space-y-3 transition-all relative overflow-hidden shadow-lg shadow-red-950/20">
           <div className="flex items-start gap-3">
-            <div className="w-12 h-12 rounded-xl bg-black border border-red-600 shadow flex items-center justify-center overflow-hidden shrink-0">
+            <div className="w-12 h-12   bg-black border border-red-600 shadow flex items-center justify-center overflow-hidden shrink-0">
               {peer.avatarUrl ? (
                 <img src={peer.avatarUrl} alt={peer.name} className="w-full h-full object-cover" />
               ) : (
@@ -105,10 +105,10 @@ export default function RealPeerSidebar({
               <p className="text-xs text-red-400 truncate">{peer.handle}</p>
               <div className="flex items-center gap-1.5 mt-1">
                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 font-bold">
-                  {peer.gender === 'female' ? 'Girlfriend 👩‍💻' : 'Boyfriend 👨‍💻'}
+                  {peer.gender === 'female' ? 'Girlfriend' : 'Boyfriend'}
                 </span>
                 <span className="text-[10px] text-red-400 font-bold flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                  <span className="w-1.5 h-1.5   bg-red-500 animate-pulse" />
                   <span>Online</span>
                 </span>
               </div>
@@ -117,20 +117,18 @@ export default function RealPeerSidebar({
 
           {/* Followers, Location & Fuel Badges */}
           <div className="flex flex-wrap gap-1.5 pt-1 text-[10px]">
-            <span className="px-2 py-0.5 rounded-lg bg-zinc-900 border border-zinc-800 text-white font-bold flex items-center gap-1">
-              <span>🌟</span>
+            <span className="px-2 py-0.5   bg-zinc-900 border border-zinc-800 text-white font-bold flex items-center gap-1">
               <span>{followerCount} followers</span>
             </span>
             {peer.location && (
-              <span className="px-2 py-0.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 flex items-center gap-1">
-                <span>📍</span>
+              <span className="px-2 py-0.5   bg-zinc-900 border border-zinc-800 text-zinc-300 flex items-center gap-1">
                 <span>{peer.location}</span>
               </span>
             )}
-            <span className="px-2 py-0.5 rounded-lg bg-zinc-900 border border-zinc-800 text-amber-300 flex items-center gap-1">
+            <span className="px-2 py-0.5   bg-zinc-900 border border-zinc-800 text-amber-300 flex items-center gap-1">
               <span>{peer.drink || '☕ Bunna'}</span>
             </span>
-            <span className="px-2 py-0.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 flex items-center gap-1">
+            <span className="px-2 py-0.5   bg-zinc-900 border border-zinc-800 text-zinc-300 flex items-center gap-1">
               <span>⌨️ {peer.indentation || 'Tabs'}</span>
             </span>
           </div>
@@ -140,47 +138,43 @@ export default function RealPeerSidebar({
             <button
               type="button"
               onClick={() => onWave?.(peer)}
-              className="py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-[11px] text-amber-300 hover:text-white transition-all flex items-center justify-center gap-1 shadow-sm"
+              className="py-1.5   bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-[11px] text-amber-300 hover:text-white transition-all flex items-center justify-center gap-1 shadow-sm"
               title="Send coffee wave"
             >
               <span>👋</span>
-              <span>Wave</span>
             </button>
 
             <button
               type="button"
               onClick={() => onLike?.(peer)}
-              className="py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-[11px] text-red-400 hover:text-white transition-all flex items-center justify-center gap-1 shadow-sm"
+              className="py-1.5   bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-[11px] text-red-400 hover:text-white transition-all flex items-center justify-center gap-1 shadow-sm"
               title="Send love"
             >
-              <span>💖</span>
-              <span>Like</span>
+              <span>❤️</span>
             </button>
 
             <button
               type="button"
               onClick={() => onAddFriend?.(peer)}
-              className="py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-[11px] text-zinc-300 hover:text-white transition-all flex items-center justify-center gap-1 shadow-sm"
+              className="py-1.5   bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-[11px] text-zinc-300 hover:text-white transition-all flex items-center justify-center gap-1 shadow-sm"
               title="Add friend"
             >
-              <span>👥</span>
               <span>Request</span>
             </button>
           </div>
         </div>
 
         {/* Real Compatibility Meter */}
-        <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-3 space-y-2">
+        <div className="bg-zinc-950 border border-zinc-800   p-3 space-y-2">
           <div className="flex items-center justify-between text-xs">
             <span className="text-zinc-400 font-bold flex items-center gap-1">
-              <span>✨</span>
               <span>{isAm ? "የመስፈርቶች ተኳሃኝነት" : "Compatibility"}</span>
             </span>
             <span className="font-bold text-red-400">{matchScore}%</span>
           </div>
-          <div className="w-full bg-black rounded-full h-2 overflow-hidden border border-zinc-800">
+          <div className="w-full bg-black   h-2 overflow-hidden border border-zinc-800">
             <div
-              className="h-full bg-gradient-to-r from-red-700 via-red-500 to-white rounded-full transition-all duration-700 shadow"
+              className="h-full bg-gradient-to-r from-red-700 via-red-500 to-white   transition-all duration-700 shadow"
               style={{ width: `${matchScore}%` }}
             />
           </div>
@@ -192,7 +186,7 @@ export default function RealPeerSidebar({
         </div>
 
         {/* Developer Stats (Logic, Chemistry, Caffeine, Romance) */}
-        <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-3 space-y-2.5">
+        <div className="bg-zinc-950 border border-zinc-800   p-3 space-y-2.5">
           <div className="flex items-center justify-between text-xs border-b border-zinc-800 pb-1.5">
             <span className="font-bold text-white">// Developer Stats</span>
             <span className="text-[10px] text-red-400 font-mono">LIVE</span>
@@ -207,13 +201,7 @@ export default function RealPeerSidebar({
         </div>
 
         {/* Bio Terminal */}
-        <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-3 space-y-1.5 text-xs">
-          <div className="flex items-center gap-1.5 text-zinc-500 text-[10px] border-b border-zinc-900 pb-1">
-            <span className="w-2 h-2 rounded-full bg-red-500" />
-            <span className="w-2 h-2 rounded-full bg-zinc-600" />
-            <span className="w-2 h-2 rounded-full bg-zinc-400" />
-            <span className="ml-1 text-zinc-400">bio.md</span>
-          </div>
+        <div className="bg-zinc-950 border border-zinc-800   p-3 space-y-1.5 text-xs">
           <p className="text-zinc-300 text-xs leading-relaxed italic">
             "{peer.bio}"
           </p>
@@ -226,7 +214,7 @@ export default function RealPeerSidebar({
 
         {/* Switch to Other Online Developers */}
         {otherPeers.length > 0 && (
-          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-3 space-y-2.5">
+          <div className="bg-zinc-950 border border-zinc-800   p-3 space-y-2.5">
             <div className="flex items-center justify-between text-xs">
               <span className="font-bold text-white">
                 // {peer.gender === 'female' ? 'Other Girlfriends' : 'Other Boyfriends'}
@@ -240,28 +228,20 @@ export default function RealPeerSidebar({
                 return (
                   <div
                     key={other.id}
-                    className={`flex items-center justify-between p-2 rounded-xl bg-black border transition-all text-xs ${
+                    className={`flex items-center justify-between p-2   bg-black border transition-all text-xs ${
                       unread > 0 ? 'border-red-600 shadow-md' : 'border-zinc-800 hover:border-red-800'
                     }`}
                   >
                     <div className="flex items-center gap-2 min-w-0 pr-1">
-                      <div className="w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
-                        {other.avatarUrl ? (
-                          <img src={other.avatarUrl} alt={other.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <span className="text-sm">{other.emoji || '🧑‍💻'}</span>
-                        )}
-                      </div>
                       <div className="truncate">
                         <p className="font-bold text-white truncate text-[11px]">{other.name}</p>
-                        <p className="text-[10px] text-zinc-500 truncate">{other.handle}</p>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-1.5 shrink-0">
                       {unread > 0 && (
-                        <span className="px-1.5 py-0.5 rounded-full bg-red-600 text-white text-[9px] font-black animate-pulse">
-                          💬 {unread}
+                        <span className="px-1.5 py-0.5   bg-red-600 text-white text-[9px] font-black animate-pulse">
+                          {unread}
                         </span>
                       )}
                       <button
@@ -271,7 +251,7 @@ export default function RealPeerSidebar({
                           onSwitchPeer?.(other);
                           onCloseMobile?.();
                         }}
-                        className="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-red-950 border border-zinc-700 hover:border-red-600 text-white text-[10px] font-bold transition-all"
+                        className="px-2.5 py-1   bg-zinc-900 hover:bg-red-950 border border-zinc-700 hover:border-red-600 text-white text-[10px] font-bold transition-all"
                       >
                         Chat
                       </button>
