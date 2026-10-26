@@ -17,7 +17,7 @@ export const TRANSLATIONS = {
   en: {
     appName: 'find_my_soulmate',
     appTagline: 'dev :: edition v2.0',
-    appSubtitle: '// Stop debugging alone. Find your dev soulmate.',
+    appSubtitle: '// Stop debugging alone. Pick your amte than hitting keyboard alone!',
     systemOnline: 'System',
     selectPartner: 'Select Your Soulmate',
     openChannel: 'OPEN CHANNEL',
@@ -48,12 +48,12 @@ export const TRANSLATIONS = {
     stats: { logic: 'Logic', romance: 'Romance', patience: 'Patience', caffeine: 'Caffeine' },
     relationship_labels: {
       0: 'Strangers', 20: 'Acquaintances', 40: 'Friends',
-      60: 'Close Friends', 80: 'Soulmates 💖', 95: '💖 DESTINED 💖',
+      60: 'Close Friends', 80: 'Soulmates ❤️', 95: '❤️ DESTINED ❤️',
     },
     giftResponse: (giftName) => `✨ *receives the ${giftName}* This is... wow. Thank you. 🥺`,
     partnerBio: 'partner.bio',
     moods: {
-      smitten: '💖 Smitten',
+      smitten: '❤️ Smitten',
       curious: '🤔 Curious',
       stressed: '😤 Stressed',
       caffeinated: '☕ Highly Caffeinated',
@@ -101,12 +101,12 @@ export const TRANSLATIONS = {
     stats: { logic: 'አስተሳሰብ', romance: 'ፍቅር', patience: 'ትዕግስት', caffeine: 'ካፌይን' },
     relationship_labels: {
       0: 'እንግዶች', 20: 'ትውውቅ', 40: 'ጓደኞች',
-      60: 'ቅርብ ጓደኞች', 80: 'የነፍስ ጓደኞች 💖', 95: '💖 ዕድል ያቆራኛቸው 💖',
+      60: 'ቅርብ ጓደኞች', 80: 'የነፍስ ጓደኞች ❤️', 95: '❤️ ዕድል ያቆራኛቸው ❤️',
     },
     giftResponse: (giftName) => `✨ *${giftName} ይቀበላል/ትቀበላለች* ይህ... ዋው። አመሰግናለሁ። 🥺`,
     partnerBio: 'የጓደኛ.ታሪክ',
     moods: {
-      smitten: '💖 ፍቅር ወደቀ',
+      smitten: '❤️ ፍቅር ወደቀ',
       curious: '🤔 ጓጉቷል/ጓጉታለች',
       stressed: '😤 ጭንቀት ላይ',
       caffeinated: '☕ ቡናው ሞቅ አለ',
@@ -127,7 +127,7 @@ export const TRANSLATIONS = {
 // ─────────────────────────────────────────────────────────────
 export const LOVE_WORDS = {
   en: [
-    'You are my favorite bug to never fix 💖',
+    'You are my favorite bug to never fix ❤️',
     'My heart has no 404 errors when you\'re around',
     'You are the missing semicolon in my life',
     'Your smile has a better UX than anything I\'ve ever shipped',
@@ -143,7 +143,7 @@ export const LOVE_WORDS = {
     'I\'d switch frameworks for you 💜',
   ],
   am: [
-    'እወድሻለሁ / እወድሃለሁ 💖',
+    'እወድሻለሁ / እወድሃለሁ ❤️',
     'ልቤ ያንተ/ያንቺ ነው',
     'ቆንጆ ነህ/ነሽ',
     'ፍቅሬ ለዘላለም አብሮ/አብራ ይሁን',
