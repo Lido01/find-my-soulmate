@@ -1,21 +1,17 @@
-// Commit: fix(layout): support object/array allCharacters, correct stats access and avatar gradients
+// ─────────────────────────────────────────────────────────────────────────────
+// Sidebar.jsx — Developer AI Persona Stats & Partner Switcher
+// High-tech Red, Black & White developer theme with Space Grotesk / JetBrains Mono
+// ─────────────────────────────────────────────────────────────────────────────
 
 import { useState, useEffect } from "react";
 import { MOOD_META } from "../../data/characters.js";
 import RelationshipMeter from "../ui/RelationshipMeter.jsx";
 import StatBar from "../ui/StatBar.jsx";
 
-export function getMoodGlow(mood) {
-  const m = MOOD_META[mood];
-  if (!m) return {};
-  const c = m.borderColor || "#64748b";
-  return { boxShadow: `0 0 12px ${c}80, 0 0 28px ${c}30`, borderColor: c };
-}
-
 const STAT_COLORS = {
-  logic: "cyan",
-  romance: "fuchsia",
-  patience: "emerald",
+  logic: "red",
+  romance: "red",
+  patience: "slate",
   caffeine: "amber",
 };
 
@@ -45,7 +41,6 @@ export default function Sidebar({
 
   const mood = charState.mood || activeCharacter.defaultMood || "curious";
   const moodMeta = MOOD_META[mood] ?? {};
-  const moodGlow = getMoodGlow(mood);
 
   const initials = activeCharacter.avatarInitials || (activeCharacter.name
     ? activeCharacter.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
@@ -54,8 +49,6 @@ export default function Sidebar({
   const bio = typeof activeCharacter.bio === 'object'
     ? (activeCharacter.bio[lang] || activeCharacter.bio.en || "")
     : (activeCharacter.bio || "");
-
-  const borderColor = activeCharacter.borderColor || "#10b981";
 
   // Access stats from activeCharacter
   const stats = activeCharacter.stats || charState.stats || {};
@@ -70,50 +63,42 @@ export default function Sidebar({
 
   return (
     <aside
-      className="w-64 shrink-0 bg-slate-950 border-r border-slate-800 flex flex-col overflow-y-auto"
-      style={{ scrollbarWidth: "thin", scrollbarColor: "#1e293b transparent" }}
+      className="w-64 shrink-0 bg-black border-r border-zinc-800 flex flex-col overflow-y-auto font-mono select-text"
+      style={{ scrollbarWidth: "thin", scrollbarColor: "#27272a transparent" }}
     >
       {/* Header */}
-      <div className="p-3 border-b border-slate-800 flex items-center justify-between">
+      <div className="p-3 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/90">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="font-mono text-xs text-slate-300 font-bold tracking-widest">Dev.Connections</span>
+          <span className="w-2 h-2   bg-red-500 animate-pulse" />
+          <span className="font-mono text-xs text-white font-bold tracking-widest">DEV.CONNECTIONS</span>
         </div>
         {aiModeActive && (
-          <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-700/60 text-emerald-400 font-bold">
+          <span className="font-mono text-[10px] px-2 py-0.5   bg-red-600 text-white font-bold">
             🤖 AI
           </span>
         )}
       </div>
 
-      <div className="flex flex-col gap-3 p-3 flex-1">
+      <div className="flex flex-col gap-3 p-3 flex-1 bg-black">
         {/* Active partner card */}
-        <div
-          className="bg-slate-900 border rounded-xl p-3 space-y-2.5 transition-all duration-300 relative overflow-hidden"
-          style={moodGlow}
-        >
+        <div className="bg-zinc-950 border border-red-900/60   p-3.5 space-y-3 shadow-lg shadow-red-950/20">
           <div className="flex items-center gap-2.5">
-            <div
-              className={`w-10 h-10 rounded-xl bg-gradient-to-br ${activeCharacter.avatarBg || 'from-slate-800 to-slate-950'} flex items-center justify-center text-sm font-mono font-bold text-white border-2 shrink-0 shadow-md`}
-              style={{ borderColor: borderColor }}
-            >
+            <div className="w-10 h-10   bg-black border-2 border-red-600 flex items-center justify-center text-sm font-mono font-bold text-white shrink-0 shadow-md">
               {initials}
             </div>
             <div className="flex-1 min-w-0">
-              <p className={`font-mono text-xs font-bold truncate ${activeCharacter.textClass || 'text-white'}`}>
+              <p className="font-mono text-xs font-bold truncate text-white">
                 {activeCharacter.name}
               </p>
-              <p className="font-mono text-[10px] text-slate-500 truncate">{activeCharacter.handle}</p>
+              <p className="font-mono text-[10px] text-red-400 truncate">{activeCharacter.handle}</p>
             </div>
             <span className="text-xl">{moodMeta.emoji || "🤔"}</span>
           </div>
 
           {/* Mood status pill */}
-          <div
-            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 border border-slate-700/50 ${moodMeta.bgClass || 'bg-slate-800/60'}`}
-          >
+          <div className="flex items-center gap-1.5   px-2.5 py-1.5 border border-zinc-800 bg-black">
             <span className="text-xs">{moodMeta.emoji || "🤔"}</span>
-            <span className={`font-mono text-[10px] font-bold ${moodMeta.textClass || 'text-cyan-400'}`}>
+            <span className="font-mono text-[10px] font-bold text-red-400">
               {t?.moods?.[mood] ?? mood}
             </span>
           </div>
@@ -121,15 +106,15 @@ export default function Sidebar({
           {/* Relationship meter */}
           <RelationshipMeter
             value={charState.relationship ?? activeCharacter.initialRelationship ?? 10}
-            accentColor={activeCharacter.accentColor ?? "emerald"}
+            accentColor="red"
             t={t}
           />
         </div>
 
         {/* Stats */}
         {Object.keys(stats).length > 0 && (
-          <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-3 space-y-2">
-            <p className="font-mono text-[10px] text-slate-500 uppercase tracking-widest mb-1">
+          <div className="bg-zinc-950 border border-zinc-800   p-3 space-y-2">
+            <p className="font-mono text-[10px] text-zinc-400 uppercase tracking-widest mb-1 font-bold">
               {t?.partnerStats ?? "// partner.stats"}
             </p>
             {statKeys.map((key) =>
@@ -147,11 +132,11 @@ export default function Sidebar({
 
         {/* Bio terminal */}
         {bio && (
-          <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3">
-            <p className="font-mono text-[10px] text-slate-500 mb-1 uppercase tracking-widest">
+          <div className="bg-zinc-950 border border-zinc-800   p-3">
+            <p className="font-mono text-[10px] text-zinc-400 mb-1 uppercase tracking-widest font-bold">
               {t?.partnerBio ?? "// partner.bio"}
             </p>
-            <pre className="font-mono text-[10px] text-slate-300 whitespace-pre-wrap leading-relaxed overflow-hidden">
+            <pre className="font-mono text-[10px] text-zinc-300 whitespace-pre-wrap leading-relaxed overflow-hidden">
               {bio}
             </pre>
           </div>
@@ -159,9 +144,9 @@ export default function Sidebar({
 
         {/* Rotating Fun fact */}
         {currentFact && (
-          <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-3">
-            <p className="font-mono text-[10px] text-slate-500 mb-1 uppercase tracking-widest">// fun fact</p>
-            <p className="font-mono text-[10px] text-slate-400 italic leading-relaxed">
+          <div className="bg-zinc-950 border border-zinc-800   p-3">
+            <p className="font-mono text-[10px] text-red-400 mb-1 uppercase tracking-widest font-bold">// fun fact</p>
+            <p className="font-mono text-[10px] text-zinc-400 italic leading-relaxed">
               {typeof currentFact === "object" ? currentFact[lang] ?? currentFact.en : currentFact}
             </p>
           </div>
@@ -170,7 +155,7 @@ export default function Sidebar({
         {/* Switch partner buttons */}
         {otherCharacters.length > 0 && (
           <div className="space-y-1.5 mt-auto pt-2">
-            <p className="font-mono text-[10px] text-slate-600 uppercase tracking-widest">
+            <p className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
               {t?.switchPartner ?? "// switch partner"}
             </p>
             {otherCharacters.map((c) => {
@@ -181,17 +166,16 @@ export default function Sidebar({
               return (
                 <button
                   key={c.id}
+                  type="button"
                   onClick={() => onSwitchCharacter?.(c.id)}
-                  className="w-full flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-600 rounded-lg px-2.5 py-2 transition-all duration-200 text-left group"
+                  className="w-full flex items-center gap-2 bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 hover:border-red-600   px-2.5 py-2 transition-all duration-200 text-left group shadow-sm"
                 >
-                  <div
-                    className={`w-7 h-7 rounded-lg bg-gradient-to-br ${c.avatarBg || 'from-slate-800 to-slate-950'} flex items-center justify-center text-[10px] font-mono font-bold text-white shrink-0`}
-                  >
+                  <div className="w-7 h-7   bg-black border border-zinc-800 group-hover:border-red-600 flex items-center justify-center text-[10px] font-mono font-bold text-white shrink-0">
                     {cInitials}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`font-mono text-xs font-bold truncate ${c.textClass || 'text-white'}`}>{c.name}</p>
-                    <p className="font-mono text-[10px] text-slate-500 truncate">
+                    <p className="font-mono text-xs font-bold truncate text-white">{c.name}</p>
+                    <p className="font-mono text-[10px] text-zinc-400 truncate">
                       {cState.relationship ?? c.initialRelationship ?? 10}% bond
                     </p>
                   </div>
