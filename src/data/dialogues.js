@@ -212,7 +212,7 @@ export const LINUS_DIALOGUES = {
 
   linus_full_smitten: {
     id: 'linus_full_smitten',
-    partnerMessage: `I ran your latest commit through checkpatch.pl.\n\n0 errors. 0 warnings.\n\n"Coding style: Perfect"\n\nI've only seen that message twice in ten years.\nOnce was my own patch.\n\n...The other one is yours.\n\nI think I need to go lie down.\nThis is too much emotional processing for one session.\n\n💖 [linus.feelings file size: 847 MB and growing]`,
+    partnerMessage: `I ran your latest commit through checkpatch.pl.\n\n0 errors. 0 warnings.\n\n"Coding style: Perfect"\n\nI've only seen that message twice in ten years.\nOnce was my own patch.\n\n...The other one is yours.\n\nI think I need to go lie down.\nThis is too much emotional processing for one session.\n\n❤️ [linus.feelings file size: 847 MB and growing]`,
     mood: MOODS.SMITTEN,
     moodDelta: 0,
     relationshipDelta: 0,
@@ -589,7 +589,7 @@ export const DEVON_DIALOGUES = {
 
   devon_full_smitten: {
     id: 'devon_full_smitten',
-    partnerMessage: `okay so i finished the portfolio\nit looks incredible\nresponsive on every device\ngreen build\nperformance score: 98\n\nand i just want to say —\nthis would not have happened without you.\nlike literally. i would be on rewrite #6 right now.\n\ninstead i'm sitting here with a perfectly cold brew\nand a working website\nand someone i actually want to show it to\n\nthat last part is the rarest part.\n\n💖 [devon.heart: running at full capacity, no crashes]`,
+    partnerMessage: `okay so i finished the portfolio\nit looks incredible\nresponsive on every device\ngreen build\nperformance score: 98\n\nand i just want to say —\nthis would not have happened without you.\nlike literally. i would be on rewrite #6 right now.\n\ninstead i'm sitting here with a perfectly cold brew\nand a working website\nand someone i actually want to show it to\n\nthat last part is the rarest part.\n\n❤️ [devon.heart: running at full capacity, no crashes]`,
     mood: MOODS.SMITTEN,
     isTerminal: true,
     moodDelta: 0,
@@ -700,7 +700,7 @@ export const LINA_DIALOGUES = {
   },
   lina_rebase_smitten: {
     id: 'lina_rebase_smitten',
-    partnerMessage: `...Wait. You squashed all the 'fix typo' commits.\nLinear git history. Atomic commits following conventional commit spec.\n\nI... I don't know what to say.\nThis is genuinely the most romantic thing any developer has ever shown me.\n\n💖 [lina.heart: load average 4.88, overheating]`,
+    partnerMessage: `...Wait. You squashed all the 'fix typo' commits.\nLinear git history. Atomic commits following conventional commit spec.\n\nI... I don't know what to say.\nThis is genuinely the most romantic thing any developer has ever shown me.\n\n❤️ [lina.heart: load average 4.88, overheating]`,
     mood: MOODS.SMITTEN,
     choices: [
       {
@@ -767,7 +767,7 @@ export const DANI_DIALOGUES = {
   },
   dani_css_relief: {
     id: 'dani_css_relief',
-    partnerMessage: `WAIT\nYou changed place-items: center and added min-width: 0 on the flex children?!\nIT WORKED! IT'S BEAUTIFUL!! 💅✨\n\nYou are literally an angel sent from the W3C consortium to save my life.\nI could literally hug you through this screen rn! 🥰💖`,
+    partnerMessage: `WAIT\nYou changed place-items: center and added min-width: 0 on the flex children?!\nIT WORKED! IT'S BEAUTIFUL!! 💅✨\n\nYou are literally an angel sent from the W3C consortium to save my life.\nI could literally hug you through this screen rn! 🥰❤️`,
     mood: MOODS.SMITTEN,
     choices: [
       {
@@ -781,12 +781,12 @@ export const DANI_DIALOGUES = {
   },
   dani_date_agreed: {
     id: 'dani_date_agreed',
-    partnerMessage: `YES! A million times yes! ☕💖\nNitro cold brew date! I'll bring my laptop and we can make animations together!\nYou're seriously the coolest developer I've ever met 🥰`,
+    partnerMessage: `YES! A million times yes! ☕❤️\nNitro cold brew date! I'll bring my laptop and we can make animations together!\nYou're seriously the coolest developer I've ever met 🥰`,
     mood: MOODS.SMITTEN,
     choices: [
       {
         id: 'dani_end',
-        label: "Can't wait. You have the sweetest energy, Dani 💖",
+        label: "Can't wait. You have the sweetest energy, Dani ❤️",
         next: 'dani_date_agreed',
         moodDelta: +10,
         relationshipDelta: +10,
@@ -811,7 +811,7 @@ export const SENAIT_DIALOGUES = {
       },
       {
         id: 'senait_amharic',
-        label: "ሰላም ቆንጆ! I code late into the night while dreaming of love 💖",
+        label: "ሰላም ቆንጆ! I code late into the night while dreaming of love ❤️",
         next: 'senait_amharic_flirt',
         moodDelta: +30,
         relationshipDelta: +25,
@@ -825,7 +825,7 @@ export const SENAIT_DIALOGUES = {
     choices: [
       {
         id: 'senait_accept_cup',
-        label: "I would be honored. Let's talk about our dreams over that cup 🥺💖",
+        label: "I would be honored. Let's talk about our dreams over that cup 🥺❤️",
         next: 'senait_amharic_flirt',
         moodDelta: +20,
         relationshipDelta: +25,
@@ -834,7 +834,7 @@ export const SENAIT_DIALOGUES = {
   },
   senait_amharic_flirt: {
     id: 'senait_amharic_flirt',
-    partnerMessage: `ዋው! ያንተ/ያንቺ አነጋገር በጣም ያምራል 🥺✨\n"ቆንጆ" ብለህ/ሽ ስትጠራኝ/ኝ ልቤ እንዴት እንደዘለለ!\nMy neural networks can process billions of parameters, but you just disrupted all my weights.\nየኔ ውድ፣ you have such a rare soul. 💖`,
+    partnerMessage: `ዋው! ያንተ/ያንቺ አነጋገር በጣም ያምራል 🥺✨\n"ቆንጆ" ብለህ/ሽ ስትጠራኝ/ኝ ልቤ እንዴት እንደዘለለ!\nMy neural networks can process billions of parameters, but you just disrupted all my weights.\nየኔ ውድ፣ you have such a rare soul. ❤️`,
     mood: MOODS.SMITTEN,
     choices: [
       {
@@ -848,7 +848,7 @@ export const SENAIT_DIALOGUES = {
   },
   senait_date_ready: {
     id: 'senait_date_ready',
-    partnerMessage: `የኔ ፍቅር... 💖\nWhen we sit down together, no bugs will matter.\nTraditional Ethiopian dinner, jazz music, and heartfelt laughter.\nI'm so glad I opened this channel today. ✨`,
+    partnerMessage: `የኔ ፍቅር... ❤️\nWhen we sit down together, no bugs will matter.\nTraditional Ethiopian dinner, jazz music, and heartfelt laughter.\nI'm so glad I opened this channel today. ✨`,
     mood: MOODS.SMITTEN,
     choices: [
       {
@@ -892,7 +892,7 @@ export const DAWIT_DIALOGUES = {
     choices: [
       {
         id: 'dawit_lifetime',
-        label: "Not at all. In fact, that's the most romantic dev analogy ever 🥺💖",
+        label: "Not at all. In fact, that's the most romantic dev analogy ever 🥺❤️",
         next: 'dawit_amharic_flirt',
         moodDelta: +20,
         relationshipDelta: +25,
@@ -906,7 +906,7 @@ export const DAWIT_DIALOGUES = {
     choices: [
       {
         id: 'dawit_dinner',
-        label: "Let's share authentic Injera & Tibs together soon 🇪🇹💖",
+        label: "Let's share authentic Injera & Tibs together soon 🇪🇹❤️",
         next: 'dawit_end_state',
         moodDelta: +20,
         relationshipDelta: +25,
@@ -920,7 +920,7 @@ export const DAWIT_DIALOGUES = {
     choices: [
       {
         id: 'dawit_repeat',
-        label: "A lifetime guarantee with you, Dawit 💖",
+        label: "A lifetime guarantee with you, Dawit ❤️",
         next: 'dawit_end_state',
         moodDelta: +10,
         relationshipDelta: +10,
