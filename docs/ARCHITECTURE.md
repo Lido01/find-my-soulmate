@@ -27,7 +27,7 @@ flowchart TD
         subgraph Mode2["Mode 2: Real WebSocket & Social Network"]
             Matchmaker["Matchmaking Queue\n(Girlfriend 👩‍💻 vs Boyfriend 👨‍💻)"]
             ChatRooms["1-on-1 Direct Rooms\n(ws://0.0.0.0:8080)"]
-            Social["Social Interactions\n(Waves 👋, Likes 💖, Coffee ☕, Friends 👥)"]
+            Social["Social Interactions\n(Waves 👋, Likes ❤️, Coffee ☕, Friends 👥)"]
         end
     end
 
@@ -76,7 +76,7 @@ flowchart TD
    - Supports room creation, typing debouncing, instant messaging, and audio note metadata.
 3. **Social Community Layer**:
    - **Coffee Waves 👋**: 1-click friendly greeting triggering cross-device chime and toast.
-   - **Developer Love 💖**: Increments persistent profile likes in database.
+   - **Developer Love ❤️**: Increments persistent profile likes in database.
    - **Friend Network 👥**: Add to mutual developer circle and view in dedicated "My Friends" tab.
    - **Dev Social Feed 🚀**: Post real-time coding thoughts, coffee cravings, and status updates.
 
