@@ -144,7 +144,13 @@ export default function RealChatLobby({
           next.delete(notif.fromUser.id);
           return next;
         });
-        setMyFriends((prev) => new Set([...prev, notif.fromUser.id]));
+        setMyFriends((prev) => {
+          const next = new Set([...prev, notif.fromUser.id]);
+          if (userProfile) {
+            onUpdateUserProfile?.({ ...userProfile, friends: Array.from(next) });
+          }
+          return next;
+        });
       } else if (notif.type === 'friend_decline' && notif.fromUser?.id) {
         setRequestedUserIds((prev) => {
           const next = new Set(prev);
@@ -165,6 +171,9 @@ export default function RealChatLobby({
         if (Array.isArray(data.actor.friends)) setMyFriends(new Set(data.actor.friends));
         if (Array.isArray(data.actor.following)) setFollowingUserIds(new Set(data.actor.following));
         onUpdateUserProfile?.({ ...userProfile, ...data.actor });
+      } else if (data.targetUserId === userProfile?.id && data.targetUser) {
+        if (Array.isArray(data.targetUser.friends)) setMyFriends(new Set(data.targetUser.friends));
+        onUpdateUserProfile?.({ ...userProfile, ...data.targetUser });
       }
     });
 
@@ -188,27 +197,49 @@ export default function RealChatLobby({
     setTimeout(() => setSocialToast(null), 3600);
   }
 
-  // Combine database users and active WebSocket presence so ALL users are always visible
+  // Combine database users and active WebSocket presence so ALL users are always visible with NO duplicates
   const allKnownUsersMap = new Map();
-  // 1. Seed from database users
-  for (const u of dbUsers) {
-    allKnownUsersMap.set(u.id, { ...u, isLiveNow: false });
-  }
-  // 2. Overlay live presence from WebSocket
-  for (const u of onlineUsers) {
-    const existing = allKnownUsersMap.get(u.id) || {};
-    allKnownUsersMap.set(u.id, {
+  const handleToIdMap = new Map();
+
+  function addOrMergeUser(u, isLive = false) {
+    if (!u || !u.id) return;
+    const normHandle = (u.handle || '').toLowerCase().trim();
+    const existingId = normHandle ? handleToIdMap.get(normHandle) : null;
+    const targetId = existingId || u.id;
+    const existing = allKnownUsersMap.get(targetId) || {};
+
+    const merged = {
       ...existing,
       ...u,
-      isLiveNow: Boolean(u.isLiveSocket),
-    });
+      id: targetId,
+      isLiveNow: isLive || existing.isLiveNow || Boolean(u.isLiveSocket),
+    };
+    allKnownUsersMap.set(targetId, merged);
+    if (normHandle) {
+      handleToIdMap.set(normHandle, targetId);
+    }
+  }
+
+  // 1. Seed from database users
+  for (const u of dbUsers) {
+    addOrMergeUser(u, false);
+  }
+
+  // 2. Overlay live presence from WebSocket
+  for (const u of onlineUsers) {
+    addOrMergeUser(u, Boolean(u.isLiveSocket));
   }
 
   const combinedUsers = Array.from(allKnownUsersMap.values());
 
-  // Strictly filter according to chosen preference (NO non-chosen gender shown)
+  const myHandleNorm = (userProfile?.handle || '').toLowerCase().trim();
+
+  // Strictly filter according to chosen preference (NO non-chosen gender, never show self)
   const filteredUsers = combinedUsers.filter(
-    (u) => u.gender === searchTarget && u.id !== userProfile?.id
+    (u) =>
+      u.gender === searchTarget &&
+      u.id !== userProfile?.id &&
+      (!myHandleNorm || (u.handle || '').toLowerCase().trim() !== myHandleNorm)
   );
 
   // Search query & filter pills refinement
@@ -313,6 +344,32 @@ export default function RealChatLobby({
     }
   }
 
+  async function handleToggleFriend(user) {
+    if (!userProfile?.isRegistered) {
+      soundEngine.playHeartbeat();
+      showSocialToast(isAm ? 'እባክዎ ጓደኛ ከመጠየቅዎ በፊት ይመዝገቡ' : 'Please register before adding developer friends');
+      onOpenRegister?.(user.gender);
+      return;
+    }
+
+    const isFriend = myFriends.has(user.id) || (userProfile?.friends && userProfile.friends.includes(user.id));
+    if (isFriend) {
+      soundEngine.playHeartbeat();
+      showSocialToast(isAm ? `እርስዎ እና ${user.name} ጓደኛሞች ናችሁ! 👥` : `You and ${user.name} are already friends! 👥`);
+      return;
+    }
+
+    if (requestedUserIds.has(user.id)) {
+      showSocialToast(isAm ? 'የጓደኝነት ጥያቄ አስቀድሞ ተልኳል ⏳' : `Friend request already pending for ${user.name} ⏳`);
+      return;
+    }
+
+    soundEngine.playRomanticChime();
+    setRequestedUserIds((prev) => new Set([...prev, user.id]));
+    await wsService.sendSocialAction('add_friend', user.id);
+    showSocialToast(isAm ? `የጓደኝነት ጥያቄ ለ ${user.name} ተልኳል! 👥` : `Friend request sent to ${user.name}! 👥`);
+  }
+
   async function handleLike(user) {
     if (!userProfile?.isRegistered) {
       soundEngine.playHeartbeat();
@@ -321,9 +378,9 @@ export default function RealChatLobby({
       return;
     }
     soundEngine.playHeartbeat();
-    const isLiked = likedUserIds.has(user.id);
+    const currentlyLiked = (Array.isArray(user.likedBy) && user.likedBy.includes(userProfile?.id)) || likedUserIds.has(user.id);
     const nextLiked = new Set(likedUserIds);
-    if (isLiked) {
+    if (currentlyLiked) {
       nextLiked.delete(user.id);
     } else {
       nextLiked.add(user.id);
@@ -336,7 +393,7 @@ export default function RealChatLobby({
       );
     }
     showSocialToast(
-      isLiked ? `Removed like for ${user.name}` : `❤️ Sent developer love to ${user.name}!`
+      currentlyLiked ? `Removed like for ${user.name}` : `❤️ Sent developer love to ${user.name}!`
     );
   }
 
@@ -513,9 +570,9 @@ export default function RealChatLobby({
                     99,
                     65 + sharedTech.length * 12 + (sameIndent ? 10 : 0)
                   );
-                  const isFriend = myFriends.has(user.id);
+                  const isFriend = myFriends.has(user.id) || (userProfile?.friends && userProfile.friends.includes(user.id));
                   const isFollowing = followingUserIds.has(user.id);
-                  const isLiked = likedUserIds.has(user.id);
+                  const isLiked = (Array.isArray(user.likedBy) && user.likedBy.includes(userProfile?.id)) || likedUserIds.has(user.id);
                   const isWaved = wavedUserIds.has(user.id);
                   const isRequested = requestedUserIds.has(user.id);
                   const unread = unreadCounts[user.id] || 0;
@@ -638,6 +695,20 @@ export default function RealChatLobby({
                       {/* Social Actions & Direct Chat Toolbar */}
                       <div className="space-y-2 pt-2 border-t border-zinc-800/80 font-mono">
                         <div className="grid grid-cols-4 gap-1 text-[11px]">
+                          {/* Like Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleLike(user)}
+                            className={`py-1.5  border text-center transition-colors font-bold ${
+                              isLiked
+                                ? 'bg-red-950 border-red-500 text-red-400 shadow-sm'
+                                : 'bg-black border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700'
+                            }`}
+                            title="Send developer like"
+                          >
+                            {isLiked ? '❤️ Liked' : '♡ Like'}
+                          </button>
+
                           {/* Follow Button */}
                           <button
                             type="button"
@@ -649,7 +720,7 @@ export default function RealChatLobby({
                             }`}
                             title="Follow developer"
                           >
-                            {isFollowing ? '✓ Following' : '+ Follow'}
+                            {isFollowing ? '✓ Follow' : '+ Follow'}
                           </button>
 
                           {/* Wave Button */}
@@ -663,7 +734,7 @@ export default function RealChatLobby({
                             }`}
                             title="Send developer love"
                           >
-                            {isWaved ? 'Waved' : 'Wave'}
+                            {isWaved ? '☕ Waved' : '☕ Wave'}
                           </button>
 
                           {/* Wave Button */}
