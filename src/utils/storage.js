@@ -100,32 +100,47 @@ export function saveAudioSettings(settings) {
   try { localStorage.setItem(AUDIO_SETTINGS_STORAGE, JSON.stringify(settings)); } catch { /* */ }
 }
 
-// ── Persistent Chat History per Peer ─────────────────────────────────────────
-export function loadChatHistory(peerId) {
-  if (!peerId) return [];
+// ── Persistent Chat History per Peer (Scoped to user & peer) ─────────────
+export function loadChatHistory(currentUserId, peerId) {
+  const actualPeerId = peerId || currentUserId;
+  const actualUserId = peerId ? currentUserId : null;
+  if (!actualPeerId) return [];
   try {
-    const raw = localStorage.getItem(`${CHAT_HISTORY_PREFIX}${peerId}`);
+    const scopedKey = actualUserId
+      ? `${CHAT_HISTORY_PREFIX}${actualUserId}_${actualPeerId}`
+      : `${CHAT_HISTORY_PREFIX}${actualPeerId}`;
+    const raw = localStorage.getItem(scopedKey) || localStorage.getItem(`${CHAT_HISTORY_PREFIX}${actualPeerId}`);
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
   }
 }
 
-export function saveChatHistory(peerId, messages) {
-  if (!peerId || !Array.isArray(messages)) return;
+export function saveChatHistory(currentUserId, peerId, messages) {
+  const actualMessages = Array.isArray(messages) ? messages : (Array.isArray(peerId) ? peerId : []);
+  const actualPeerId = Array.isArray(messages) ? peerId : currentUserId;
+  const actualUserId = Array.isArray(messages) ? currentUserId : null;
+  if (!actualPeerId || !Array.isArray(actualMessages)) return;
   try {
-    // Keep up to 200 messages to prevent storage overflow while retaining rich history
-    const trimmed = messages.slice(-200);
-    localStorage.setItem(`${CHAT_HISTORY_PREFIX}${peerId}`, JSON.stringify(trimmed));
+    const trimmed = actualMessages.slice(-250);
+    const scopedKey = actualUserId
+      ? `${CHAT_HISTORY_PREFIX}${actualUserId}_${actualPeerId}`
+      : `${CHAT_HISTORY_PREFIX}${actualPeerId}`;
+    localStorage.setItem(scopedKey, JSON.stringify(trimmed));
   } catch {
     /* fail silently */
   }
 }
 
-export function clearChatHistory(peerId) {
-  if (!peerId) return;
+export function clearChatHistory(currentUserId, peerId) {
+  const actualPeerId = peerId || currentUserId;
+  const actualUserId = peerId ? currentUserId : null;
+  if (!actualPeerId) return;
   try {
-    localStorage.removeItem(`${CHAT_HISTORY_PREFIX}${peerId}`);
+    if (actualUserId) {
+      localStorage.removeItem(`${CHAT_HISTORY_PREFIX}${actualUserId}_${actualPeerId}`);
+    }
+    localStorage.removeItem(`${CHAT_HISTORY_PREFIX}${actualPeerId}`);
   } catch {
     /* */
   }
