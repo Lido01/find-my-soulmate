@@ -70,3 +70,9 @@ storybook-static/
 gemini.key
 *.apikey
 secrets.json
+
+# ── Dynamic Local Server Runtime Data ─────────────────────────
+server/data/*.json
+server/data/*.tmp*
+!server/data/.gitkeep
+
