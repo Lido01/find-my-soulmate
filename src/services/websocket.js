@@ -3,23 +3,23 @@
 // Handles live connection, auto-reconnect, and intelligent peer matchmaking.
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Simulated realistic online developers (shown if user wants live peer discovery)
+// Simulated realistic online developers (shown if offline or fallback)
 const SIMULATED_ONLINE_DEVS = [
   {
-    id: 'sim_meron',
-    name: 'Meron T.',
+    id: 'user_meron',
+    name: 'Meron Tadesse',
     handle: '@meron_dev',
     gender: 'female',
     lookingFor: 'male',
     location: 'Addis Ababa 🇪🇹',
-    techStack: ['Next.js', 'Tailwind', 'GraphQL'],
+    techStack: ['Next.js', 'React', 'Tailwind', 'GraphQL'],
     bio: 'Late night frontend builder. Addicted to pour-over coffee and clean component design.',
     emoji: '👩‍💻',
     status: 'online',
     initialMood: 'curious',
   },
   {
-    id: 'sim_hanna',
+    id: 'user_hanna',
     name: 'Hanna Lind',
     handle: '@hanna_codes',
     gender: 'female',
@@ -32,8 +32,8 @@ const SIMULATED_ONLINE_DEVS = [
     initialMood: 'smitten',
   },
   {
-    id: 'sim_selam',
-    name: 'Selamawit A.',
+    id: 'user_selam',
+    name: 'Selamawit Alemayehu',
     handle: '@selam_ai',
     gender: 'female',
     lookingFor: 'male',
@@ -45,8 +45,8 @@ const SIMULATED_ONLINE_DEVS = [
     initialMood: 'caffeinated',
   },
   {
-    id: 'sim_yonas',
-    name: 'Yonas B.',
+    id: 'user_yonas',
+    name: 'Yonas Bekele',
     handle: '@yonas_rust',
     gender: 'male',
     lookingFor: 'female',
@@ -58,7 +58,7 @@ const SIMULATED_ONLINE_DEVS = [
     initialMood: 'smitten',
   },
   {
-    id: 'sim_alex',
+    id: 'user_alex',
     name: 'Alex Rivera',
     handle: '@alex_fullstack',
     gender: 'male',
@@ -71,8 +71,8 @@ const SIMULATED_ONLINE_DEVS = [
     initialMood: 'curious',
   },
   {
-    id: 'sim_kenean',
-    name: 'Kenean M.',
+    id: 'user_kenean',
+    name: 'Kenean Mengistu',
     handle: '@kenean_arch',
     gender: 'male',
     lookingFor: 'female',
@@ -325,16 +325,10 @@ class WebSocketManager {
   }
 
   startDirectChat(peer) {
-    if (this.ws && this.ws.readyState === WebSocket.OPEN && !this.isSimulated) {
-      this.ws.send(JSON.stringify({
-        type: 'room:invite',
-        targetUserId: peer.id,
-      }));
-    } else {
-      this.currentRoomId = `sim_room_${Date.now()}`;
-      this.currentPeer = peer;
-      this.emit('room:entered', { roomId: this.currentRoomId, peer });
-    }
+    this.currentPeer = peer;
+    const sortedIds = [this.currentUser?.id || 'me', peer.id].sort();
+    this.currentRoomId = `room_${sortedIds.join('___')}`;
+    this.emit('room:entered', { roomId: this.currentRoomId, peer });
   }
 
   sendMessage(text, options = {}) {
