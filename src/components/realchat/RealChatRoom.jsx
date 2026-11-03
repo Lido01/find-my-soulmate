@@ -27,8 +27,10 @@ export default function RealChatRoom({
   // Initialize messages from persistent local storage for this peer
   const [messages, setMessages] = useState(() => {
     if (!peer?.id) return [];
-    const saved = loadChatHistory(peer.id);
-    if (saved && saved.length > 0) return saved;
+    const saved = loadChatHistory(userProfile?.id, peer.id);
+    if (saved && saved.length > 0) {
+      return saved.sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0));
+    }
     return [
       {
         id: `sys_${Date.now()}`,
@@ -91,9 +93,9 @@ export default function RealChatRoom({
     if (!peer?.id) return;
 
     // 1. Initial load from local cache
-    const saved = loadChatHistory(peer.id);
+    const saved = loadChatHistory(userProfile?.id, peer.id);
     if (saved && saved.length > 0) {
-      setMessages(saved);
+      setMessages(saved.sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0)));
     } else {
       setMessages([
         {
@@ -121,8 +123,10 @@ export default function RealChatRoom({
                 sender: isMe ? 'player' : 'partner',
               });
             }
-            const merged = Array.from(map.values());
-            saveChatHistory(peer.id, merged);
+            const merged = Array.from(map.values()).sort(
+              (a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0)
+            );
+            saveChatHistory(userProfile?.id, peer.id, merged);
             return merged;
           });
         }
@@ -133,9 +137,9 @@ export default function RealChatRoom({
   // Persist messages whenever updated
   useEffect(() => {
     if (peer?.id && messages.length > 0) {
-      saveChatHistory(peer.id, messages);
+      saveChatHistory(userProfile?.id, peer.id, messages);
     }
-  }, [peer?.id, messages]);
+  }, [peer?.id, userProfile?.id, messages]);
 
   // Send seen notification to partner for unread messages when opening chat
   useEffect(() => {
@@ -155,7 +159,7 @@ export default function RealChatRoom({
   function handleClearHistory() {
     if (clearConfirm) {
       soundEngine.playHeartbeat();
-      clearChatHistory(peer.id);
+      clearChatHistory(userProfile?.id, peer.id);
       setMessages([
         {
           id: `sys_${Date.now()}`,
@@ -174,8 +178,14 @@ export default function RealChatRoom({
   useEffect(() => {
     // 1. Incoming Message
     const unbindMsg = wsService.on('chat:message', (msg) => {
-      soundEngine.playMessageBeep();
       const isMe = msg.senderId === (userProfile?.id || 'me');
+      const belongsToThisRoom =
+        msg.senderId === peer?.id ||
+        (isMe && (!msg.targetUserId || msg.targetUserId === peer?.id));
+
+      if (!belongsToThisRoom) return;
+
+      soundEngine.playMessageBeep();
 
       setMessages((prev) => {
         // Prevent duplicate
@@ -186,7 +196,7 @@ export default function RealChatRoom({
           sender: isMe ? 'player' : 'partner',
           senderName: msg.senderName,
           text: msg.text,
-          timestamp: msg.timestamp,
+          timestamp: msg.timestamp || new Date().toISOString(),
           replyTo: msg.replyTo,
           isAudio: msg.isAudio,
           audioUrl: msg.audioUrl,
@@ -206,7 +216,11 @@ export default function RealChatRoom({
           wsService.sendSeen(peer.id, [msg.id]);
         }
 
-        return [...prev, newMsg];
+        const nextList = [...prev, newMsg].sort(
+          (a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0)
+        );
+        saveChatHistory(userProfile?.id, peer.id, nextList);
+        return nextList;
       });
     });
 
@@ -239,8 +253,10 @@ export default function RealChatRoom({
               sender: isMe ? 'player' : 'partner',
             });
           }
-          const merged = Array.from(map.values());
-          saveChatHistory(peer.id, merged);
+          const merged = Array.from(map.values()).sort(
+            (a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0)
+          );
+          saveChatHistory(userProfile?.id, peer.id, merged);
           return merged;
         });
       }
@@ -248,7 +264,9 @@ export default function RealChatRoom({
 
     // 4. Typing indicator
     const unbindTyping = wsService.on('chat:typing', (data) => {
-      setPeerTyping(Boolean(data.isTyping));
+      if (!data.senderId || data.senderId === peer?.id) {
+        setPeerTyping(Boolean(data.isTyping));
+      }
     });
 
     return () => {
