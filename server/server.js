@@ -219,12 +219,12 @@ const server = http.createServer(async (req, res) => {
       const body = await readJsonBody(req);
       const user = db.getUserByLoveCode(body.loveCode);
       if (!user) {
-        sendJson(res, 404, { ok: false, error: 'Love Code not found. Please check and try again!' });
+        sendJson(res, 404, { ok: false, success: false, error: 'Love Code not found. Please check and try again!' });
         return;
       }
-      sendJson(res, 200, { ok: true, user });
+      sendJson(res, 200, { ok: true, success: true, user });
     } catch (err) {
-      sendJson(res, 400, { ok: false, error: err.message });
+      sendJson(res, 400, { ok: false, success: false, error: err.message });
     }
     return;
   }
@@ -278,10 +278,22 @@ const server = http.createServer(async (req, res) => {
       const updatedNotif = db.respondToFriendRequest(notificationId, action, userId);
 
       if ((action === 'accepted' || action === 'declined') && updatedNotif) {
+        const actorUser = db.getUserById(userId);
+        const targetUser = db.getUserById(updatedNotif.fromUser?.id);
+
         // Broadcast presence update with updated friends lists
         broadcastOnlineUsers();
 
-        // Notify the requester
+        // Broadcast social action so both users update friends lists in real-time
+        broadcastToAll({
+          type: 'social:action',
+          action: action === 'accepted' ? 'confirm_friend' : 'decline_friend',
+          actor: actorUser,
+          targetUser: targetUser,
+          targetUserId: updatedNotif.fromUser?.id,
+        });
+
+        // Notify the requester directly
         for (const [otherWs, otherUser] of clients) {
           if (otherUser && otherUser.id === updatedNotif.fromUser?.id && otherWs.readyState === WebSocket.OPEN) {
             otherWs.send(JSON.stringify({
@@ -289,10 +301,10 @@ const server = http.createServer(async (req, res) => {
               notification: {
                 id: `notif_${Date.now()}`,
                 type: action === 'accepted' ? 'friend_accept' : 'friend_decline',
-                fromUser: { id: userId, name: 'Developer friend' },
+                fromUser: actorUser || { id: userId, name: 'Developer friend' },
                 targetUserId: otherUser.id,
                 text: action === 'accepted'
-                  ? 'Your developer friend request was accepted.'
+                  ? `${actorUser?.name || 'A developer friend'} accepted your friend request! 👥`
                   : 'Your developer friend request was declined. You can send a new request later.',
                 timestamp: new Date().toISOString(),
               },
@@ -603,16 +615,34 @@ function handleClientMessage(ws, msg) {
     // ── 4. Chat Message in Room ─────────────────────────────────────────────
     case 'chat:send': {
       const roomId = msg.roomId || user.roomId;
-      const targetUserId = msg.targetUserId || msg.message?.targetUserId;
+      let targetUserId = msg.targetUserId || msg.message?.targetUserId;
+
+      // Determine recipient peer
+      let peerUser = null;
+      if (roomId && rooms.has(roomId)) {
+        const roomMembers = rooms.get(roomId);
+        for (const memberWs of roomMembers) {
+          if (memberWs !== ws) {
+            peerUser = clients.get(memberWs);
+            break;
+          }
+        }
+      }
+
+      if (!targetUserId && peerUser?.id) {
+        targetUserId = peerUser.id;
+      }
+
+      const peerId = targetUserId || peerUser?.id;
 
       const formattedMessage = {
         id: msg.message?.id || `msg_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
         senderId: user.id,
-        senderName: user.name,
-        senderHandle: user.handle,
-        senderEmoji: user.emoji,
+        senderName: user.name || 'Developer',
+        senderHandle: user.handle || '@dev',
+        senderEmoji: user.emoji || '🧑‍💻',
         senderAvatarUrl: user.avatarUrl || msg.message?.senderAvatarUrl || null,
-        targetUserId: targetUserId,
+        targetUserId: peerId || null,
         text: msg.message?.text || '',
         timestamp: new Date().toISOString(),
         replyTo: msg.message?.replyTo || null,
@@ -628,25 +658,10 @@ function handleClientMessage(ws, msg) {
         status: 'sent',
       };
 
-      // Determine recipient peer
-      let peerUser = null;
-      if (roomId && rooms.has(roomId)) {
-        const roomMembers = rooms.get(roomId);
-        for (const memberWs of roomMembers) {
-          if (memberWs !== ws) {
-            peerUser = clients.get(memberWs);
-            break;
-          }
-        }
-      } else if (targetUserId) {
-        peerUser = db.getUserById(targetUserId);
-      }
-
-      const peerId = peerUser?.id || targetUserId;
       if (peerId) {
         db.saveMessage(user.id, peerId, formattedMessage);
 
-        // Check if recipient is NOT currently active in room, create offline chat notification
+        // Check if recipient is actively chatting in this exact room
         let peerOnlineInRoom = false;
         if (roomId && rooms.has(roomId)) {
           for (const memberWs of rooms.get(roomId)) {
@@ -657,7 +672,7 @@ function handleClientMessage(ws, msg) {
           }
         }
 
-        if (!peerOnlineInRoom && peerId) {
+        if (!peerOnlineInRoom) {
           db.addNotification({
             type: 'chat_message',
             fromUser: {
@@ -678,16 +693,33 @@ function handleClientMessage(ws, msg) {
         message: formattedMessage,
       });
 
-      const roomMembers = roomId ? rooms.get(roomId) : null;
-      if (roomMembers) {
-        for (const memberWs of roomMembers) {
+      // Target sockets: deliver to BOTH sender and recipient reliably
+      const destinationSockets = new Set();
+      destinationSockets.add(ws); // Echo back to sender
+
+      for (const [otherWs, otherUser] of clients) {
+        if (!otherUser || otherWs.readyState !== WebSocket.OPEN) continue;
+        // Same user's other sessions
+        if (otherUser.id === user.id) {
+          destinationSockets.add(otherWs);
+        }
+        // Recipient user's sessions
+        if (peerId && otherUser.id === peerId) {
+          destinationSockets.add(otherWs);
+        }
+      }
+
+      // Also members of room if room exists
+      if (roomId && rooms.has(roomId)) {
+        for (const memberWs of rooms.get(roomId)) {
           if (memberWs.readyState === WebSocket.OPEN) {
-            memberWs.send(messagePayload);
+            destinationSockets.add(memberWs);
           }
         }
-      } else {
-        // Echo to self for simulated or direct inbox rooms
-        ws.send(messagePayload);
+      }
+
+      for (const destWs of destinationSockets) {
+        destWs.send(messagePayload);
       }
       break;
     }
@@ -718,14 +750,31 @@ function handleClientMessage(ws, msg) {
     // ── 5. Typing Indicators ────────────────────────────────────────────────
     case 'chat:typing': {
       const roomId = msg.roomId || user.roomId;
-      if (!roomId || !rooms.has(roomId)) return;
-
-      const roomMembers = rooms.get(roomId);
+      const targetUserId = msg.targetUserId || msg.peerId;
       const typingPayload = JSON.stringify({
         type: 'chat:typing',
         senderId: user.id,
         isTyping: Boolean(msg.isTyping),
       });
+
+      if (roomId && rooms.has(roomId)) {
+        const roomMembers = rooms.get(roomId);
+        for (const memberWs of roomMembers) {
+          if (memberWs !== ws && memberWs.readyState === WebSocket.OPEN) {
+            memberWs.send(typingPayload);
+          }
+        }
+      }
+
+      if (targetUserId) {
+        for (const [otherWs, otherUser] of clients) {
+          if (otherUser && otherUser.id === targetUserId && otherWs !== ws && otherWs.readyState === WebSocket.OPEN) {
+            otherWs.send(typingPayload);
+          }
+        }
+      }
+      break;
+    }
 
       for (const memberWs of roomMembers) {
         if (memberWs !== ws && memberWs.readyState === WebSocket.OPEN) {
