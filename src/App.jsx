@@ -172,24 +172,8 @@ export default function App() {
       }
     });
 
-    const unbindIncomingInvite = wsService.on('chat:incoming_invite', ({ peer, inviter }) => {
-      const fromPeer = peer || inviter;
-      if (fromPeer?.id) {
-        soundEngine.playRomanticChime();
-        setUnreadCounts((prev) => ({ ...prev, [fromPeer.id]: (prev[fromPeer.id] || 0) + 1 }));
-        setNotifications((prev) => [
-          {
-            id: `invite_${Date.now()}_${fromPeer.id}`,
-            type: 'message',
-            targetUserId: userProfile?.id,
-            fromUser: fromPeer,
-            text: `${fromPeer.name || 'Developer'} started a chat conversation with you! 💬`,
-            read: false,
-            timestamp: new Date().toISOString(),
-          },
-          ...prev,
-        ]);
-      }
+    const unbindIncomingInvite = wsService.on('chat:incoming_invite', () => {
+      // Passive invitation tracking; wait for actual message to alert user
     });
 
     const unbindPresence = wsService.on('presence:update', (data) => {
@@ -205,7 +189,22 @@ export default function App() {
           const nextCount = isActivelyChatting ? 0 : (prev[msg.senderId] || 0) + 1;
           return { ...prev, [msg.senderId]: nextCount };
         });
+      }
+    });
 
+    const unbindSocial = wsService.on('social:action', (data) => {
+      if (data.actor?.id === userProfile?.id && data.actor) {
+        setUserProfileState((prev) => {
+          const next = { ...prev, ...data.actor };
+          saveUserProfile(next);
+          return next;
+        });
+      } else if (data.targetUserId === userProfile?.id && data.targetUser) {
+        setUserProfileState((prev) => {
+          const next = { ...prev, ...data.targetUser };
+          saveUserProfile(next);
+          return next;
+        });
       }
     });
 
@@ -214,6 +213,7 @@ export default function App() {
       unbindIncomingInvite();
       unbindPresence();
       unbindIncoming();
+      unbindSocial();
     };
   }, [userProfile, chatMode, activeRealPeer]);
 
