@@ -261,29 +261,39 @@ export class Database {
       const existingLoveCode = existingIdx >= 0 ? users[existingIdx].loveCode : null;
       const loveCode = (userData.loveCode && userData.loveCode.trim()) || existingLoveCode || generateLoveCode();
 
+      const existingUser = existingIdx >= 0 ? users[existingIdx] : {};
+
       const updatedUser = {
-        id: userData.id || `user_${Date.now()}`,
-        name: userData.name || 'Anonymous Dev',
+        id: userData.id || existingUser.id || `user_${Date.now()}`,
+        name: userData.name || existingUser.name || 'Anonymous Dev',
         handle: cleanHandle,
-        gender: userData.gender || 'female',
-        lookingFor: userData.lookingFor || 'male',
-        location: userData.location || 'Addis Ababa 🇪🇹',
-        techStack: userData.techStack || ['React', 'TypeScript'],
-        bio: userData.bio || 'Coding with passion...',
-        quote: userData.quote || '',
-        avatarUrl: userData.avatarUrl || null,
-        indentation: userData.indentation || 'Tabs',
-        drink: userData.drink || '☕ Ethiopian Bunna',
-        emoji: userData.emoji || (userData.gender === 'female' ? '👩‍💻' : '👨‍💻'),
-        likes: typeof userData.likes === 'number' ? userData.likes : (existingIdx >= 0 ? users[existingIdx].likes : 1),
-        likedBy: userData.likedBy || (existingIdx >= 0 ? users[existingIdx].likedBy : []),
-        friends: userData.friends || (existingIdx >= 0 ? users[existingIdx].friends : []),
-        followers: userData.followers || (existingIdx >= 0 ? users[existingIdx].followers : []),
-        following: userData.following || (existingIdx >= 0 ? users[existingIdx].following : []),
+        gender: userData.gender || existingUser.gender || 'female',
+        lookingFor: userData.lookingFor || existingUser.lookingFor || 'male',
+        location: userData.location || existingUser.location || 'Addis Ababa 🇪🇹',
+        techStack: userData.techStack || existingUser.techStack || ['React', 'TypeScript'],
+        bio: userData.bio || existingUser.bio || 'Coding with passion...',
+        quote: userData.quote || existingUser.quote || '',
+        avatarUrl: userData.avatarUrl || existingUser.avatarUrl || null,
+        indentation: userData.indentation || existingUser.indentation || 'Tabs',
+        drink: userData.drink || existingUser.drink || '☕ Ethiopian Bunna',
+        emoji: userData.emoji || existingUser.emoji || (userData.gender === 'female' ? '👩‍💻' : '👨‍💻'),
+        likes: typeof userData.likes === 'number' ? userData.likes : (typeof existingUser.likes === 'number' ? existingUser.likes : 1),
+        likedBy: Array.isArray(userData.likedBy) && userData.likedBy.length > 0
+          ? userData.likedBy
+          : (Array.isArray(existingUser.likedBy) ? existingUser.likedBy : []),
+        friends: Array.isArray(userData.friends) && userData.friends.length > 0
+          ? userData.friends
+          : (Array.isArray(existingUser.friends) ? existingUser.friends : []),
+        followers: Array.isArray(userData.followers) && userData.followers.length > 0
+          ? userData.followers
+          : (Array.isArray(existingUser.followers) ? existingUser.followers : []),
+        following: Array.isArray(userData.following) && userData.following.length > 0
+          ? userData.following
+          : (Array.isArray(existingUser.following) ? existingUser.following : []),
         loveCode: loveCode,
         status: 'offline',
-        currentStatus: userData.currentStatus || 'Just registered on DevSoulmate! Say hi',
-        registeredAt: existingIdx >= 0 ? users[existingIdx].registeredAt : new Date().toISOString(),
+        currentStatus: userData.currentStatus || existingUser.currentStatus || 'Just registered on DevSoulmate! Say hi',
+        registeredAt: existingUser.registeredAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         isRegistered: true,
       };
