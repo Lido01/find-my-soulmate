@@ -14,6 +14,59 @@ const SOCIAL_FILE = path.join(DATA_DIR, 'social.json');
 const MESSAGES_FILE = path.join(DATA_DIR, 'messages.json');
 const NOTIFICATIONS_FILE = path.join(DATA_DIR, 'notifications.json');
 
+export function safeReadJson(filePath, defaultValue) {
+  try {
+    if (!fs.existsSync(filePath)) {
+      safeWriteJson(filePath, defaultValue);
+      return defaultValue;
+    }
+    const stat = fs.statSync(filePath);
+    if (stat.size === 0) {
+      safeWriteJson(filePath, defaultValue);
+      return defaultValue;
+    }
+    const content = fs.readFileSync(filePath, 'utf-8');
+    if (!content || !content.trim()) {
+      safeWriteJson(filePath, defaultValue);
+      return defaultValue;
+    }
+    return JSON.parse(content);
+  } catch (err) {
+    console.warn(`[DB] Auto-recovering empty or invalid ${path.basename(filePath)}: ${err.message}`);
+    safeWriteJson(filePath, defaultValue);
+    return defaultValue;
+  }
+}
+
+export function safeWriteJson(filePath, data) {
+  try {
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    const jsonStr = JSON.stringify(data, null, 2);
+    // Write atomically via temporary file to prevent zero-byte truncation
+    const tempPath = `${filePath}.tmp_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    fs.writeFileSync(tempPath, jsonStr, 'utf-8');
+    try {
+      fs.renameSync(tempPath, filePath);
+    } catch {
+      // Windows file lock fallback
+      fs.writeFileSync(filePath, jsonStr, 'utf-8');
+      try { fs.unlinkSync(tempPath); } catch {}
+    }
+    return true;
+  } catch (err) {
+    console.error(`[DB] Error writing ${path.basename(filePath)}:`, err.message);
+    try {
+      fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+      return true;
+    } catch {
+      return false;
+    }
+  }
+}
+
 export function generateLoveCode() {
   const p1 = Math.random().toString(36).substring(2, 6).toUpperCase();
   const p2 = Math.random().toString(36).substring(2, 6).toUpperCase();
@@ -189,18 +242,10 @@ export class Database {
       if (!fs.existsSync(DATA_DIR)) {
         fs.mkdirSync(DATA_DIR, { recursive: true });
       }
-      if (!fs.existsSync(USERS_FILE)) {
-        fs.writeFileSync(USERS_FILE, JSON.stringify(INITIAL_USERS, null, 2), 'utf-8');
-      }
-      if (!fs.existsSync(SOCIAL_FILE)) {
-        fs.writeFileSync(SOCIAL_FILE, JSON.stringify({ posts: INITIAL_POSTS, waves: [] }, null, 2), 'utf-8');
-      }
-      if (!fs.existsSync(MESSAGES_FILE)) {
-        fs.writeFileSync(MESSAGES_FILE, JSON.stringify({}, null, 2), 'utf-8');
-      }
-      if (!fs.existsSync(NOTIFICATIONS_FILE)) {
-        fs.writeFileSync(NOTIFICATIONS_FILE, JSON.stringify([], null, 2), 'utf-8');
-      }
+      safeReadJson(USERS_FILE, INITIAL_USERS);
+      safeReadJson(SOCIAL_FILE, { posts: INITIAL_POSTS, waves: [] });
+      safeReadJson(MESSAGES_FILE, {});
+      safeReadJson(NOTIFICATIONS_FILE, []);
     } catch (err) {
       console.error('[DB] Error initializing database files:', err.message);
     }
@@ -209,8 +254,7 @@ export class Database {
   getUsers() {
     try {
       this.ensureInitialized();
-      const content = fs.readFileSync(USERS_FILE, 'utf-8');
-      const users = JSON.parse(content) || [];
+      const users = safeReadJson(USERS_FILE, INITIAL_USERS);
       let dirty = false;
 
       for (const u of users) {
@@ -237,7 +281,7 @@ export class Database {
       }
 
       if (dirty) {
-        fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), 'utf-8');
+        safeWriteJson(USERS_FILE, users);
         console.log(`[DB] 🔑 Assigned missing Love Codes to database users.`);
       }
 
@@ -304,7 +348,7 @@ export class Database {
         users.unshift(updatedUser);
       }
 
-      fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), 'utf-8');
+      safeWriteJson(USERS_FILE, users);
       console.log(`[DB] 💾 User saved to database: ${updatedUser.name} (${updatedUser.handle}) [LoveCode: ${updatedUser.loveCode}]`);
       return updatedUser;
     } catch (err) {
@@ -360,9 +404,7 @@ export class Database {
       this.ensureInitialized();
       const key = this.getConversationKey(u1, u2);
       if (!key) return [];
-      if (!fs.existsSync(MESSAGES_FILE)) return [];
-      const content = fs.readFileSync(MESSAGES_FILE, 'utf-8');
-      const allMessages = JSON.parse(content) || {};
+      const allMessages = safeReadJson(MESSAGES_FILE, {});
       return allMessages[key] || [];
     } catch (err) {
       console.error('[DB] Error reading messages:', err.message);
@@ -375,8 +417,7 @@ export class Database {
       this.ensureInitialized();
       const key = this.getConversationKey(u1, u2);
       if (!key) return message;
-      const content = fs.existsSync(MESSAGES_FILE) ? fs.readFileSync(MESSAGES_FILE, 'utf-8') : '{}';
-      const allMessages = JSON.parse(content) || {};
+      const allMessages = safeReadJson(MESSAGES_FILE, {});
       if (!allMessages[key]) allMessages[key] = [];
 
       // Avoid duplicates
@@ -387,7 +428,7 @@ export class Database {
         if (allMessages[key].length > 250) {
           allMessages[key] = allMessages[key].slice(-250);
         }
-        fs.writeFileSync(MESSAGES_FILE, JSON.stringify(allMessages, null, 2), 'utf-8');
+        safeWriteJson(MESSAGES_FILE, allMessages);
       }
       return message;
     } catch (err) {
@@ -400,9 +441,8 @@ export class Database {
     try {
       this.ensureInitialized();
       const key = this.getConversationKey(u1, u2);
-      if (!key || !fs.existsSync(MESSAGES_FILE)) return [];
-      const content = fs.readFileSync(MESSAGES_FILE, 'utf-8');
-      const allMessages = JSON.parse(content) || {};
+      if (!key) return [];
+      const allMessages = safeReadJson(MESSAGES_FILE, {});
       if (!allMessages[key]) return [];
 
       let modified = false;
@@ -423,7 +463,7 @@ export class Database {
       });
 
       if (modified) {
-        fs.writeFileSync(MESSAGES_FILE, JSON.stringify(allMessages, null, 2), 'utf-8');
+        safeWriteJson(MESSAGES_FILE, allMessages);
       }
       return updatedIds;
     } catch (err) {
@@ -436,9 +476,7 @@ export class Database {
   getNotifications(userId) {
     try {
       this.ensureInitialized();
-      if (!fs.existsSync(NOTIFICATIONS_FILE)) return [];
-      const content = fs.readFileSync(NOTIFICATIONS_FILE, 'utf-8');
-      const list = JSON.parse(content) || [];
+      const list = safeReadJson(NOTIFICATIONS_FILE, []);
       // Return notifications where target is userId OR outgoing friend requests sent by this user
       return list.filter((n) => n.targetUserId === userId || (n.fromUser?.id === userId && n.type === 'friend_request'));
     } catch (err) {
@@ -450,8 +488,7 @@ export class Database {
   addNotification(notif) {
     try {
       this.ensureInitialized();
-      const content = fs.existsSync(NOTIFICATIONS_FILE) ? fs.readFileSync(NOTIFICATIONS_FILE, 'utf-8') : '[]';
-      const list = JSON.parse(content) || [];
+      const list = safeReadJson(NOTIFICATIONS_FILE, []);
 
       // Prevent duplicate pending friend requests
       if (notif.type === 'friend_request') {
@@ -479,7 +516,7 @@ export class Database {
       list.unshift(item);
       // Keep max 150 notifications
       const trimmed = list.slice(0, 150);
-      fs.writeFileSync(NOTIFICATIONS_FILE, JSON.stringify(trimmed, null, 2), 'utf-8');
+      safeWriteJson(NOTIFICATIONS_FILE, trimmed);
       return item;
     } catch (err) {
       console.error('[DB] Error adding notification:', err.message);
@@ -490,9 +527,7 @@ export class Database {
   respondToFriendRequest(notificationId, action, userId) {
     try {
       this.ensureInitialized();
-      if (!fs.existsSync(NOTIFICATIONS_FILE)) return null;
-      const content = fs.readFileSync(NOTIFICATIONS_FILE, 'utf-8');
-      const list = JSON.parse(content) || [];
+      const list = safeReadJson(NOTIFICATIONS_FILE, []);
       const targetNotif = list.find((n) => n.id === notificationId);
       if (!targetNotif) return null;
 
@@ -504,7 +539,7 @@ export class Database {
         this.interact('confirm_friend', { id: targetNotif.fromUser.id }, targetNotif.targetUserId);
       }
 
-      fs.writeFileSync(NOTIFICATIONS_FILE, JSON.stringify(list, null, 2), 'utf-8');
+      safeWriteJson(NOTIFICATIONS_FILE, list);
       return targetNotif;
     } catch (err) {
       console.error('[DB] Error responding to friend request:', err.message);
@@ -515,9 +550,7 @@ export class Database {
   markNotificationsRead(userId) {
     try {
       this.ensureInitialized();
-      if (!fs.existsSync(NOTIFICATIONS_FILE)) return;
-      const content = fs.readFileSync(NOTIFICATIONS_FILE, 'utf-8');
-      const list = JSON.parse(content) || [];
+      const list = safeReadJson(NOTIFICATIONS_FILE, []);
       let updated = false;
       for (const n of list) {
         if (n.targetUserId === userId && !n.read) {
@@ -526,7 +559,7 @@ export class Database {
         }
       }
       if (updated) {
-        fs.writeFileSync(NOTIFICATIONS_FILE, JSON.stringify(list, null, 2), 'utf-8');
+        safeWriteJson(NOTIFICATIONS_FILE, list);
       }
     } catch (err) {
       console.error('[DB] Error marking notifications read:', err.message);
@@ -590,7 +623,7 @@ export class Database {
         }
       }
 
-      fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), 'utf-8');
+      safeWriteJson(USERS_FILE, users);
       return { targetUser, actor };
     } catch (err) {
       console.error('[DB] Error interacting:', err.message);
@@ -601,8 +634,7 @@ export class Database {
   getPosts() {
     try {
       this.ensureInitialized();
-      const content = fs.readFileSync(SOCIAL_FILE, 'utf-8');
-      const data = JSON.parse(content);
+      const data = safeReadJson(SOCIAL_FILE, { posts: INITIAL_POSTS, waves: [] });
       return data.posts || [];
     } catch (err) {
       return INITIAL_POSTS;
@@ -612,8 +644,7 @@ export class Database {
   addPost(post) {
     try {
       this.ensureInitialized();
-      const content = fs.readFileSync(SOCIAL_FILE, 'utf-8');
-      const data = JSON.parse(content);
+      const data = safeReadJson(SOCIAL_FILE, { posts: INITIAL_POSTS, waves: [] });
       const newPost = {
         id: `post_${Date.now()}`,
         authorId: post.authorId,
@@ -626,7 +657,7 @@ export class Database {
         comments: 0,
       };
       data.posts = [newPost, ...(data.posts || [])].slice(0, 50);
-      fs.writeFileSync(SOCIAL_FILE, JSON.stringify(data, null, 2), 'utf-8');
+      safeWriteJson(SOCIAL_FILE, data);
       return newPost;
     } catch (err) {
       console.error('[DB] Error adding post:', err.message);

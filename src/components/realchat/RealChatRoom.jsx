@@ -115,7 +115,9 @@ export default function RealChatRoom({
         if (serverMsgs && serverMsgs.length > 0) {
           setMessages((prev) => {
             const map = new Map();
-            for (const m of prev) map.set(m.id, m);
+            for (const m of prev) {
+              if (m.sender !== 'system') map.set(m.id, m);
+            }
             for (const sm of serverMsgs) {
               const isMe = sm.senderId === userProfile.id;
               map.set(sm.id, {

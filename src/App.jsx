@@ -136,6 +136,9 @@ export default function App() {
     setChatMode('real_ws');
     if (peer?.id) {
       setUnreadCounts((prev) => ({ ...prev, [peer.id]: 0 }));
+      setNotifications((prev) =>
+        prev.map((n) => (n.fromUser?.id === peer.id && n.type === 'chat_message' ? { ...n, read: true } : n))
+      );
     }
   }, []);
 
@@ -221,21 +224,40 @@ export default function App() {
   useEffect(() => {
     if (userProfile?.id) {
       wsService.fetchNotifications(userProfile.id).then((notifs) => {
-        if (Array.isArray(notifs)) setNotifications(notifs);
+        if (Array.isArray(notifs)) {
+          setNotifications(notifs);
+          // Also compute unread chat messages for each sender from offline unread chat_message notifications
+          const incomingUnread = {};
+          for (const n of notifs) {
+            if (n.type === 'chat_message' && !n.read && n.fromUser?.id) {
+              incomingUnread[n.fromUser.id] = (incomingUnread[n.fromUser.id] || 0) + 1;
+            }
+          }
+          if (Object.keys(incomingUnread).length > 0) {
+            setUnreadCounts((prev) => ({ ...prev, ...incomingUnread }));
+          }
+        }
       });
     }
   }, [userProfile?.id]);
 
-  // Listen for real-time incoming notifications (friend requests, waves, likes)
+  // Listen for real-time incoming notifications (friend requests, waves, likes, offline messages)
   useEffect(() => {
     const unbindNotif = wsService.on('notification:new', (notif) => {
       setNotifications((prev) => [notif, ...prev.filter((n) => n.id !== notif.id)]);
       soundEngine.playRomanticChime();
+      if (notif.type === 'chat_message' && notif.fromUser?.id) {
+        setUnreadCounts((prev) => {
+          const isActivelyChatting = chatMode === 'real_ws' && activeRealPeer?.id === notif.fromUser.id;
+          const nextCount = isActivelyChatting ? 0 : (prev[notif.fromUser.id] || 0) + 1;
+          return { ...prev, [notif.fromUser.id]: nextCount };
+        });
+      }
     });
     return () => {
       unbindNotif();
     };
-  }, []);
+  }, [chatMode, activeRealPeer]);
 
   const unreadNotifCount = notifications.filter((n) => !n.read).length;
 
