@@ -124,7 +124,7 @@ export default function DevRegisterModal({
 
     try {
       const res = await wsService.loginWithLoveCode(code);
-      if (res.success && res.user) {
+      if ((res.ok || res.success) && res.user) {
         soundEngine.playRomanticChime();
         setSuccessMsg(`Welcome back, ${res.user.name}!`);
         onSaveProfile?.(res.user);
