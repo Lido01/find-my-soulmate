@@ -776,14 +776,6 @@ function handleClientMessage(ws, msg) {
       break;
     }
 
-      for (const memberWs of roomMembers) {
-        if (memberWs !== ws && memberWs.readyState === WebSocket.OPEN) {
-          memberWs.send(typingPayload);
-        }
-      }
-      break;
-    }
-
     // ── 6. Social Action (Wave, Like, Follow, Coffee, Friend Request) ─────────
     case 'social:interact': {
       const { action, targetUserId } = msg;
