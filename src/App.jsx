@@ -484,6 +484,11 @@ export default function App() {
                 setDefaultRegisterTarget(target || null);
                 setShowDevRegisterModal(true);
               }}
+              onOpenLogin={() => {
+                setRegisterModalAuthMode('login');
+                setDefaultRegisterTarget(null);
+                setShowDevRegisterModal(true);
+              }}
               onOpenOnboarding={() => setShowOnboarding(true)}
               onOpenAbout={() => setShowAboutModal(true)}
               onSwitchToRealWs={() => {
