@@ -43,7 +43,6 @@ import NotificationCenterModal from './components/notifications/NotificationCent
 
 // UI components
 import MoodToast from './components/ui/MoodToast.jsx';
-import LoveWordBubble from './components/ui/LoveWordBubble.jsx';
 
 // Real-Time WebSocket Chat Components
 import RealChatLobby from './components/realchat/RealChatLobby.jsx';
@@ -676,7 +675,6 @@ export default function App() {
 
       {/* Ambient overlays */}
       <MoodToast mood={moodToast.mood} visible={moodToast.visible} t={t} lang={lang} />
-      <LoveWordBubble lang={lang} />
 
     </div>
   );

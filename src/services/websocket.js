@@ -1,7 +1,29 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// websocket.js — Robust WebSocket Client Manager for Live Developer Dating Chat
+// websocket.js — Robust WebSocket & Supabase Client Manager for Live Developer Dating Chat
 // Handles live connection, auto-reconnect, and intelligent peer matchmaking.
+// Seamlessly routes to Supabase in Production/Vercel or WebSocket server in Local.
 // ─────────────────────────────────────────────────────────────────────────────
+
+import {
+  isSupabaseConfigured,
+  supabase,
+  sbSaveUser,
+  sbFetchUsers,
+  sbLoginWithLoveCode,
+  sbFetchMessages,
+  sbSendMessage,
+  sbMarkMessagesSeen,
+  sbFetchNotifications,
+  sbAddNotification,
+  sbMarkNotificationsRead,
+  sbRespondFriendRequest,
+  sbFetchPosts,
+  sbAddPost,
+  sbInteract,
+  mapMessageFromDb,
+  mapNotificationFromDb,
+  mapUserFromDb,
+} from './supabase.js';
 
 // Simulated realistic online developers (shown if offline or fallback)
 const SIMULATED_ONLINE_DEVS = [
@@ -102,6 +124,7 @@ function getWsBase() {
 class WebSocketManager {
   constructor() {
     this.ws = null;
+    this.sbChannel = null;
     this.connected = false;
     this.isSimulated = false;
     this.listeners = new Map();
@@ -139,6 +162,62 @@ class WebSocketManager {
   // ── Connect ───────────────────────────────────────────────────────────────
   connect(url = null) {
     if (url) this.serverUrl = url;
+
+    // Supabase Mode (Production / Vercel Serverless)
+    if (isSupabaseConfigured() && supabase) {
+      this.connected = true;
+      this.isSimulated = false;
+      this.emit('connection:status', { status: 'connected', isSimulated: false, provider: 'supabase' });
+      console.log('[WS-Client] ⚡ Connected via Supabase Realtime.');
+
+      if (!this.sbChannel) {
+        this.sbChannel = supabase
+          .channel('soulmate-global')
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
+            const msg = mapMessageFromDb(payload.new);
+            if (msg && msg.senderId !== this.currentUser?.id) {
+              this.emit('chat:message', msg);
+            }
+          })
+          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, (payload) => {
+            const msg = mapMessageFromDb(payload.new);
+            if (msg && msg.status === 'seen') {
+              this.emit('chat:seen', { messageIds: [msg.id] });
+            }
+          })
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications' }, (payload) => {
+            const notif = mapNotificationFromDb(payload.new);
+            if (notif && (!this.currentUser || notif.targetUserId === this.currentUser.id)) {
+              this.emit('notification:new', notif);
+            }
+          })
+          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'users' }, (payload) => {
+            const user = mapUserFromDb(payload.new);
+            if (user) {
+              this.emit('presence:update', { users: [user] });
+            }
+          })
+          .on('broadcast', { event: 'chat:typing' }, ({ payload }) => {
+            if (payload.senderId !== this.currentUser?.id) {
+              this.emit('chat:typing', payload);
+            }
+          })
+          .on('broadcast', { event: 'chat:message' }, ({ payload }) => {
+            if (payload.senderId !== this.currentUser?.id) {
+              this.emit('chat:message', payload);
+            }
+          })
+          .subscribe();
+      }
+
+      // Initial presence broadcast from Supabase
+      sbFetchUsers().then((users) => {
+        if (users?.length) {
+          this.emit('presence:update', { users, count: users.length });
+        }
+      });
+      return;
+    }
 
     // Close existing connection if any
     if (this.ws) {
@@ -192,6 +271,10 @@ class WebSocketManager {
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
+    }
+    if (this.sbChannel) {
+      try { this.sbChannel.unsubscribe(); } catch {}
+      this.sbChannel = null;
     }
     if (this.ws) {
       try {
@@ -291,6 +374,10 @@ class WebSocketManager {
 
   registerProfile(profile) {
     this.currentUser = profile;
+    if (isSupabaseConfigured()) {
+      sbSaveUser(profile).catch((err) => console.warn('[Supabase] Profile sync warning:', err.message));
+      return;
+    }
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify({
         type: 'profile:register',
@@ -305,6 +392,19 @@ class WebSocketManager {
   }
 
   findMatch(lookingFor = 'female') {
+    if (isSupabaseConfigured()) {
+      this.emit('match:waiting', { message: 'Scanning developer frequencies in Supabase...' });
+      sbFetchUsers().then((users) => {
+        const pool = (users || []).filter((u) => u.id !== this.currentUser?.id);
+        const candidates = pool.filter((p) => p.gender === lookingFor || lookingFor === 'any');
+        const match = candidates[Math.floor(Math.random() * candidates.length)] || pool[0] || this.simulatedPeers[0];
+        this.currentRoomId = `room_${[this.currentUser?.id || 'me', match.id].sort().join('___')}`;
+        this.currentPeer = match;
+        this.emit('room:entered', { roomId: this.currentRoomId, peer: match });
+      });
+      return;
+    }
+
     if (this.ws && this.ws.readyState === WebSocket.OPEN && !this.isSimulated) {
       this.ws.send(JSON.stringify({
         type: 'match:find',
@@ -355,6 +455,29 @@ class WebSocketManager {
       status: 'sent',
     };
 
+    if (isSupabaseConfigured()) {
+      // 1. Send & Persist in Supabase Postgres
+      sbSendMessage({
+        ...msgPayload,
+        imageData: options.imageUrl,
+        voiceData: options.audioUrl,
+        codeSnippet: options.isCode ? text : null,
+        codeLanguage: options.codeLang || null,
+        recipientId: msgPayload.targetUserId,
+      }).catch((e) => console.error('[Supabase] Send error:', e));
+
+      // 2. Broadcast live to peer over Supabase channel
+      this.sbChannel?.send({
+        type: 'broadcast',
+        event: 'chat:message',
+        payload: msgPayload,
+      });
+
+      // 3. Local echo for instant response
+      this.emit('chat:message', msgPayload);
+      return;
+    }
+
     if (this.ws && this.ws.readyState === WebSocket.OPEN && !this.isSimulated) {
       this.ws.send(JSON.stringify({
         type: 'chat:send',
@@ -372,6 +495,10 @@ class WebSocketManager {
   }
 
   sendSeen(peerId, messageIds = []) {
+    if (isSupabaseConfigured()) {
+      sbMarkMessagesSeen(this.currentUser?.id, peerId, messageIds).catch(() => {});
+      return;
+    }
     if (this.ws && this.ws.readyState === WebSocket.OPEN && !this.isSimulated) {
       this.ws.send(JSON.stringify({
         type: 'chat:seen',
@@ -382,6 +509,9 @@ class WebSocketManager {
   }
 
   async fetchMessages(user1, user2) {
+    if (isSupabaseConfigured()) {
+      return await sbFetchMessages(user1, user2);
+    }
     try {
       const res = await fetch(`${getApiBase()}/api/chat/messages?user1=${encodeURIComponent(user1)}&user2=${encodeURIComponent(user2)}`);
       if (res.ok) {
@@ -393,6 +523,9 @@ class WebSocketManager {
   }
 
   async fetchNotifications(userId) {
+    if (isSupabaseConfigured()) {
+      return await sbFetchNotifications(userId);
+    }
     try {
       const res = await fetch(`${getApiBase()}/api/notifications?userId=${encodeURIComponent(userId)}`);
       if (res.ok) {
@@ -404,6 +537,9 @@ class WebSocketManager {
   }
 
   async respondToFriendRequest(notificationId, action, userId) {
+    if (isSupabaseConfigured()) {
+      return await sbRespondFriendRequest(notificationId, action, userId);
+    }
     try {
       const res = await fetch(`${getApiBase()}/api/notifications/respond`, {
         method: 'POST',
@@ -419,6 +555,10 @@ class WebSocketManager {
   }
 
   async markNotificationsRead(userId) {
+    if (isSupabaseConfigured()) {
+      await sbMarkNotificationsRead(userId);
+      return;
+    }
     try {
       await fetch(`${getApiBase()}/api/notifications/mark-read`, {
         method: 'POST',
@@ -429,6 +569,14 @@ class WebSocketManager {
   }
 
   async loginWithLoveCode(loveCode) {
+    if (isSupabaseConfigured()) {
+      const user = await sbLoginWithLoveCode(loveCode);
+      if (user) {
+        this.currentUser = user;
+        return { ok: true, success: true, user };
+      }
+      return { ok: false, success: false, error: 'Love Code not found in database' };
+    }
     try {
       const res = await fetch(`${getApiBase()}/api/auth/login-code`, {
         method: 'POST',
@@ -443,6 +591,17 @@ class WebSocketManager {
   }
 
   sendTyping(isTyping) {
+    if (isSupabaseConfigured() && this.sbChannel) {
+      this.sbChannel.send({
+        type: 'broadcast',
+        event: 'chat:typing',
+        payload: {
+          senderId: this.currentUser?.id,
+          isTyping,
+        },
+      });
+      return;
+    }
     if (this.ws && this.ws.readyState === WebSocket.OPEN && !this.isSimulated) {
       this.ws.send(JSON.stringify({
         type: 'chat:typing',
@@ -514,6 +673,10 @@ class WebSocketManager {
   // ── Database & Social REST API Helpers ─────────────────────────────────────
   async registerInBackend(profile) {
     this.currentUser = profile;
+    if (isSupabaseConfigured()) {
+      const saved = await sbSaveUser(profile);
+      return saved || profile;
+    }
     try {
       const res = await fetch(`${getApiBase()}/api/register`, {
         method: 'POST',
@@ -534,6 +697,10 @@ class WebSocketManager {
   }
 
   async fetchRegisteredUsers() {
+    if (isSupabaseConfigured()) {
+      const users = await sbFetchUsers();
+      if (users?.length) return users;
+    }
     try {
       const res = await fetch(`${getApiBase()}/api/users`);
       if (res.ok) {
@@ -545,6 +712,9 @@ class WebSocketManager {
   }
 
   async fetchCommunityPosts() {
+    if (isSupabaseConfigured()) {
+      return await sbFetchPosts();
+    }
     try {
       const res = await fetch(`${getApiBase()}/api/social/feed`);
       if (res.ok) {
@@ -564,6 +734,9 @@ class WebSocketManager {
       authorEmoji: this.currentUser.emoji || '🧑‍💻',
       content,
     };
+    if (isSupabaseConfigured()) {
+      return await sbAddPost(postPayload);
+    }
     try {
       const res = await fetch(`${getApiBase()}/api/social/post`, {
         method: 'POST',
@@ -580,6 +753,11 @@ class WebSocketManager {
 
   async fetchUserProfile(userId) {
     if (!userId) return null;
+    if (isSupabaseConfigured()) {
+      const users = await sbFetchUsers();
+      const match = (users || []).find((u) => u.id === userId);
+      if (match) return match;
+    }
     try {
       const res = await fetch(`${getApiBase()}/api/users/profile?userId=${encodeURIComponent(userId)}`);
       if (res.ok) {
@@ -594,6 +772,9 @@ class WebSocketManager {
 
   async sendSocialAction(action, targetUserId) {
     if (!this.currentUser) return null;
+    if (isSupabaseConfigured()) {
+      return await sbInteract(action, targetUserId, this.currentUser);
+    }
     try {
       // Send over socket if connected
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
