@@ -107,16 +107,26 @@ const SIMULATED_ONLINE_DEVS = [
   },
 ];
 
+function isLocalEnvironment() {
+  if (typeof window === 'undefined') return true;
+  const h = window.location.hostname || '';
+  return h === 'localhost' || h === '127.0.0.1' || h.startsWith('192.168.') || h.startsWith('10.') || h.endsWith('.local');
+}
+
 function getApiBase() {
   if (typeof window !== 'undefined' && window.location?.hostname) {
-    return `http://${window.location.hostname}:8080`;
+    if (isLocalEnvironment()) {
+      return `http://${window.location.hostname}:8080`;
+    }
   }
   return 'http://localhost:8080';
 }
 
 function getWsBase() {
   if (typeof window !== 'undefined' && window.location?.hostname) {
-    return `ws://${window.location.hostname}:8080`;
+    if (isLocalEnvironment()) {
+      return `ws://${window.location.hostname}:8080`;
+    }
   }
   return 'ws://localhost:8080';
 }
@@ -216,6 +226,13 @@ class WebSocketManager {
           this.emit('presence:update', { users, count: users.length });
         }
       });
+      return;
+    }
+
+    // If on a remote host (e.g. Vercel) without Supabase, fall back to simulation immediately
+    if (!isLocalEnvironment() && !isSupabaseConfigured()) {
+      console.log('[WS-Client] 🌐 Production hosting detected without Supabase keys. Using simulated live peers.');
+      this.fallbackToSimulation();
       return;
     }
 

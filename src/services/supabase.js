@@ -5,29 +5,46 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+function getCleanSupabaseConfig() {
+  try {
+    let url = (import.meta.env.VITE_SUPABASE_URL || '').trim().replace(/^["']|["']$/g, '');
+    let key = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim().replace(/^["']|["']$/g, '');
 
-export const isSupabaseConfigured = () => Boolean(
-  SUPABASE_URL && 
-  SUPABASE_ANON_KEY && 
-  !SUPABASE_URL.includes('your-project') &&
-  !SUPABASE_ANON_KEY.includes('your-anon-key')
-);
+    if (!url || !key) return null;
+    if (url.includes('your-project') || key.includes('your-anon-key')) return null;
 
-export const supabase = isSupabaseConfigured()
-  ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    if (!/^https?:\/\//i.test(url)) {
+      url = `https://${url}`;
+    }
+
+    // Validate URL syntax safely
+    new URL(url);
+    return { url, key };
+  } catch {
+    return null;
+  }
+}
+
+export const isSupabaseConfigured = () => Boolean(getCleanSupabaseConfig());
+
+export const supabase = (() => {
+  const cfg = getCleanSupabaseConfig();
+  if (!cfg) return null;
+  try {
+    const client = createClient(cfg.url, cfg.key, {
       realtime: {
         params: {
           eventsPerSecond: 10,
         },
       },
-    })
-  : null;
-
-if (isSupabaseConfigured()) {
-  console.log('[Supabase] 🚀 Initialized Supabase Realtime Client with URL:', SUPABASE_URL);
-}
+    });
+    console.log('[Supabase] 🚀 Initialized Supabase Realtime Client with URL:', cfg.url);
+    return client;
+  } catch (err) {
+    console.warn('[Supabase] Failed to initialize client safely:', err.message);
+    return null;
+  }
+})();
 
 // ── Data Transformation Helpers ──────────────────────────────────────────────
 export function mapUserFromDb(row) {
