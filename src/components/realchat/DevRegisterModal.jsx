@@ -189,7 +189,7 @@ export default function DevRegisterModal({
     };
 
     try {
-      await wsService.registerUser(profileData);
+      await wsService.registerInBackend(profileData);
     } catch (err) {
       console.warn('Backend sync deferred; saving locally:', err);
     }

@@ -95,8 +95,8 @@ export function mapUserToDb(profile) {
     followers: profile.followers || [],
     status: profile.status || 'online',
     current_status: profile.currentStatus || '',
-    avatar_data: profile.avatarData || null,
-    audio_intro: profile.audioIntro || null,
+    avatar_data: profile.avatarData || profile.avatarUrl || null,
+    audio_intro: profile.audioIntro || profile.audioUrl || null,
     registered_at: profile.registeredAt || new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
