@@ -692,6 +692,10 @@ class WebSocketManager {
   }
 
   // ── Database & Social REST API Helpers ─────────────────────────────────────
+  async registerUser(profile) {
+    return await this.registerInBackend(profile);
+  }
+
   async registerInBackend(profile) {
     this.currentUser = profile;
     if (isSupabaseConfigured()) {
