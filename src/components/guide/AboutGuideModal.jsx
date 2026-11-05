@@ -12,6 +12,7 @@ export default function AboutGuideModal({
   onClose,
   onChooseCategory,
   lang = "en",
+  theme = "light",
 }) {
   const [activeTab, setActiveTab] = useState("overview"); // 'overview' | 'audio' | 'chat' | 'gifts' | 'personas'
 

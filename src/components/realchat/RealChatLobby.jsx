@@ -673,10 +673,10 @@ export default function RealChatLobby({
                             className="flex items-center gap-3 min-w-0 text-left group cursor-pointer flex-1"
                             title="Click to view full developer profile"
                           >
-                            <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-black border-2 border-zinc-800 flex items-center justify-center overflow-hidden shrink-0 group-hover:border-red-500 transition-colors shadow-md">
-                              {user.avatarUrl ? (
+                            <div className="relative w-12 h-12 sm:w-14 sm:h-14  bg-black border-2 border-zinc-800 flex items-center justify-center overflow-hidden shrink-0 group-hover:border-red-500 transition-colors shadow-md">
+                              {(user.avatarUrl || user.avatarData) ? (
                                 <img
-                                  src={user.avatarUrl}
+                                  src={user.avatarUrl || user.avatarData}
                                   alt={user.name}
                                   className="w-full h-full object-cover"
                                 />
@@ -892,8 +892,8 @@ export default function RealChatLobby({
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-11 h-11  bg-black border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
-                        {friend.avatarUrl ? (
-                          <img src={friend.avatarUrl} alt={friend.name} className="w-full h-full object-cover" />
+                        {(friend.avatarUrl || friend.avatarData) ? (
+                          <img src={friend.avatarUrl || friend.avatarData} alt={friend.name} className="w-full h-full object-cover" />
                         ) : (
                           <span className="text-2xl">{friend.emoji || '🧑‍💻'}</span>
                         )}

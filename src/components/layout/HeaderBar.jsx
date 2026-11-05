@@ -27,6 +27,7 @@ export default function HeaderBar({
   onReset,
   onLogout,
   onBack,
+  onGoHome,
   onApiKeyClick,
   onOpenProfile,
   onOpenRegister,
@@ -69,13 +70,23 @@ export default function HeaderBar({
         <span className="w-2.5 h-2.5   bg-[#1dcf1d]" />
       </div>
 
-      {/* Breadcrumb Brand */}
-      <div className="flex items-center gap-1.5 font-sans font-bold text-xs sm:text-sm tracking-tight min-w-0">
+      {/* Breadcrumb Brand & Home Button */}
+      <div className="flex items-center gap-2 font-sans font-bold text-xs sm:text-sm tracking-tight min-w-0">
+        <button
+          type="button"
+          onClick={() => {
+            soundEngine.playHeartbeat();
+            onGoHome?.();
+          }}
+          className="flex items-center gap-1 px-2 py-1 rounded bg-zinc-900 border border-zinc-800 hover:border-red-500 text-white text-xs font-mono transition-all cursor-pointer shadow-sm active:scale-95"
+          title="Return to Home / Discover"
+        >
+          <span>🏠</span>
+          <span className="hidden sm:inline font-bold">Home</span>
+        </button>
         <span className="text-red-500 flex items-center gap-1">
           <span className="hidden xs:inline">find_my_soulmate</span>
         </span>
-        <span className="text-zinc-600 hidden sm:inline">/</span>
-        <span className="text-zinc-300 font-mono text-[11px] hidden sm:inline">find_my_soulmate</span>
       </div>
 
       {/* Mode Switcher: Virtual AI vs Real WebSocket (Visible on ALL devices) */}

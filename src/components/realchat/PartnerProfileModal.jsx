@@ -97,9 +97,9 @@ export default function PartnerProfileModal({
         <div className="px-5 -mt-12 sm:-mt-14 flex items-end justify-between relative z-10 shrink-0">
           <div className="relative">
             <div className="w-20 h-20 sm:w-24 sm:h-24   bg-black border-2 border-red-600 shadow-2xl flex items-center justify-center overflow-hidden">
-              {peer.avatarUrl ? (
+              {(peer.avatarUrl || peer.avatarData) ? (
                 <img
-                  src={peer.avatarUrl}
+                  src={peer.avatarUrl || peer.avatarData}
                   alt={peer.name}
                   className="w-full h-full object-cover"
                 />

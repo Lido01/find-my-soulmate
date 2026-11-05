@@ -203,24 +203,45 @@ body.theme-light .app-shell,
 }
 
 /* Base Surfaces in Light Mode */
-.theme-light .bg-black {
+.theme-light .bg-black,
+.theme-light div.bg-black,
+.theme-light header.bg-black,
+.theme-light header.bg-black\/95,
+.theme-light header.bg-black\/90,
+.theme-light header.bg-zinc-950\/90 {
   background-color: #ffffff !important;
+  color: #09090b !important;
 }
 
-.theme-light .bg-zinc-950 {
+.theme-light .bg-zinc-950,
+.theme-light .bg-zinc-950\/95,
+.theme-light .bg-zinc-950\/90,
+.theme-light .bg-zinc-950\/85,
+.theme-light .bg-zinc-950\/80,
+.theme-light .bg-zinc-950\/70,
+.theme-light .bg-zinc-950\/60,
+.theme-light .bg-zinc-950\/50,
+.theme-light .bg-zinc-950\/40 {
   background-color: #f8fafc !important;
 }
 
-.theme-light .bg-zinc-900 {
-  background-color: #f1f5f9 !important;
-}
-
+.theme-light .bg-zinc-900,
+.theme-light .bg-zinc-900\/95,
 .theme-light .bg-zinc-900\/90,
 .theme-light .bg-zinc-900\/80,
 .theme-light .bg-zinc-900\/70,
 .theme-light .bg-zinc-900\/60,
 .theme-light .bg-zinc-900\/50 {
-  background-color: rgba(241, 245, 249, 0.88) !important;
+  background-color: #f1f5f9 !important;
+}
+
+/* Modal Windows & Cards in Light Mode */
+.theme-light .fixed .bg-black,
+.theme-light .fixed div[class*="max-w-"].bg-black,
+.theme-light .modal-card {
+  background-color: #ffffff !important;
+  color: #09090b !important;
+  border-color: #e2e8f0 !important;
 }
 
 .theme-light .bg-zinc-800 {
