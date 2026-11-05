@@ -144,31 +144,60 @@ export async function sbSaveUser(profile) {
   if (!supabase) return profile;
   try {
     const payload = mapUserToDb(profile);
+    const cleanHandle = (payload.handle || '').trim().toLowerCase();
 
-    // 1. Check if handle already exists in Supabase
-    const { data: existingByHandle } = await supabase
+    // 1. Check if user with this handle already exists in Supabase
+    const { data: existingRows } = await supabase
       .from('users')
       .select('*')
-      .ilike('handle', payload.handle)
-      .maybeSingle();
+      .ilike('handle', cleanHandle);
 
-    if (existingByHandle) {
-      if (existingByHandle.id === payload.id || existingByHandle.love_code === payload.love_code) {
-        const { data: updated, error: updateErr } = await supabase
-          .from('users')
-          .update(payload)
-          .eq('id', existingByHandle.id)
-          .select()
-          .single();
-        if (updateErr) throw updateErr;
-        return mapUserFromDb(updated || existingByHandle);
-      } else {
-        return {
-          error: `Handle "${payload.handle}" is already taken by another developer. Please choose a different handle or login with your Love Code.`,
-        };
+    if (existingRows && existingRows.length > 0) {
+      const existing = existingRows[0];
+      const targetId = existing.id;
+      const targetLoveCode = existing.love_code || payload.love_code;
+
+      const mergedPayload = {
+        ...payload,
+        id: targetId,
+        love_code: targetLoveCode,
+      };
+
+      const { data: updated, error: updateErr } = await supabase
+        .from('users')
+        .update(mergedPayload)
+        .eq('id', targetId)
+        .select()
+        .single();
+
+      if (!updateErr && updated) {
+        return mapUserFromDb(updated);
       }
     }
 
+    // 2. Check if user with this love_code already exists
+    if (payload.love_code) {
+      const { data: existingCodeRows } = await supabase
+        .from('users')
+        .select('*')
+        .eq('love_code', payload.love_code);
+
+      if (existingCodeRows && existingCodeRows.length > 0) {
+        const existing = existingCodeRows[0];
+        const { data: updated, error: updateErr } = await supabase
+          .from('users')
+          .update({ ...payload, id: existing.id })
+          .eq('id', existing.id)
+          .select()
+          .single();
+
+        if (!updateErr && updated) {
+          return mapUserFromDb(updated);
+        }
+      }
+    }
+
+    // 3. New user upsert by id
     const { data, error } = await supabase
       .from('users')
       .upsert(payload, { onConflict: 'id' })
@@ -176,17 +205,25 @@ export async function sbSaveUser(profile) {
       .single();
 
     if (error) {
+      // If handle constraint conflict, update directly by handle
       if (error.code === '23505' || (error.message && error.message.includes('users_handle_key'))) {
-        return {
-          error: `Handle "${payload.handle}" is already taken. Please choose a different handle or login with your Love Code.`,
-        };
+        const { data: fallbackUpdated, error: fallbackErr } = await supabase
+          .from('users')
+          .update(payload)
+          .ilike('handle', cleanHandle)
+          .select()
+          .single();
+        if (!fallbackErr && fallbackUpdated) {
+          return mapUserFromDb(fallbackUpdated);
+        }
       }
-      throw error;
+      console.warn('[Supabase] Non-fatal upsert warning:', error.message);
+      return profile;
     }
     return mapUserFromDb(data);
   } catch (err) {
-    console.error('[Supabase] Error saving user:', err.message);
-    return { error: err.message || 'Error saving user profile' };
+    console.warn('[Supabase] Non-fatal save user exception:', err.message);
+    return profile;
   }
 }
 

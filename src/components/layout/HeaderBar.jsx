@@ -122,14 +122,6 @@ export default function HeaderBar({
         >
           <span className="hidden sm:inline">Live Match</span>
           <span className="sm:hidden font-bold">Live</span>
-          {unreadCount > 0 && (
-            <span
-              className="flex items-center gap-0.5 px-1.5 py-0.5   bg-red-600 text-white text-[9px] sm:text-[10px] font-black animate-pulse shadow-md ml-0.5"
-              title={`${unreadCount} unread message${unreadCount > 1 ? 's' : ''}`}
-            >
-              <span>{unreadCount}</span>
-            </span>
-          )}
         </button>
       </div>
 
@@ -199,16 +191,26 @@ export default function HeaderBar({
           <span className="font-bold">Guide</span>
         </button>
 
-        {/* Profile & Audio Settings Button (Desktop) */}
+        {/* Profile & Audio Settings Button (All Devices) */}
         <button
+          type="button"
           onClick={() => {
             soundEngine.playHeartbeat();
             onOpenProfile?.();
           }}
-          className="hidden sm:flex items-center gap-1.5 font-mono text-xs px-2.5 py-1   border border-zinc-800 bg-zinc-950 hover:border-red-500/80 text-white transition-all shadow-sm"
-          title="Profile & Audio Voice Settings"
+          className="flex items-center gap-1.5 font-mono text-xs px-2 sm:px-2.5 py-1 rounded-lg border border-zinc-800 bg-zinc-950 hover:border-red-500 text-white transition-all shadow-sm"
+          title="My Profile & Audio Voice Settings"
         >
-          <IconUser className="w-3.5 h-3.5 text-red-400" />
+          {userProfile?.emoji ? (
+            <span className="text-sm leading-none">{userProfile.emoji}</span>
+          ) : (
+            <IconUser className="w-3.5 h-3.5 text-red-400" />
+          )}
+          {userProfile?.name && (
+            <span className="hidden md:inline font-bold text-[11px] truncate max-w-[80px]">
+              {userProfile.name}
+            </span>
+          )}
         </button>
 
         {/* Language toggle (Desktop) */}

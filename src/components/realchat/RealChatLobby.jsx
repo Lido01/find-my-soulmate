@@ -33,8 +33,16 @@ export default function RealChatLobby({
   const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'online' | 'friends' | 'following' | 'shared_tech' | 'bunna' | 'tabs' | 'spaces'
   const [inspectPeer, setInspectPeer] = useState(null);
 
-  // Locked strictly to user's registered target preference
-  const searchTarget = userProfile?.lookingFor === 'male' ? 'male' : 'female';
+  // Target preference: starts with user's lookingFor, but can be switched freely!
+  const [selectedTarget, setSelectedTarget] = useState(() => userProfile?.lookingFor || 'female');
+
+  useEffect(() => {
+    if (userProfile?.lookingFor) {
+      setSelectedTarget(userProfile.lookingFor);
+    }
+  }, [userProfile?.lookingFor]);
+
+  const searchTarget = selectedTarget;
 
   // Social interactions state: robustly synced with backend database
   const [myFriends, setMyFriends] = useState(() => new Set(userProfile?.friends || []));
@@ -234,13 +242,13 @@ export default function RealChatLobby({
 
   const myHandleNorm = (userProfile?.handle || '').toLowerCase().trim();
 
-  // Strictly filter according to chosen preference (NO non-chosen gender, never show self)
-  const filteredUsers = combinedUsers.filter(
-    (u) =>
-      u.gender === searchTarget &&
-      u.id !== userProfile?.id &&
-      (!myHandleNorm || (u.handle || '').toLowerCase().trim() !== myHandleNorm)
-  );
+  // Filter according to chosen preference (never show self)
+  const filteredUsers = combinedUsers.filter((u) => {
+    if (u.id === userProfile?.id) return false;
+    if (myHandleNorm && (u.handle || '').toLowerCase().trim() === myHandleNorm) return false;
+    if (selectedTarget === 'all') return true;
+    return u.gender === selectedTarget;
+  });
 
   // Search query & filter pills refinement
   const searchedUsers = filteredUsers.filter((u) => {
@@ -474,6 +482,60 @@ export default function RealChatLobby({
         {/* ── TAB 1: ALL REGISTERED & ONLINE PEERS ── */}
         {activeTab === 'discover' && (
           <div className="space-y-3.5 animate-fade-in pb-8">
+            {/* Target Preference Switcher (Boyfriends, Girlfriends, All) */}
+            <div className="flex items-center justify-between p-2.5 bg-zinc-950 border border-zinc-800 rounded-lg">
+              <span className="font-mono text-[11px] text-zinc-400 font-bold">
+                {isAm ? 'የፍለጋ ምድብ:' : 'Discovering Developers:'}
+              </span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playHeartbeat();
+                    setSelectedTarget('male');
+                  }}
+                  className={`px-3 py-1 rounded-md text-xs font-bold font-mono transition-all flex items-center gap-1 ${
+                    selectedTarget === 'male'
+                      ? 'bg-red-600 text-white shadow-sm'
+                      : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
+                  }`}
+                >
+                  <span>👨‍💻</span>
+                  <span>{isAm ? 'ወንዶች' : 'Boyfriends'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playHeartbeat();
+                    setSelectedTarget('female');
+                  }}
+                  className={`px-3 py-1 rounded-md text-xs font-bold font-mono transition-all flex items-center gap-1 ${
+                    selectedTarget === 'female'
+                      ? 'bg-red-600 text-white shadow-sm'
+                      : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
+                  }`}
+                >
+                  <span>👩‍💻</span>
+                  <span>{isAm ? 'ሴቶች' : 'Girlfriends'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEngine.playHeartbeat();
+                    setSelectedTarget('all');
+                  }}
+                  className={`px-2.5 py-1 rounded-md text-xs font-bold font-mono transition-all flex items-center gap-1 ${
+                    selectedTarget === 'all'
+                      ? 'bg-red-600 text-white shadow-sm'
+                      : 'text-zinc-400 hover:text-white bg-black border border-zinc-800'
+                  }`}
+                >
+                  <span>✨</span>
+                  <span>{isAm ? 'ሁሉም' : 'All'}</span>
+                </button>
+              </div>
+            </div>
+
             {/* Search Input & Filter Chips */}
             <div className="space-y-2">
               <div className="flex flex-col sm:flex-row gap-2">

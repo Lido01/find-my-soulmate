@@ -349,6 +349,7 @@ export default function App() {
         onOpenProfile={() => setShowProfileModal(true)}
         onOpenRegister={(target) => {
           setDefaultRegisterTarget(target || null);
+          setRegisterModalAuthMode('register');
           setShowDevRegisterModal(true);
         }}
         onOpenLogin={() => {
@@ -598,6 +599,7 @@ export default function App() {
         onOpenProfile={() => setShowProfileModal(true)}
         onOpenRegister={(target) => {
           setDefaultRegisterTarget(target || null);
+          setRegisterModalAuthMode('register');
           setShowDevRegisterModal(true);
         }}
         onOpenAbout={() => setShowAboutModal(true)}

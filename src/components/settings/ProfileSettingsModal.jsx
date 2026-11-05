@@ -3,7 +3,7 @@
 // High-tech Red, Black & White developer theme with Space Grotesk / JetBrains Mono
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { IconX, IconCheck, IconUser } from '../ui/Icons.jsx';
 import { soundEngine } from '../../utils/audio.js';
 import { wsService } from '../../services/websocket.js';
@@ -25,6 +25,12 @@ export default function ProfileSettingsModal({
   const [audio, setAudio] = useState({ ...audioSettings });
   const [savedNotice, setSavedNotice] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
+
+  useEffect(() => {
+    if (userProfile) {
+      setProfile({ ...userProfile });
+    }
+  }, [isOpen, userProfile]);
 
   if (!isOpen) return null;
 

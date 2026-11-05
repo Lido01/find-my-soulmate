@@ -190,10 +190,9 @@ export default function DevRegisterModal({
 
     try {
       const res = await wsService.registerInBackend(profileData);
-      if (res && res.error) {
-        setIsSaving(false);
-        setErrorMsg(res.error);
-        return;
+      if (res && res.user) {
+        profileData.loveCode = res.user.loveCode || profileData.loveCode;
+        profileData.id = res.user.id || profileData.id;
       }
     } catch (err) {
       console.warn('Backend sync deferred; saving locally:', err);
@@ -392,23 +391,66 @@ export default function DevRegisterModal({
         {/* ── STEP 2: TELL ME ABOUT YOURSELF (FULL PROFILE CREATION) ─────────── */}
         {authMode === 'register' && step === 2 && (
           <form onSubmit={handleFormSubmit} className="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs bg-black" style={{ scrollbarWidth: 'thin', scrollbarColor: '#27272a transparent' }}>
-            {/* Preference Badge / Change Button */}
-            <div className="p-2.5   bg-zinc-950 border border-zinc-800 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-zinc-400 text-[11px]">
-                  {isAm ? "የተመረጠ:" : "Looking for:"}
-                </span>
-                <span className="font-bold text-red-400">
-                  {lookingFor === 'female' ? 'Girlfriend 👩‍💻' : 'Boyfriend 👨‍💻'}
-                </span>
+            {/* Gender & Dating Preference Selectors */}
+            <div className="p-3 bg-zinc-950 border border-zinc-800 rounded-lg space-y-2.5">
+              <div className="space-y-1">
+                <label className="text-zinc-300 font-bold block text-[11px]">
+                  {isAm ? "እኔ (የእርስዎ ፆታ)" : "I am a (Your Gender):"}
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setGender('female')}
+                    className={`py-2 px-2 rounded border font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
+                      gender === 'female'
+                        ? 'bg-red-600 border-red-500 text-white shadow-sm'
+                        : 'bg-black border-zinc-800 text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    <span>👩‍💻</span>
+                    <span>{isAm ? "ሴት ገንቢ" : "Female Developer"}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setGender('male')}
+                    className={`py-2 px-2 rounded border font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
+                      gender === 'male'
+                        ? 'bg-red-600 border-red-500 text-white shadow-sm'
+                        : 'bg-black border-zinc-800 text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    <span>👨‍💻</span>
+                    <span>{isAm ? "ወንድ ገንቢ" : "Male Developer"}</span>
+                  </button>
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setStep(1)}
-                className="text-[11px] text-zinc-400 hover:text-white underline font-bold"
-              >
-                {isAm ? "ቀይር" : "Change"}
-              </button>
+
+              <div className="space-y-1 pt-1">
+                <label className="text-zinc-300 font-bold block text-[11px]">
+                  {isAm ? "ማንን ማግኘት ይፈልጋሉ?" : "Looking to match with:"}
+                </label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {[
+                    { id: 'female', label: isAm ? 'ሴት ጓደኛ' : 'Girlfriend', icon: '👩‍💻' },
+                    { id: 'male', label: isAm ? 'ወንድ ጓደኛ' : 'Boyfriend', icon: '👨‍💻' },
+                    { id: 'all', label: isAm ? 'ሁሉም' : 'Everyone', icon: '✨' },
+                  ].map((opt) => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => setLookingFor(opt.id)}
+                      className={`py-1.5 px-1 rounded border font-bold text-xs flex items-center justify-center gap-1 transition-all ${
+                        lookingFor === opt.id
+                          ? 'bg-red-950/80 border-red-600 text-white shadow-sm'
+                          : 'bg-black border-zinc-800 text-zinc-400 hover:text-white'
+                      }`}
+                    >
+                      <span>{opt.icon}</span>
+                      <span>{opt.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Unique Love Code Card for Cross-Device Login */}
