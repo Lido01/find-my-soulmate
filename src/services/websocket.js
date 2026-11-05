@@ -723,7 +723,9 @@ class WebSocketManager {
     this.currentUser = profile;
     if (isSupabaseConfigured()) {
       const saved = await sbSaveUser(profile);
-      return saved || profile;
+      const user = saved && !saved.error ? saved : profile;
+      this.currentUser = user;
+      return { ok: true, user };
     }
     try {
       const res = await fetch(`${getApiBase()}/api/register`, {
@@ -745,24 +747,34 @@ class WebSocketManager {
   }
 
   async fetchRegisteredUsers() {
+    let dbUsers = [];
     if (isSupabaseConfigured()) {
       try {
-        const users = await sbFetchUsers();
-        if (users && users.length > 0) return users;
+        dbUsers = await sbFetchUsers();
       } catch (e) {
         console.warn('[Supabase] fetchRegisteredUsers fallback:', e.message);
       }
-    }
-    if (isLocalEnvironment()) {
+    } else if (isLocalEnvironment()) {
       try {
         const res = await fetch(`${getApiBase()}/api/users`);
         if (res.ok) {
           const data = await res.json();
-          if (data.users && data.users.length > 0) return data.users;
+          dbUsers = data.users || [];
         }
       } catch {}
     }
-    return this.simulatedPeers || [];
+
+    // Combine real registered users with community devs so both gender pools are populated
+    const userMap = new Map();
+    for (const sim of this.simulatedPeers || []) {
+      userMap.set(sim.id, sim);
+    }
+    for (const u of dbUsers || []) {
+      if (u && u.id) {
+        userMap.set(u.id, u);
+      }
+    }
+    return Array.from(userMap.values());
   }
 
   async fetchCommunityPosts() {
@@ -815,7 +827,7 @@ class WebSocketManager {
     if (isSupabaseConfigured()) {
       const users = await sbFetchUsers();
       const match = (users || []).find((u) => u.id === userId);
-      if (match) return match;
+      return match || null;
     }
     if (isLocalEnvironment()) {
       try {
@@ -824,9 +836,7 @@ class WebSocketManager {
           const data = await res.json();
           return data.user || null;
         }
-      } catch (err) {
-        console.warn('[WS-Client] Profile sync error:', err.message);
-      }
+      } catch {}
     }
     return null;
   }
