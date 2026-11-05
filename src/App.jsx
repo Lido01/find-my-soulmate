@@ -57,9 +57,9 @@ export default function App() {
   const [audioSettings, setAudioSettingsState] = useState(() => loadAudioSettings());
   const [theme, setTheme] = useState(() => {
     try {
-      return localStorage.getItem('fms_theme') || 'dark';
+      return localStorage.getItem('fms_theme') || 'light';
     } catch {
-      return 'dark';
+      return 'light';
     }
   });
 
@@ -285,6 +285,14 @@ export default function App() {
     handleSwitchCharacter, handleBack, handleReset,
   } = useGameState({ apiKey, lang, onMoodChange: handleMoodChange });
 
+  // Home navigation: returns cleanly to main discovery screen
+  const handleGoHome = useCallback(() => {
+    soundEngine.playRomanticChime();
+    setActiveRealPeer(null);
+    setChatMode('virtual');
+    handleBack();
+  }, [handleBack]);
+
   // Clean Logout: clears user session and returns to selection without clearing backend database
   const handleLogout = useCallback(() => {
     soundEngine.playHeartbeat();
@@ -345,6 +353,7 @@ export default function App() {
         onReset={handleReset}
         onLogout={handleLogout}
         onBack={handleBack}
+        onGoHome={handleGoHome}
         onApiKeyClick={() => setShowApiModal(true)}
         onOpenProfile={() => setShowProfileModal(true)}
         onOpenRegister={(target) => {
@@ -614,6 +623,7 @@ export default function App() {
       <NotificationCenterModal
         isOpen={showNotificationsModal}
         onClose={() => setShowNotificationsModal(false)}
+        theme={theme}
         notifications={notifications}
         onUpdateNotifications={setNotifications}
         userProfile={userProfile}
@@ -674,6 +684,7 @@ export default function App() {
       <AboutGuideModal
         isOpen={showAboutModal}
         onClose={() => setShowAboutModal(false)}
+        theme={theme}
         onChooseCategory={(cat) => {
           handleBack();
         }}

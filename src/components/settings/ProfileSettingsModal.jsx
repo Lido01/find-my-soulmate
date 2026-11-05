@@ -3,7 +3,7 @@
 // High-tech Red, Black & White developer theme with Space Grotesk / JetBrains Mono
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { IconX, IconCheck, IconUser } from '../ui/Icons.jsx';
 import { soundEngine } from '../../utils/audio.js';
 import { wsService } from '../../services/websocket.js';
@@ -25,6 +25,54 @@ export default function ProfileSettingsModal({
   const [audio, setAudio] = useState({ ...audioSettings });
   const [savedNotice, setSavedNotice] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
+  const fileInputRef = useRef(null);
+
+  function handleImageUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_SIZE = 360;
+        let width = img.width;
+        let height = img.height;
+        if (width > height) {
+          if (width > MAX_SIZE) {
+            height *= MAX_SIZE / width;
+            width = MAX_SIZE;
+          }
+        } else {
+          if (height > MAX_SIZE) {
+            width *= MAX_SIZE / height;
+            height = MAX_SIZE;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressed = canvas.toDataURL('image/jpeg', 0.82);
+        setProfile((prev) => ({
+          ...prev,
+          avatarUrl: compressed,
+          avatarData: compressed,
+        }));
+      };
+      img.src = event.target?.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handleRemovePhoto() {
+    setProfile((prev) => ({
+      ...prev,
+      avatarUrl: null,
+      avatarData: null,
+    }));
+  }
 
   useEffect(() => {
     if (userProfile) {
@@ -136,6 +184,59 @@ export default function ProfileSettingsModal({
                 </button>
               </div>
             )}
+
+            {/* Photo Avatar Uploader & Emoji Picker */}
+            <div className="p-3 bg-zinc-950 border border-zinc-800 rounded-xl space-y-2.5">
+              <label className="font-mono text-[11px] text-zinc-400 block font-bold">
+                {isAm ? 'የመገለጫ ፎቶ እና ኢሞጂ' : 'Profile Picture & Emoji Avatar'}
+              </label>
+
+              <div className="flex items-center gap-3">
+                <div className="relative w-14 h-14 rounded-lg bg-black border-2 border-red-600 overflow-hidden shrink-0 flex items-center justify-center shadow-md">
+                  {profile.avatarUrl || profile.avatarData ? (
+                    <img
+                      src={profile.avatarUrl || profile.avatarData}
+                      alt={profile.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-3xl">{profile.emoji || '🧑‍💻'}</span>
+                  )}
+                </div>
+
+                <div className="flex-1 space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer"
+                    >
+                      <span>📷</span>
+                      <span>{profile.avatarUrl || profile.avatarData ? (isAm ? 'ፎቶ ቀይር' : 'Change Photo') : (isAm ? 'ፎቶ ስቀል' : 'Upload Photo')}</span>
+                    </button>
+                    {(profile.avatarUrl || profile.avatarData) && (
+                      <button
+                        type="button"
+                        onClick={handleRemovePhoto}
+                        className="px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-800 text-xs font-bold transition-colors cursor-pointer"
+                      >
+                        {isAm ? 'አስወግድ' : 'Remove Photo'}
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-[10px] text-zinc-500 font-sans">
+                    {isAm ? 'የተሰቀለው ፎቶ በሌሎች ተጠቃሚዎች ዝርዝር ላይ ወዲያውኑ ይታያል' : 'Compressed for instant viewing across the platform.'}
+                  </p>
+                </div>
+              </div>
+            </div>
 
             {/* Name, Handle & Emoji */}
             <div className="space-y-3">

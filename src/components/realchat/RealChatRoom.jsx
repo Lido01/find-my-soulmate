@@ -615,8 +615,8 @@ export default function RealChatRoom({
         >
           <div className="relative shrink-0">
             <span className="text-xl p-1.5   bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden w-9 h-9 group-hover:border-red-600 transition-all">
-              {peer?.avatarUrl ? (
-                <img src={peer.avatarUrl} alt={peer.name} className="w-full h-full object-cover" />
+              {(peer?.avatarUrl || peer?.avatarData) ? (
+                <img src={peer.avatarUrl || peer.avatarData} alt={peer.name} className="w-full h-full object-cover" />
               ) : (
                 peer?.emoji || (peer?.gender === 'female' ? '👩‍💻' : '👨‍💻')
               )}

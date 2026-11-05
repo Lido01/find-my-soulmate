@@ -70,7 +70,9 @@ export function mapUserFromDb(row) {
     status: row.status || 'online',
     currentStatus: row.current_status || '',
     avatarData: row.avatar_data || null,
+    avatarUrl: row.avatar_data || null,
     audioIntro: row.audio_intro || null,
+    audioUrl: row.audio_intro || null,
     registeredAt: row.registered_at,
     isRegistered: true,
   };
@@ -131,10 +133,13 @@ export function mapNotificationFromDb(row) {
     type: row.type,
     title: row.title,
     body: row.body,
+    text: row.body || row.title || '',
     fromUser: row.from_user,
     read: row.read,
+    status: row.action_status || 'pending',
     actionStatus: row.action_status,
     createdAt: row.created_at,
+    timestamp: row.created_at,
   };
 }
 

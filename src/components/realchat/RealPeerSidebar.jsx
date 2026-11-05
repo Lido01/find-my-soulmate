@@ -94,8 +94,8 @@ export default function RealPeerSidebar({
         <div className="bg-zinc-950 border border-red-900/60   p-3.5 space-y-3 transition-all relative overflow-hidden shadow-lg shadow-red-950/20">
           <div className="flex items-start gap-3">
             <div className="w-12 h-12   bg-black border border-red-600 shadow flex items-center justify-center overflow-hidden shrink-0">
-              {peer.avatarUrl ? (
-                <img src={peer.avatarUrl} alt={peer.name} className="w-full h-full object-cover" />
+              {(peer.avatarUrl || peer.avatarData) ? (
+                <img src={peer.avatarUrl || peer.avatarData} alt={peer.name} className="w-full h-full object-cover" />
               ) : (
                 <span className="text-3xl">{peer.emoji || (peer.gender === 'female' ? '👩‍💻' : '👨‍💻')}</span>
               )}

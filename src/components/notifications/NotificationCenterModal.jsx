@@ -17,7 +17,54 @@ export default function NotificationCenterModal({
   onOpenChatWithPeer,
   onInspectProfile,
   lang = 'en',
+  theme = 'dark',
 }) {
+  function getEventMeta(notif) {
+    switch (notif.type) {
+      case 'friend_request':
+        return {
+          badge: isAm ? 'የጓደኝነት ጥያቄ' : 'Friend Request',
+          icon: '🤝',
+          desc: isAm ? 'የጓደኝነት ጥያቄ ልኮልዎታል! አብራችሁ ለመገናኘት ተቀበሉ።' : 'sent you a developer friend request to connect.',
+          badgeCls: 'bg-red-950/80 border-red-600/70 text-red-300',
+        };
+      case 'wave':
+        return {
+          badge: isAm ? 'የቀጥታ ሰላምታ' : 'Live Wave',
+          icon: '👋',
+          desc: isAm ? 'የቀጥታ ሰላምታ ልኮልዎታል! ሰላምታ ይመልሱ ወይም ውይይት ይጀምሩ።' : 'waved at you! Wave back or start chatting.',
+          badgeCls: 'bg-zinc-900 border-zinc-700 text-zinc-300',
+        };
+      case 'like':
+        return {
+          badge: isAm ? 'መገለጫ ተወዷል' : 'Profile Starred',
+          icon: '❤️',
+          desc: isAm ? 'የገንቢ መገለጫዎን ወደደው (Liked)!' : 'starred and liked your developer profile.',
+          badgeCls: 'bg-red-950/80 border-red-600/70 text-red-400',
+        };
+      case 'chat_message':
+        return {
+          badge: isAm ? 'አዲስ መልእክት' : 'New Message',
+          icon: '💬',
+          desc: isAm ? 'መልእክት ልኮልዎታል:' : 'sent you a direct chat message:',
+          badgeCls: 'bg-zinc-900 border-red-600/70 text-red-300',
+        };
+      case 'friend_accept':
+        return {
+          badge: isAm ? 'ጓደኝነት ተቀባይነት አግኝቷል' : 'Friend Connected',
+          icon: '🎉',
+          desc: isAm ? 'የጓደኝነት ጥያቄዎን ተቀብለዋል! አሁን በቀጥታ ማውራት ይችላሉ።' : 'accepted your friend request! You are now connected.',
+          badgeCls: 'bg-zinc-900 border-zinc-700 text-white',
+        };
+      default:
+        return {
+          badge: isAm ? 'ማሳወቂያ' : 'Notification',
+          icon: '🔔',
+          desc: notif.body || notif.text || '',
+          badgeCls: 'bg-zinc-900 border-zinc-700 text-zinc-300',
+        };
+    }
+  }
   const [activeTab, setActiveTab] = useState('all'); // 'all' | 'requests' | 'social'
   const isAm = lang === 'am';
 
@@ -211,50 +258,68 @@ export default function NotificationCenterModal({
               const isReq = notif.type === 'friend_request';
               const isAccepted = notif.status === 'accepted';
               const isDeclined = notif.status === 'declined';
+              const meta = getEventMeta(notif);
+              const avatar = notif.fromUser?.avatarUrl || notif.fromUser?.avatarData;
+              const dateVal = notif.createdAt || notif.timestamp || new Date().toISOString();
+              const timeStr = new Date(dateVal).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
               return (
                 <div
                   key={notif.id}
-                  className={`p-3   border transition-all text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
+                  className={`p-3.5 rounded-lg border transition-all text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
                     notif.read
-                      ? 'bg-zinc-950/80 border-zinc-800'
-                      : 'bg-zinc-900/90 border-red-900/70 shadow-md'
+                      ? 'bg-zinc-950 border-zinc-800'
+                      : 'bg-zinc-900/90 border-red-600/70 shadow-md'
                   }`}
                 >
-                  <div className="flex items-start gap-2.5 min-w-0 flex-1">
-                    <div className="w-10 h-10   bg-black border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
-                      {notif.fromUser?.avatarUrl ? (
+                  <div className="flex items-start gap-3 min-w-0 flex-1">
+                    <div className="w-11 h-11 rounded-lg bg-black border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
+                      {avatar ? (
                         <img
-                          src={notif.fromUser.avatarUrl}
-                          alt={notif.fromUser.name}
+                          src={avatar}
+                          alt={notif.fromUser?.name || 'Dev'}
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <span className="text-xl">{notif.fromUser?.emoji || '🧑‍💻'}</span>
+                        <span className="text-2xl">{notif.fromUser?.emoji || '🧑‍💻'}</span>
                       )}
                     </div>
 
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5 flex-wrap">
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold border flex items-center gap-1 ${meta.badgeCls}`}>
+                          <span>{meta.icon}</span>
+                          <span>{meta.badge}</span>
+                        </span>
                         <span className="font-bold text-white truncate">{notif.fromUser?.name || 'Developer'}</span>
-                        <span className="text-[10px] text-red-400">{notif.fromUser?.handle}</span>
+                        <span className="text-[10px] text-red-400 font-mono">{notif.fromUser?.handle}</span>
                       </div>
-                      <p className="text-[11px] text-zinc-300 mt-0.5">{notif.text}</p>
-                      <span className="text-[9px] text-zinc-500 block mt-1">
-                        {new Date(notif.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+
+                      <p className="text-[11px] text-zinc-300 font-sans leading-relaxed">
+                        <span className="font-medium text-white">{notif.fromUser?.name || 'Developer'}</span> {meta.desc}
+                      </p>
+
+                      {(notif.body || notif.text) && notif.type === 'chat_message' && (
+                        <p className="text-[11px] text-red-300 italic bg-black/60 border-l-2 border-red-500 px-2 py-0.5 rounded-r truncate">
+                          "{notif.body || notif.text}"
+                        </p>
+                      )}
+
+                      <span className="text-[9px] text-zinc-500 font-mono block">
+                        {timeStr}
                       </span>
                     </div>
                   </div>
 
-                  {/* Actions for Friend Request */}
-                  {isReq && (
-                    <div className="flex items-center gap-1.5 self-end sm:self-center shrink-0">
-                      {isAccepted ? (
-                        <span className="px-2.5 py-1   bg-zinc-900 border border-zinc-700 text-white text-[10px] font-bold">
+                  {/* Contextual Actions */}
+                  <div className="flex items-center gap-1.5 self-end sm:self-center shrink-0">
+                    {isReq ? (
+                      isAccepted ? (
+                        <span className="px-2.5 py-1 rounded bg-zinc-900 border border-zinc-700 text-white text-[10px] font-bold">
                           ✓ {isAm ? "ጓደኛ ሆነዋል" : "Friends"}
                         </span>
                       ) : isDeclined ? (
-                        <span className="px-2.5 py-1   bg-zinc-950 border border-zinc-800 text-zinc-500 text-[10px]">
+                        <span className="px-2.5 py-1 rounded bg-zinc-950 border border-zinc-800 text-zinc-500 text-[10px]">
                           Declined
                         </span>
                       ) : (
@@ -262,35 +327,56 @@ export default function NotificationCenterModal({
                           <button
                             type="button"
                             onClick={() => handleAcceptFriend(notif)}
-                            className="px-3 py-1.5   bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition-all shadow"
+                            className="px-3 py-1.5 rounded bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition-all shadow cursor-pointer active:scale-95"
                           >
-                            {isAm ? "ተቀበል ✓" : "Accept"}
+                            {isAm ? "ተቀበል ✓" : "Accept ✓"}
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDeclineFriend(notif)}
-                            className="px-2.5 py-1.5   bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white text-xs transition-all"
+                            className="px-2.5 py-1.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white text-xs transition-all cursor-pointer"
                           >
                             ✕
                           </button>
                         </>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Action for Chat Message or Social Action */}
-                  {!isReq && notif.fromUser?.id && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onClose();
-                        onOpenChatWithPeer?.(notif.fromUser);
-                      }}
-                      className="px-3 py-1.5   bg-zinc-900 hover:bg-zinc-800 border border-red-600/70 text-red-300 font-bold text-[11px] transition-all shrink-0 self-end sm:self-center"
-                    >
-                      {isAm ? "አውራ" : "Chat"}
-                    </button>
-                  )}
+                      )
+                    ) : notif.type === 'wave' ? (
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            soundEngine.playRomanticChime();
+                            wsService.sendSocialAction('wave', notif.fromUser?.id);
+                          }}
+                          className="px-2.5 py-1.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white text-xs font-bold transition-all cursor-pointer"
+                        >
+                          👋 {isAm ? "ሰላምታ መልስ" : "Wave Back"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onClose();
+                            onOpenChatWithPeer?.(notif.fromUser);
+                          }}
+                          className="px-3 py-1.5 rounded bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition-all shadow cursor-pointer"
+                        >
+                          💬 {isAm ? "አውራ" : "Chat"}
+                        </button>
+                      </div>
+                    ) : notif.fromUser?.id ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onClose();
+                          onOpenChatWithPeer?.(notif.fromUser);
+                        }}
+                        className="px-3 py-1.5 rounded bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition-all shadow cursor-pointer active:scale-95 flex items-center gap-1"
+                      >
+                        <span>💬</span>
+                        <span>{isAm ? "ውይይት ክፈት" : "Open Chat"}</span>
+                      </button>
+                    ) : null}
+                  </div>
                 </div>
               );
             })
