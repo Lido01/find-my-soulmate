@@ -220,11 +220,15 @@ class WebSocketManager {
           .subscribe();
       }
 
-      // Initial presence broadcast from Supabase
+      // Initial presence broadcast from Supabase (with fallback to default seed developers)
       sbFetchUsers().then((users) => {
-        if (users?.length) {
+        if (users && users.length > 0) {
           this.emit('presence:update', { users, count: users.length });
+        } else {
+          this.emit('presence:update', { users: this.simulatedPeers, count: this.simulatedPeers.length });
         }
+      }).catch(() => {
+        this.emit('presence:update', { users: this.simulatedPeers, count: this.simulatedPeers.length });
       });
       return;
     }
@@ -715,30 +719,41 @@ class WebSocketManager {
 
   async fetchRegisteredUsers() {
     if (isSupabaseConfigured()) {
-      const users = await sbFetchUsers();
-      if (users?.length) return users;
-    }
-    try {
-      const res = await fetch(`${getApiBase()}/api/users`);
-      if (res.ok) {
-        const data = await res.json();
-        return data.users || [];
+      try {
+        const users = await sbFetchUsers();
+        if (users && users.length > 0) return users;
+      } catch (e) {
+        console.warn('[Supabase] fetchRegisteredUsers fallback:', e.message);
       }
-    } catch {}
+    }
+    if (isLocalEnvironment()) {
+      try {
+        const res = await fetch(`${getApiBase()}/api/users`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.users && data.users.length > 0) return data.users;
+        }
+      } catch {}
+    }
     return this.simulatedPeers || [];
   }
 
   async fetchCommunityPosts() {
     if (isSupabaseConfigured()) {
-      return await sbFetchPosts();
+      try {
+        const posts = await sbFetchPosts();
+        if (posts && posts.length > 0) return posts;
+      } catch {}
     }
-    try {
-      const res = await fetch(`${getApiBase()}/api/social/feed`);
-      if (res.ok) {
-        const data = await res.json();
-        return data.posts || [];
-      }
-    } catch {}
+    if (isLocalEnvironment()) {
+      try {
+        const res = await fetch(`${getApiBase()}/api/social/feed`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.posts && data.posts.length > 0) return data.posts;
+        }
+      } catch {}
+    }
     return [];
   }
 
