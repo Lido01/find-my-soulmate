@@ -452,17 +452,18 @@ class WebSocketManager {
     this.emit('room:entered', { roomId: this.currentRoomId, peer });
   }
 
-  sendMessage(text, options = {}) {
+  async sendMessage(text, options = {}) {
+    const msgId = options.id || `msg_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
     const msgPayload = {
-      id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+      id: msgId,
       senderId: this.currentUser?.id || 'me',
       senderName: this.currentUser?.name || 'Me',
       senderHandle: this.currentUser?.handle || '@me',
       senderEmoji: this.currentUser?.emoji || '🧑‍💻',
       senderAvatarUrl: this.currentUser?.avatarUrl || null,
       targetUserId: options.targetUserId || this.currentPeer?.id || null,
-      text: text.trim(),
-      timestamp: new Date().toISOString(),
+      text: (text || '').trim(),
+      timestamp: options.timestamp || new Date().toISOString(),
       replyTo: options.replyTo || null,
       isAudio: Boolean(options.isAudio),
       audioUrl: options.audioUrl || null,
@@ -473,45 +474,67 @@ class WebSocketManager {
       imageUrl: options.imageUrl || null,
       isCode: Boolean(options.isCode),
       codeLang: options.codeLang || null,
-      status: 'sent',
+      status: 'sending',
     };
 
+    // 1. Emit locally as sending so UI renders pending status
+    this.emit('chat:message', msgPayload);
+
     if (isSupabaseConfigured()) {
-      // 1. Send & Persist in Supabase Postgres
-      sbSendMessage({
-        ...msgPayload,
-        imageData: options.imageUrl,
-        voiceData: options.audioUrl,
-        codeSnippet: options.isCode ? text : null,
-        codeLanguage: options.codeLang || null,
-        recipientId: msgPayload.targetUserId,
-      }).catch((e) => console.error('[Supabase] Send error:', e));
+      try {
+        if (typeof navigator !== 'undefined' && !navigator.onLine) {
+          throw new Error('Network connection is offline');
+        }
 
-      // 2. Broadcast live to peer over Supabase channel
-      this.sbChannel?.send({
-        type: 'broadcast',
-        event: 'chat:message',
-        payload: msgPayload,
-      });
+        // Send & Persist in Supabase Postgres
+        await sbSendMessage({
+          ...msgPayload,
+          imageData: options.imageUrl,
+          voiceData: options.audioUrl,
+          codeSnippet: options.isCode ? text : null,
+          codeLanguage: options.codeLang || null,
+          recipientId: msgPayload.targetUserId,
+        });
 
-      // 3. Local echo for instant response
-      this.emit('chat:message', msgPayload);
-      return;
+        // 2. Broadcast live to peer over Supabase channel
+        this.sbChannel?.send({
+          type: 'broadcast',
+          event: 'chat:message',
+          payload: { ...msgPayload, status: 'sent' },
+        });
+
+        this.emit('chat:status', { messageId: msgId, status: 'sent' });
+        return { ok: true, message: { ...msgPayload, status: 'sent' } };
+      } catch (e) {
+        console.warn('[Supabase] Send failed:', e.message);
+        this.emit('chat:status', { messageId: msgId, status: 'failed', error: e.message });
+        return { ok: false, error: e.message, message: { ...msgPayload, status: 'failed' } };
+      }
     }
 
     if (this.ws && this.ws.readyState === WebSocket.OPEN && !this.isSimulated) {
-      this.ws.send(JSON.stringify({
-        type: 'chat:send',
-        roomId: this.currentRoomId,
-        targetUserId: msgPayload.targetUserId,
-        message: msgPayload,
-      }));
+      try {
+        this.ws.send(JSON.stringify({
+          type: 'chat:send',
+          roomId: this.currentRoomId,
+          targetUserId: msgPayload.targetUserId,
+          message: { ...msgPayload, status: 'sent' },
+        }));
+        this.emit('chat:status', { messageId: msgId, status: 'sent' });
+        return { ok: true, message: { ...msgPayload, status: 'sent' } };
+      } catch (err) {
+        this.emit('chat:status', { messageId: msgId, status: 'failed', error: err.message });
+        return { ok: false, error: err.message, message: { ...msgPayload, status: 'failed' } };
+      }
     } else {
-      // Echo locally
-      this.emit('chat:message', msgPayload);
-
-      // Trigger simulated reply from peer after human delay
-      this.triggerSimulatedReply(text, options);
+      if (this.isSimulated) {
+        this.emit('chat:status', { messageId: msgId, status: 'sent' });
+        this.triggerSimulatedReply(text, options);
+        return { ok: true, message: { ...msgPayload, status: 'sent' } };
+      } else {
+        this.emit('chat:status', { messageId: msgId, status: 'failed', error: 'No active connection' });
+        return { ok: false, error: 'No active connection', message: { ...msgPayload, status: 'failed' } };
+      }
     }
   }
 
@@ -794,14 +817,16 @@ class WebSocketManager {
       const match = (users || []).find((u) => u.id === userId);
       if (match) return match;
     }
-    try {
-      const res = await fetch(`${getApiBase()}/api/users/profile?userId=${encodeURIComponent(userId)}`);
-      if (res.ok) {
-        const data = await res.json();
-        return data.user || null;
+    if (isLocalEnvironment()) {
+      try {
+        const res = await fetch(`${getApiBase()}/api/users/profile?userId=${encodeURIComponent(userId)}`);
+        if (res.ok) {
+          const data = await res.json();
+          return data.user || null;
+        }
+      } catch (err) {
+        console.warn('[WS-Client] Profile sync error:', err.message);
       }
-    } catch (err) {
-      console.warn('[WS-Client] Profile sync error:', err.message);
     }
     return null;
   }

@@ -264,7 +264,21 @@ export default function RealChatRoom({
       }
     });
 
-    // 4. Typing indicator
+    // 4. Real-time Status updates (sent / failed)
+    const unbindStatus = wsService.on('chat:status', ({ messageId, status }) => {
+      setMessages((prev) => {
+        const next = prev.map((m) => {
+          if (m.id === messageId) {
+            return { ...m, status };
+          }
+          return m;
+        });
+        if (peer?.id) saveChatHistory(userProfile?.id, peer.id, next);
+        return next;
+      });
+    });
+
+    // 5. Typing indicator
     const unbindTyping = wsService.on('chat:typing', (data) => {
       if (!data.senderId || data.senderId === peer?.id) {
         setPeerTyping(Boolean(data.isTyping));
@@ -275,9 +289,44 @@ export default function RealChatRoom({
       unbindMsg();
       unbindSeen();
       unbindHistory();
+      unbindStatus();
       unbindTyping();
     };
   }, [peer, userProfile, isAm, isPeerOnline]);
+
+  // Telegram-style failed message retry handler
+  const handleRetryMessage = (failedMsg) => {
+    if (!failedMsg || !peer?.id) return;
+    soundEngine.playHeartbeat();
+    setMessages((prev) =>
+      prev.map((m) => (m.id === failedMsg.id ? { ...m, status: 'sending' } : m))
+    );
+    wsService.sendMessage(failedMsg.text, {
+      ...failedMsg,
+      targetUserId: peer.id,
+    });
+  };
+
+  // Re-attempt sending any queued / failed messages when back online
+  useEffect(() => {
+    function handleOnline() {
+      setMessages((prev) => {
+        const failed = prev.filter((m) => m.sender === 'player' && m.status === 'failed');
+        if (failed.length > 0 && peer?.id) {
+          failed.forEach((fm) => {
+            wsService.sendMessage(fm.text, { ...fm, targetUserId: peer.id });
+          });
+          return prev.map((m) =>
+            m.sender === 'player' && m.status === 'failed' ? { ...m, status: 'sending' } : m
+          );
+        }
+        return prev;
+      });
+    }
+
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, [peer?.id]);
 
   // Handle typing debounce
   function handleTextareaChange(e) {
@@ -659,6 +708,7 @@ export default function RealChatRoom({
                 setReplyingTo(msg);
                 if (textareaRef.current) textareaRef.current.focus();
               }}
+              onRetry={handleRetryMessage}
               lang={lang}
             />
           );

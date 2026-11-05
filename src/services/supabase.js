@@ -18,6 +18,7 @@ function getCleanSupabaseConfig() {
     }
 
     // Validate URL syntax safely
+    url = url.replace(/\/rest\/v1\/?$/i, '').replace(/\/+$/, '');
     new URL(url);
     return { url, key };
   } catch {
@@ -143,17 +144,49 @@ export async function sbSaveUser(profile) {
   if (!supabase) return profile;
   try {
     const payload = mapUserToDb(profile);
+
+    // 1. Check if handle already exists in Supabase
+    const { data: existingByHandle } = await supabase
+      .from('users')
+      .select('*')
+      .ilike('handle', payload.handle)
+      .maybeSingle();
+
+    if (existingByHandle) {
+      if (existingByHandle.id === payload.id || existingByHandle.love_code === payload.love_code) {
+        const { data: updated, error: updateErr } = await supabase
+          .from('users')
+          .update(payload)
+          .eq('id', existingByHandle.id)
+          .select()
+          .single();
+        if (updateErr) throw updateErr;
+        return mapUserFromDb(updated || existingByHandle);
+      } else {
+        return {
+          error: `Handle "${payload.handle}" is already taken by another developer. Please choose a different handle or login with your Love Code.`,
+        };
+      }
+    }
+
     const { data, error } = await supabase
       .from('users')
       .upsert(payload, { onConflict: 'id' })
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      if (error.code === '23505' || (error.message && error.message.includes('users_handle_key'))) {
+        return {
+          error: `Handle "${payload.handle}" is already taken. Please choose a different handle or login with your Love Code.`,
+        };
+      }
+      throw error;
+    }
     return mapUserFromDb(data);
   } catch (err) {
     console.error('[Supabase] Error saving user:', err.message);
-    return profile;
+    return { error: err.message || 'Error saving user profile' };
   }
 }
 
@@ -253,7 +286,7 @@ export async function sbSendMessage(msg) {
     return mapMessageFromDb(data);
   } catch (err) {
     console.error('[Supabase] Error sending message:', err.message);
-    return msg;
+    throw err;
   }
 }
 
