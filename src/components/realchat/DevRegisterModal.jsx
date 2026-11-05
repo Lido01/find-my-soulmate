@@ -189,7 +189,12 @@ export default function DevRegisterModal({
     };
 
     try {
-      await wsService.registerInBackend(profileData);
+      const res = await wsService.registerInBackend(profileData);
+      if (res && res.error) {
+        setIsSaving(false);
+        setErrorMsg(res.error);
+        return;
+      }
     } catch (err) {
       console.warn('Backend sync deferred; saving locally:', err);
     }
@@ -198,13 +203,8 @@ export default function DevRegisterModal({
     setSuccessMsg(isAm ? 'መገለጫዎ በተሳካ ሁኔታ ተመዝግቧል!' : 'Developer Profile registered successfully in database!');
 
     onSaveProfile?.(profileData);
-
-    setTimeout(() => {
-      setIsSaving(false);
-      setSuccessMsg('');
-      onClose?.();
-      onStartChatNow?.();
-    }, 1100);
+    setIsSaving(false);
+    setStep(3);
   }
 
   return (
@@ -219,6 +219,8 @@ export default function DevRegisterModal({
             <span className="text-[10px] text-red-400 uppercase tracking-widest font-bold">
               {authMode === 'login'
                 ? (isAm ? 'መግቢያ' : 'Authentication')
+                : step === 3
+                ? (isAm ? 'ምዝገባው ተጠናቋል!' : 'Registration Complete!')
                 : step === 1
                 ? (isAm ? 'ደረጃ 1 ከ 2' : 'Step 1 of 2')
                 : (isAm ? 'ደረጃ 2 ከ 2' : 'Step 2 of 2')}
@@ -226,6 +228,8 @@ export default function DevRegisterModal({
             <h2 className="font-heading text-base sm:text-lg font-black text-white">
               {authMode === 'login'
                 ? (isAm ? 'በ Love Code ይግቡ' : 'Login with Love Code')
+                : step === 3
+                ? (isAm ? 'ልዩ የፍቅር ቁልፍዎ (Love Code)' : 'Your Permanent Login Key')
                 : step === 1
                 ? (isAm ? 'ማንን ማግኘት ይፈልጋሉ?' : 'Who are you looking for?')
                 : (isAm ? 'ስለ እርስዎ ይንገሩን (መገለጫ ይመዝገቡ)' : 'Tell Me About Yourself')}
@@ -244,6 +248,7 @@ export default function DevRegisterModal({
         </div>
 
         {/* Auth Mode Toggle Tabs (Register vs Login with Love Code) */}
+        {step !== 3 && (
         <div className="grid grid-cols-2 p-1.5 bg-black border-b border-zinc-800 text-xs shrink-0 gap-1.5">
           <button
             type="button"
@@ -276,6 +281,7 @@ export default function DevRegisterModal({
             {isAm ? 'በ Love Code ግባ' : 'Login with Love Code'}
           </button>
         </div>
+        )}
 
         {/* ── AUTH MODE: LOGIN WITH LOVE CODE ─────────────────────────────────── */}
         {authMode === 'login' && (
@@ -663,6 +669,83 @@ export default function DevRegisterModal({
               </button>
             </div>
           </form>
+        )}
+        {/* ── STEP 3: REGISTRATION COMPLETE & LOVE CODE REVEAL ─────────────────── */}
+        {authMode === 'register' && step === 3 && (
+          <div className="p-6 sm:p-7 space-y-6 overflow-y-auto bg-black text-center animate-fade-in font-mono">
+            {/* Celebration Badge */}
+            <div className="space-y-2">
+              <div className="w-16 h-16 bg-red-950/80 border-2 border-red-600 rounded-full mx-auto flex items-center justify-center text-3xl shadow-lg shadow-red-950/60 animate-bounce">
+                🎉
+              </div>
+              <h3 className="font-heading text-xl font-black text-white">
+                {isAm ? `እንኳን ደህና መጡ፣ ${name}!` : `Welcome to Find My Soulmate, ${name}!`}
+              </h3>
+              <p className="text-xs text-zinc-400 max-w-sm mx-auto leading-relaxed font-sans">
+                {isAm
+                  ? 'የገንቢ መገለጫዎ በተሳካ ሁኔታ ተመዝግቧል። ይህንን ልዩ Love Code በመጠቀም በማንኛውም ስልክ ወይም ኮምፒውተር መግባት ይችላሉ።'
+                  : 'Your developer card is officially registered! Save your unique Love Code below to login from any phone, laptop, or browser without needing a password.'}
+              </p>
+            </div>
+
+            {/* Love Code Glowing Card */}
+            <div className="p-5 bg-zinc-950 border-2 border-red-600/80 rounded-xl space-y-3 shadow-xl shadow-red-950/50">
+              <span className="text-[10px] text-red-400 font-bold uppercase tracking-widest block">
+                🔑 {isAm ? 'የእርስዎ ቋሚ የመግቢያ ኮድ' : 'YOUR PERMANENT LOVE CODE'}
+              </span>
+
+              <div className="font-mono text-2xl sm:text-3xl font-black text-white tracking-widest select-all py-2 px-4 bg-black border border-zinc-800 rounded-lg inline-block shadow-inner">
+                {currentProfile?.loveCode || loveCode}
+              </div>
+
+              <div>
+                <button
+                  type="button"
+                  onClick={handleCopyLoveCode}
+                  className={`px-5 py-2.5 rounded-lg text-xs font-bold transition-all inline-flex items-center gap-2 ${
+                    copiedCode
+                      ? 'bg-zinc-800 text-red-400 border border-red-500 shadow-sm'
+                      : 'bg-red-600 hover:bg-red-700 text-white shadow-md shadow-red-950/40 cursor-pointer active:scale-95'
+                  }`}
+                >
+                  <span>{copiedCode ? '✓' : '📋'}</span>
+                  <span>{copiedCode ? (isAm ? 'ተቀድቷል!' : 'Copied to Clipboard!') : (isAm ? 'ኮዱን ቅዳ (Copy Code)' : 'Copy Love Code')}</span>
+                </button>
+              </div>
+
+              <p className="text-[11px] text-zinc-500 font-sans pt-1">
+                {isAm
+                  ? '💡 ይህንን ኮድ በማስታወሻዎ ላይ ያስቀምጡት። በማንኛውም ጊዜ በ "Login with Love Code" መግባት ይችላሉ።'
+                  : '💡 Save this code in your notes. You can use it anytime to log right back into your account and restore your chat history.'}
+              </p>
+            </div>
+
+            {/* Next Steps Buttons */}
+            <div className="pt-2 space-y-2.5">
+              <button
+                type="button"
+                onClick={() => {
+                  soundEngine.playRomanticChime();
+                  onClose?.();
+                  onStartChatNow?.();
+                }}
+                className="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg text-xs sm:text-sm shadow-lg shadow-red-950/60 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+              >
+                <span>🚀</span>
+                <span>{isAm ? 'የፍቅር ጓደኛ መፈለግ እና ማውራት ጀምር' : 'Start Finding Matches & Chatting Now →'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  onClose?.();
+                }}
+                className="w-full py-2.5 bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white font-bold rounded-lg text-xs transition-colors"
+              >
+                {isAm ? 'መገለጫዬን ዝጋ' : 'Done / Close'}
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </div>

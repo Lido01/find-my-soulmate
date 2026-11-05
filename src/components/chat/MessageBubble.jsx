@@ -64,7 +64,7 @@ function GiftBadge({ message, lang = "en" }) {
   );
 }
 
-export default function MessageBubble({ message, character, userProfile, onReply, lang = "en" }) {
+export default function MessageBubble({ message, character, userProfile, onReply, onRetry, lang = "en" }) {
   const [isPlayingVoice, setIsPlayingVoice] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
@@ -260,17 +260,39 @@ export default function MessageBubble({ message, character, userProfile, onReply
               <span className="font-mono text-[10px] text-zinc-500">{timeStr}</span>
             )}
 
-            {/* Telegram-style Read Receipt */}
-            {message.status === 'seen' ? (
+            {/* Telegram-style Read Receipt & Delivery Status */}
+            {message.status === 'failed' ? (
+              <div className="flex items-center gap-1.5 ml-1">
+                <span className="text-[11px] text-red-400 font-bold flex items-center gap-1" title="Failed to send">
+                  <span>⚠️</span>
+                  <span>Failed</span>
+                </span>
+                {onRetry && (
+                  <button
+                    type="button"
+                    onClick={() => onRetry(message)}
+                    className="text-[10px] font-mono text-white bg-red-600 hover:bg-red-700 px-2 py-0.5 rounded font-bold transition-all shadow-sm flex items-center gap-1 cursor-pointer active:scale-95"
+                    title="Tap to retry sending message"
+                  >
+                    <span>🔄</span>
+                    <span>Retry</span>
+                  </button>
+                )}
+              </div>
+            ) : message.status === 'sending' || message.status === 'pending' ? (
+              <span className="text-[12px] text-zinc-400 flex items-center font-bold animate-pulse" title="Sending...">
+                <span className="leading-none">🕒</span>
+              </span>
+            ) : message.status === 'seen' ? (
               <span className="text-[12px] text-red-500 flex items-center font-black tracking-tighter" title="Read by partner (Seen)">
                 <span className="leading-none text-red-500">✓✓</span>
               </span>
             ) : message.status === 'delivered' ? (
-              <span className="text-[12px] text-zinc-400 flex items-center font-black tracking-tighter" title="Delivered">
+              <span className="text-[12px] text-zinc-400 flex items-center font-black tracking-tighter" title="Delivered to partner">
                 <span className="leading-none">✓✓</span>
               </span>
             ) : (
-              <span className="text-[12px] text-zinc-500 flex items-center font-bold" title="Sent">
+              <span className="text-[12px] text-zinc-500 flex items-center font-bold" title="Sent to server">
                 <span className="leading-none">✓</span>
               </span>
             )}
