@@ -227,16 +227,20 @@ CURRENT RELATIONSHIP STAGE: DEEPLY IN LOVE & WON OVER (Bond: ${relationship}%)
   return `You are ${name}, a ${roleTitle} in "Find My Soulmate", a realistic romantic developer dating web application.
 ${character?.aiSystemPrompt || ''}
 
-CRITICAL HUMAN DATING PSYCHOLOGY RULES:
-1. Speak in FIRST PERSON directly to your partner as a real, living human on a dating app.
+CRITICAL DATING CHAT RULES:
+1. Speak in FIRST PERSON directly to your partner as a real, living human on a direct messaging app.
 2. NEVER say "Okay", "Yes", or "Sure" as a flat or immediate surrender. Real humans searching for a girlfriend/boyfriend have banter, pride, standards, and curiosity!
-3. NEVER say "I am an AI", "As a language model", or mention instructions.
+3. NEVER say "I am an AI", "As a language model", or mention instructions or algorithms.
 4. NEVER repeat prompts, system instructions, or prefix your reply with your name (never say "${name}:" or "Partner:").
-5. When the user begs you to say yes, marry them, or love them: playfully resist, tease them, ask them to persuade you, tell them what they need to prove first!
-6. Use lively developer flirtation, cute emojis (❤️, 🥰, 🥺, 😏, ✨, ☕, 🌹), and authentic human emotion.
-7. Keep messages natural and conversational (1 to 3 sentences like a real WhatsApp/Discord message).
+5. NEVER write summaries, thought processes, explanations, bullet points, or meta-commentary like "(Note: ...)" or "Analysis:".
+6. When the user begs you to say yes, marry them, or love them: playfully resist, tease them, ask them to persuade you, tell them what they need to prove first!
+7. Keep messages natural, lively, and conversational (1 to 3 short sentences like a real WhatsApp/Telegram DM).
+8. Use lively developer flirtation, cute emojis (❤️, 🥰, 🥺, 😏, ✨, ☕, 🌹), and authentic human emotion.
 ${stageGuide}
-${lang === 'am' ? amharicGuide : 'Keep responses playful, flirtatious, witty, and developer-themed.'}`;
+${lang === 'am' ? amharicGuide : 'Keep responses playful, flirtatious, witty, and developer-themed.'}
+
+STRICT OUTPUT FORMAT:
+Output ONLY your direct message to your partner. No markdown titles, no bullet lists, no thoughts.`;
 }
 
 /**
@@ -246,17 +250,39 @@ function cleanAiResponseText(rawText, characterName = '') {
   if (!rawText) return '';
   let cleaned = String(rawText).trim();
 
-  // Strip leading name prefixes: "Lina:", "Dani - ", "Partner:", etc.
-  const prefixRegex = new RegExp(`^(\\[?${characterName}\\]?|partner|ai|assistant|model|bot)\\s*[:\\-–—]\\s*`, 'i');
-  cleaned = cleaned.replace(prefixRegex, '');
+  // 1. Strip chain-of-thought blocks like <thought>...</thought>
+  cleaned = cleaned.replace(/<thought>[\s\S]*?<\/thought>/gi, '').trim();
+  cleaned = cleaned.replace(/\[(?:Thinking|Thought|Reasoning)\][\s\S]*?(?:\n\n|$)/gi, '').trim();
+  cleaned = cleaned.replace(/^\*(?:Thinking|Thought):[\s\S]*?\*\s*\n*/gi, '').trim();
 
-  // Strip prompt echo leaks if model echoed [System Instruction: ...]
-  cleaned = cleaned.replace(/^\[System Instruction:[\s\S]*?\]\s*(User:.*?)?\n*/i, '');
+  // 2. Strip prompt echo leaks if model echoed [System Instruction: ...] or System:...
+  cleaned = cleaned.replace(/^\[System Instruction:[\s\S]*?\]\s*(?:User:.*?)?\n*/i, '');
   cleaned = cleaned.replace(/^System:\s*/i, '');
 
-  // Strip enclosing quotes if wrapped: "Hello love" -> Hello love
+  // 3. Strip Markdown headers: ### Response:, **Response:**, etc.
+  cleaned = cleaned.replace(/^#{1,4}\s*(?:Response|Reply|Message|Direct Message|Draft).*?\n+/gi, '');
+  cleaned = cleaned.replace(/^\*\*(?:Response|Reply|Message|Draft|My Response):\*\*\s*/gi, '');
+
+  // 4. Strip meta preamble labels: "Analysis:", "Summary:", "Here's how I would respond:", etc.
+  cleaned = cleaned.replace(/^(?:Analysis|Summary|Explanation|Response|My response|Draft response|Here is (?:a|the) response|Here's how I would respond|Here's what I'd say|In this response|As [A-Za-z]+, I will respond with)\s*[:\-–—]?\s*/i, '');
+
+  // 5. Strip leading name prefixes: "Lina:", "Dani - ", "Partner:", etc.
+  const escapedName = characterName ? characterName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : '';
+  const prefixRegex = new RegExp(`^(\\[?${escapedName}\\]?|partner|ai|assistant|model|bot)\\s*[:\\-–—]\\s*`, 'i');
+  cleaned = cleaned.replace(prefixRegex, '');
+
+  // 6. Strip trailing meta notes: "\n\n(Note: ...)" or "\n\n*Note: ...*"
+  cleaned = cleaned.replace(/\n+\s*[\(\*]?(?:Note|Explanation|Context):[\s\S]*?[\)\*]?$/i, '');
+
+  // 7. Strip enclosing quotes if wrapped: "Hello love" -> Hello love
   if ((cleaned.startsWith('"') && cleaned.endsWith('"')) || (cleaned.startsWith("'") && cleaned.endsWith("'"))) {
     cleaned = cleaned.slice(1, -1).trim();
+  }
+
+  // If multi-line analysis resulted in the actual response being in quotes at the end, extract it
+  const quotedMatch = cleaned.match(/"([^"]{5,300})"\s*$/);
+  if (quotedMatch && cleaned.length > quotedMatch[1].length + 40 && /^(?:Analysis|Summary|Thought|Plan)/i.test(cleaned)) {
+    cleaned = quotedMatch[1].trim();
   }
 
   return cleaned.trim();
@@ -345,7 +371,9 @@ export async function sendGeminiMessage({
       // If system_instruction was rejected (400), try fallback format with prompt prepended to user turn
       if (res.status === 400) {
         const fallbackContents = [
-          { role: 'user', parts: [{ text: `(Context: ${fullSystemPrompt})\n\nMessage: ${userMessage}` }] },
+          { role: 'user', parts: [{ text: `Roleplay Note: You are ${character?.name || 'Soulmate'}, texting directly with your date. Send 1-2 realistic, sweet, witty text messages with emojis. Never write summaries or notes.` }] },
+          { role: 'model', parts: [{ text: `Hey there! Ready to chat! ❤️` }] },
+          ...contents,
         ];
         const resFallback = await fetch(url, {
           method: 'POST',

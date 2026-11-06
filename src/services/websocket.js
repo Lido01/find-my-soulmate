@@ -529,7 +529,10 @@ class WebSocketManager {
     } else {
       if (this.isSimulated) {
         this.emit('chat:status', { messageId: msgId, status: 'sent' });
-        this.triggerSimulatedReply(text, options);
+        const isTargetSimulated = this.currentPeer?.isSimulated || this.currentPeer?.id?.startsWith('sim_');
+        if (isTargetSimulated) {
+          this.triggerSimulatedReply(text, options);
+        }
         return { ok: true, message: { ...msgPayload, status: 'sent' } };
       } else {
         this.emit('chat:status', { messageId: msgId, status: 'failed', error: 'No active connection' });
@@ -669,6 +672,9 @@ class WebSocketManager {
 
   triggerSimulatedReply(playerText, options = {}) {
     if (!this.currentPeer) return;
+    // Strictly do not fire simulated fake replies for real database users
+    const isRealUser = this.currentPeer.id && !this.currentPeer.id.startsWith('sim_') && this.currentPeer.isSimulated !== true;
+    if (isRealUser && isSupabaseConfigured()) return;
 
     // Simulate typing after 800ms
     setTimeout(() => {
@@ -764,14 +770,23 @@ class WebSocketManager {
       } catch {}
     }
 
-    // Combine real registered users with community devs so both gender pools are populated
+    // Real registered database users are the primary real tech persons for this platform!
     const userMap = new Map();
-    for (const sim of this.simulatedPeers || []) {
-      userMap.set(sim.id, sim);
-    }
+    // 1. Add real database users first
     for (const u of dbUsers || []) {
       if (u && u.id) {
         userMap.set(u.id, u);
+      }
+    }
+    // 2. Add community demo profiles only if not already represented
+    for (const sim of this.simulatedPeers || []) {
+      if (!userMap.has(sim.id)) {
+        const exists = Array.from(userMap.values()).some(
+          (u) => (u.handle || '').toLowerCase() === (sim.handle || '').toLowerCase()
+        );
+        if (!exists) {
+          userMap.set(sim.id, sim);
+        }
       }
     }
     return Array.from(userMap.values());

@@ -108,7 +108,7 @@ export default function App() {
   }, [theme]);
 
   // Mode switcher: 'virtual' (AI Soulmates) vs 'real_ws' (Live WebSocket Real Users)
-  const [chatMode, setChatMode] = useState('virtual');
+  const [chatMode, setChatMode] = useState('real_ws');
   const [activeRealPeer, setActiveRealPeer] = useState(null);
   const [onlinePeers, setOnlinePeers] = useState([]);
 
@@ -289,7 +289,7 @@ export default function App() {
   const handleGoHome = useCallback(() => {
     soundEngine.playRomanticChime();
     setActiveRealPeer(null);
-    setChatMode('virtual');
+    setChatMode('real_ws');
     handleBack();
   }, [handleBack]);
 
@@ -300,7 +300,7 @@ export default function App() {
     clearUserProfile();
     setUserProfileState(null);
     setActiveRealPeer(null);
-    setChatMode('virtual');
+    setChatMode('real_ws');
     handleReset();
     setRegisterModalAuthMode('login'); // Prompt immediately with Love Code login
     setShowDevRegisterModal(true);
