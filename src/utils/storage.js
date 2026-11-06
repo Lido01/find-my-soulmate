@@ -121,6 +121,9 @@ export function saveChatHistory(currentUserId, peerId, messages) {
   const actualPeerId = Array.isArray(messages) ? peerId : currentUserId;
   const actualUserId = Array.isArray(messages) ? currentUserId : null;
   if (!actualPeerId || !Array.isArray(actualMessages)) return;
+  // Never save empty or system-only dummy chats
+  const hasRealMessages = actualMessages.some((m) => m && (m.sender === 'player' || m.sender === 'partner'));
+  if (!hasRealMessages) return;
   try {
     const trimmed = actualMessages.slice(-250);
     const scopedKey = actualUserId

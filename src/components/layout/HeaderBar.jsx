@@ -81,10 +81,10 @@ export default function HeaderBar({
           className="flex items-center gap-1 px-2 py-1 rounded bg-zinc-900 border border-zinc-800 hover:border-red-500 text-white text-xs font-mono transition-all cursor-pointer shadow-sm active:scale-95"
           title="Return to Home / Discover"
         >
-          <span>🏠</span>
-          <span className="hidden sm:inline font-bold">Home</span>
+          <span className="">🏠</span>
+          {/* <span className="hidden sm:inline font-bold">Home</span> */}
         </button>
-        <span className="text-red-500 flex items-center gap-1">
+        <span className="text-red-500 flex items-center">
           <span className="hidden xs:inline">find_my_soulmate</span>
         </span>
       </div>
@@ -94,11 +94,6 @@ export default function HeaderBar({
         <button
           type="button"
           onClick={() => {
-            if (!userProfile?.isRegistered) {
-              soundEngine.playHeartbeat();
-              onOpenRegister?.();
-              return;
-            }
             soundEngine.playHeartbeat();
             onToggleChatMode?.('virtual');
           }}
@@ -116,11 +111,6 @@ export default function HeaderBar({
         <button
           type="button"
           onClick={() => {
-            if (!userProfile?.isRegistered) {
-              soundEngine.playHeartbeat();
-              onOpenRegister?.();
-              return;
-            }
             soundEngine.playRomanticChime();
             onToggleChatMode?.('real_ws');
           }}

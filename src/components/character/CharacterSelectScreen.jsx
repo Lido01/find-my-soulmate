@@ -91,10 +91,21 @@ export default function CharacterSelectScreen({
           </h1>
         </div>
 
-        {/* Tagline */}
-        <p className="font-mono text-zinc-400 text-xs sm:text-sm mb-4 text-center max-w-md">
-          // Stop debugging alone. Connect with your verified developer soulmate.
+        {/* AI Soulmate Community Banner */}
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-950/40 border border-red-600/40 text-red-300 text-xs font-mono mb-2">
+          <span>🤖 AI Soulmate Community & Virtual Roleplay Partners</span>
+        </div>
+        <p className="font-mono text-zinc-400 text-xs sm:text-sm mb-3 text-center">
+          // Intelligent, affectionate developer soulmates powered by Gemini. Connect, flirt, and code together.
         </p>
+        <button
+          type="button"
+          onClick={onSwitchToRealWs}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 hover:border-red-500 text-xs font-mono font-bold text-zinc-200 hover:text-white transition-all shadow-sm mb-4"
+        >
+          <span>⚡ Want real developers? Switch to Live Match</span>
+          <span>→</span>
+        </button>
 
         {/* ═══════════════════════════════════════════════════════════════════
             FIRST TIME GATE SCREEN (ONLY SHOWN IF NO CHOICE HAS BEEN MADE YET)
@@ -230,24 +241,42 @@ export default function CharacterSelectScreen({
              LOCKED CHOSEN ROSTER (ONLY the chosen gender, no non-chosen displayed)
              ═══════════════════════════════════════════════════════════════════ */
           <div className="w-full mt-4 animate-fade-in space-y-5">
-            {/* Target Status Banner */}
-            <div className="w-full flex items-center justify-between p-3 rounded-2xl bg-zinc-950 border border-zinc-800 shadow-md flex-wrap gap-2">
+            {/* Target Status Banner with Direct Switcher */}
+            <div className="w-full flex items-center justify-between p-3 bg-zinc-950 border border-zinc-800 shadow-md flex-wrap gap-2">
               <div className="flex items-center gap-2 font-mono text-xs">
-                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                <span className="text-zinc-400">{isAm ? "የተመረጠ:" : "Active Preference:"}</span>
-                <span className="font-bold text-white px-2.5 py-0.5 rounded-lg bg-black border border-zinc-800">
-                  {activeTarget === 'female'
-                    ? (isAm ? 'የሴት ጓደኞች' : 'Girlfriends')
-                    : (isAm ? 'የወንድ ጓደኞች ' : 'Boyfriends')}
-                </span>
-                <span className="text-zinc-500 text-[11px]">
-                  ({activeRoster.length} {isAm ? 'ገንቢዎች' : 'soulmates'})
-                </span>
+                <span className="text-zinc-400">{isAm ? "የተመረጠ:" : "Category:"}</span>
+                <button
+                  type="button"
+                  onClick={() => handleSelectCategory('female')}
+                  className={`px-2.5 py-1 rounded border text-xs font-bold transition-all ${
+                    activeTarget === 'female'
+                      ? 'bg-red-950/80 border-red-600 text-white'
+                      : 'bg-black border-zinc-800 text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  👩‍💻 {isAm ? 'የሴት ጓደኞች' : 'AI Girlfriends'} ({girlfriends.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSelectCategory('male')}
+                  className={`px-2.5 py-1 rounded border text-xs font-bold transition-all ${
+                    activeTarget === 'male'
+                      ? 'bg-red-950/80 border-red-600 text-white'
+                      : 'bg-black border-zinc-800 text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  👨‍💻 {isAm ? 'የወንድ ጓደኞች' : 'AI Boyfriends'} ({boyfriends.length})
+                </button>
               </div>
 
-              <span className="text-[11px] text-zinc-500 font-mono">
-                {isAm ? "ምርጫን ለመቀየር በ Settings ⚙️ ውስጥ ይቀይሩ" : "To change preference, edit in Settings ⚙️"}
-              </span>
+              <button
+                type="button"
+                onClick={onSwitchToRealWs}
+                className="text-[11px] text-red-400 hover:text-red-300 font-mono font-bold flex items-center gap-1"
+              >
+                <span>⚡ Live Match with Real Techies</span>
+                <span>→</span>
+              </button>
             </div>
 
             {/* Character Cards Grid (Strictly chosen gender only!) */}

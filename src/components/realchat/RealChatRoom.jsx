@@ -31,16 +31,7 @@ export default function RealChatRoom({
     if (saved && saved.length > 0) {
       return saved.sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0));
     }
-    return [
-      {
-        id: `sys_${Date.now()}`,
-        sender: 'system',
-        text: isAm
-          ? `⚡ የቀጥታ ግንኙነት ተመስርቷል። ከ @${peer.handle} ጋር ውይይት ጀምረዋል!`
-          : `⚡ Secure connection established with ${peer.name} (${peer.handle})! Say hi!`,
-        timestamp: new Date().toISOString(),
-      },
-    ];
+    return [];
   });
 
   const [inputText, setInputText] = useState("");
@@ -97,16 +88,7 @@ export default function RealChatRoom({
     if (saved && saved.length > 0) {
       setMessages(saved.sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0)));
     } else {
-      setMessages([
-        {
-          id: `sys_${Date.now()}`,
-          sender: 'system',
-          text: isAm
-            ? `⚡ የቀጥታ ግንኙነት ተመስርቷል። ከ @${peer.handle} ጋር ውይይት ጀምረዋል!`
-            : `⚡ Secure connection established with ${peer.name} (${peer.handle})! Say hi!`,
-          timestamp: new Date().toISOString(),
-        },
-      ]);
+      setMessages([]);
     }
 
     // 2. Fetch server database history to sync across devices/refreshes
@@ -138,7 +120,7 @@ export default function RealChatRoom({
 
   // Persist messages whenever updated
   useEffect(() => {
-    if (peer?.id && messages.length > 0) {
+    if (peer?.id && messages.some((m) => m && (m.sender === 'player' || m.sender === 'partner'))) {
       saveChatHistory(userProfile?.id, peer.id, messages);
     }
   }, [peer?.id, userProfile?.id, messages]);
@@ -687,6 +669,40 @@ export default function RealChatRoom({
         className="flex-1 h-full min-h-0 overflow-y-auto p-3 sm:p-4 space-y-2.5 bg-black"
         style={{ scrollbarWidth: 'thin' }}
       >
+        {messages.length === 0 && (
+          <div className="flex-1 flex flex-col items-center justify-center p-6 text-center max-w-sm mx-auto my-auto animate-fade-in select-text">
+            <div className="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-3xl mb-3 shadow-lg">
+              {peer?.emoji || '💬'}
+            </div>
+            <h3 className="text-base font-bold text-white mb-1">
+              {isAm ? `${peer.name} ጋር ውይይት ጀምር` : `Say hi to ${peer.name}!`}
+            </h3>
+            <p className="text-xs text-zinc-400 mb-4 leading-relaxed font-sans">
+              {isAm
+                ? `ከ @${peer.handle} ጋር እስካሁን የተላከ መልእክት የለም። የበረዶ መስበሪያ መልእክት በመላክ ውይይቱን ጀምሩ!`
+                : `No messages with @${peer.handle} yet. Break the ice and start your conversation!`}
+            </p>
+            <div className="flex flex-col gap-2 w-full">
+              <button
+                type="button"
+                onClick={() => sendMessage("👋 Hey! Loved seeing your profile pop up. What are you building today?")}
+                className="text-xs px-3 py-2 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-red-500/50 text-zinc-200 text-left transition-all flex items-center justify-between group"
+              >
+                <span>👋 Hey! What are you building today?</span>
+                <span className="text-zinc-500 group-hover:text-red-400 font-mono text-[10px]">Send →</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => sendMessage("☕ Tabs or spaces? And coffee first or PR first?")}
+                className="text-xs px-3 py-2 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-red-500/50 text-zinc-200 text-left transition-all flex items-center justify-between group"
+              >
+                <span>☕ Tabs or spaces? Coffee first or PR first?</span>
+                <span className="text-zinc-500 group-hover:text-red-400 font-mono text-[10px]">Send →</span>
+              </button>
+            </div>
+          </div>
+        )}
+
         {messages.map((m) => {
           if (m.sender === 'system') {
             return (
